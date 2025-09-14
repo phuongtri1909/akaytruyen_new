@@ -1,0 +1,206 @@
+.section-stories-new #list-index {
+    position: relative;
+}
+
+.section-stories-new .list {
+    text-align: left;
+    width: 100%;
+}
+
+.section-stories-new .list>.row>div {
+    height: 40px;
+    line-height: 40px;
+    border-left: 1px dashed #CCC;
+    border-bottom: 1px dashed #CCC;
+    overflow: hidden
+}
+
+.section-stories-new .list h3 {
+    display: inline;
+    margin: 0;
+}
+
+.section-stories-new .list .row {
+    border-bottom: 1px dashed #CCC;
+}
+
+.section-stories-new .list .row:last-child {
+    border-bottom: 0 !important;
+}
+
+.section-stories-new .list .row > div:first-child {
+    border-left: 0;
+    padding-left: 0;
+}
+
+.section-stories-new .col-cat {
+    width: 22.5%;
+}
+
+.section-stories-new .col-time {
+    width: 13.66666667%;
+}
+
+/* Title column */
+.section-stories-new .col-title {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0; /* Cho phép flex item co lại */
+}
+
+.section-stories-new .col-title h3 {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    min-width: 0; /* Cho phép co lại */
+    flex: 1; /* Chiếm phần còn lại */
+}
+
+.section-stories-new .col-title h3 a {
+    font-size: 16px;
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: block;
+}
+
+.section-stories-new .col-title h3 a:hover {
+    color: #690;
+    text-decoration: underline;
+}
+
+.section-stories-new .col-title .fa-chevron-right {
+    font-size: 14px;
+    color: #999;
+    margin-right: 8px;
+    flex-shrink: 0; /* Không co lại */
+}
+
+/* Category column */
+.section-stories-new .col-cat a {
+    color: #4E4E4E;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.section-stories-new .col-cat a:hover {
+    color: #690;
+    text-decoration: underline;
+}
+
+/* Chapter column */
+.section-stories-new .col-chap a {
+    color: #31708f;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.section-stories-new .col-chap a:hover {
+    color: #690;
+    text-decoration: underline;
+}
+
+.section-stories-new .chapter-text {
+    font-size: 12px;
+}
+
+.section-stories-new .chapter-new-badge {
+    background: #ff4757;
+    color: white;
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-weight: bold;
+    text-transform: uppercase;
+    animation: blink 1.5s infinite;
+    margin-left: 3px;
+}
+
+@keyframes blink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0.3;
+    }
+}
+
+/* Time column */
+.section-stories-new .col-time {
+    color: #666;
+    font-size: 13px;
+}
+
+/* Labels - ưu tiên hiển thị */
+.section-stories-new .label-title {
+    padding: 1px 3px;
+    font-size: 13px;
+    vertical-align: bottom;
+    margin-left: 5px;
+    border: 1px solid;
+    border-radius: 2px;
+    display: inline-block;
+    flex-shrink: 0; /* Không co lại */
+    white-space: nowrap; /* Không xuống dòng */
+}
+
+.section-stories-new .label-new {
+    border-color: #8EB3FD;
+    color: #8EB3FD;
+}
+
+.section-stories-new .label-new:before {
+    content: "New";
+}
+
+.section-stories-new .label-full {
+    border-color: #86AD86;
+    color: #86AD86;
+}
+
+.section-stories-new .label-full:before {
+    content: "Full";
+}
+
+.section-stories-new .label-hot {
+    border-color: #FD8383;
+    color: #FD8383;
+}
+
+.section-stories-new .label-hot:before {
+    content: "Hot";
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+    .section-stories-new .hidden-xs {
+        display: none !important;
+    }
+
+    /* Mobile chapter optimization - rút gọn "Chương" thành "C" */
+    .section-stories-new .chapter-label {
+        font-size: 0; /* Ẩn text gốc */
+    }
+
+    .section-stories-new .chapter-label:before {
+        content: "C ";
+        font-size: 12px; /* Hiển thị "C" với font size bình thường */
+    }
+
+    .section-stories-new .chapter-new-badge {
+        font-size: 9px;
+        padding: 1px 3px;
+    }
+}
+
+@media (max-width: 991px) {
+    .section-stories-new .hidden-sm {
+        display: none !important;
+    }
+
+}

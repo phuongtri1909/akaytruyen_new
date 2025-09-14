@@ -18,14 +18,12 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Artisan;
 use App\Models\Comment;
-use App\Models\LiveComment;
 use App\Models\User;
 
 class CrawlController extends Controller
 {
     public function __construct(
         protected CategoryRepositoryInterface $categoryRepository,
-        protected AuthorRepositoryInterface $authorRepository,
         protected ChapterRepositoryInterface $chapterRepository,
         protected StoryRepositoryInterface $storyRepository
         // protected Stor
@@ -42,10 +40,9 @@ class CrawlController extends Controller
         $data = [];
         $users = User::all(); // Lấy danh sách tất cả người dùng
         $comments = Comment::latest()->paginate(30);
-        $live_comments = LiveComment::orderBy('created_at', 'desc')->get();
         $totalComments = Comment::count();
 
-        return view('Admin.pages.comment.index', compact('data', 'users', 'comments', 'live_comments'));
+        return view('Admin.pages.comment.index', compact('data', 'users', 'comments'));
     }
 
     public function destroy($id)

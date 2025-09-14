@@ -2,12 +2,12 @@
 
 namespace App\Observers;
 
-use App\Models\Livechat;
+use App\Models\LiveChat;
 use Illuminate\Support\Facades\Cache;
 
-class LivechatObserver
+class LiveChatObserver
 {
-    public function created(Livechat $comment): void
+    public function created(LiveChat $comment): void
     {
         // New top-level comment increases count
         if (is_null($comment->parent_id)) {
@@ -19,7 +19,7 @@ class LivechatObserver
         }
     }
 
-    public function updated(Livechat $comment): void
+    public function updated(LiveChat $comment): void
     {
         // If parent_id toggled between null and not-null, invalidate count
         if ($comment->wasChanged('parent_id')) {
@@ -33,7 +33,7 @@ class LivechatObserver
         }
     }
 
-    public function deleted(Livechat $comment): void
+    public function deleted(LiveChat $comment): void
     {
         // Removing a top-level comment decreases count
         if (is_null($comment->parent_id)) {

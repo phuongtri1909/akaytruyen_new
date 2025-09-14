@@ -2,7 +2,6 @@
 
 namespace App\Http\Livewire;
 
-use App\Models\LiveChatReaction;
 use Livewire\Component;
 use App\Models\LiveChat;
 use Illuminate\Support\Facades\Auth;
@@ -69,13 +68,6 @@ class LiveChatSection extends Component
         } else {
             session()->flash('error', 'Bạn không có quyền xóa bình luận này.');
         }
-    }
-
-    public function react($commentId, $type)
-    {
-        if (!Auth::check()) return;
-
-        LiveChatReaction::toggleReaction(Auth::id(), $commentId, $type);
     }
 
     public function pinComment($commentId)

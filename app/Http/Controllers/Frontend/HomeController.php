@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Frontend;
 use Carbon\Carbon;
 use App\Helpers\Helper;
 use App\Models\Chapter;
-use App\Models\LiveComment;
 use App\Models\Story;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;

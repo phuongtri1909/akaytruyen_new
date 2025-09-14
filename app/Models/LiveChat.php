@@ -62,10 +62,6 @@ class LiveChat extends Model
         return $this->belongsTo(LiveChat::class, 'parent_id');
     }
 
-    public function reactions(): HasMany
-    {
-        return $this->hasMany(LiveChatReaction::class, 'comment_id');
-    }
 
     /**
      * Scope để lấy comments chính (không phải reply)

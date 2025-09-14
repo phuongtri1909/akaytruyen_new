@@ -18,20 +18,17 @@ use App\Models\Chapter;
 use App\Models\Category;
 use App\Models\Setting;
 use App\Models\Story;
-use App\Models\LiveComment;
 use App\Models\Donation;
-use App\Models\Livechat;
 use App\Models\BanIp;
 use App\Observers\StoryObserver;
 use App\Observers\ChapterObserver;
-use App\Observers\LiveCommentObserver;
 use App\Observers\DonationObserver;
 use App\Observers\UserObserver;
 use App\Observers\CategoryObserver;
 use App\Observers\SettingObserver;
 use App\Observers\BannedIpObserver;
 use App\Observers\StatusObserver;
-use App\Observers\LivechatObserver;
+use App\Observers\LiveChatObserver;
 use App\Observers\NotificationObserver;
 use App\Observers\UserTaggedObserver;
 
@@ -42,6 +39,7 @@ use App\Models\Rating;
 use App\Models\Comment;
 use App\Observers\RatingObserver;
 use App\Observers\CommentObserver;
+use App\Models\LiveChat;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -60,14 +58,13 @@ class AppServiceProvider extends ServiceProvider
         // Register model observers for cache invalidation
         Story::observe(StoryObserver::class);
         Chapter::observe(ChapterObserver::class);
-        //Rating::observe(RatingObserver::class);
+        Rating::observe(RatingObserver::class);
         Comment::observe(CommentObserver::class);
-        //LiveComment::observe(LiveCommentObserver::class);
-       // Livechat::observe(LivechatObserver::class);
+        LiveChat::observe(LiveChatObserver::class);
         Donation::observe(DonationObserver::class);
         User::observe(UserObserver::class);
-        //Notification::observe(NotificationObserver::class);
-        //UserTagged::observe(UserTaggedObserver::class);
+        Notification::observe(NotificationObserver::class);
+        UserTagged::observe(UserTaggedObserver::class);
         Category::observe(CategoryObserver::class);
         //Setting::observe(SettingObserver::class);
         BanIp::observe(BannedIpObserver::class);

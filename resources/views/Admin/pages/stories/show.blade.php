@@ -25,6 +25,16 @@
                             <i class="fas fa-edit"></i> Chỉnh sửa
                         </a>
                     @endcan
+                    @canany(['xem_danh_sach_thong_tin_donate', 'them_thong_tin_donate', 'sua_thong_tin_donate', 'xoa_thong_tin_donate'])
+                        <a href="{{ route('admin.donate.index', $story->id) }}" class="action-button">
+                            <i class="fas fa-heart"></i> Thông tin donate
+                        </a>
+                    @endcan
+                    @canany(['xem_danh_sach_thanh_vien_donate', 'them_thanh_vien_donate', 'sua_thanh_vien_donate', 'xoa_thanh_vien_donate'])
+                        <a href="{{ route('admin.donations.index', $story->id) }}" class="action-button">
+                            <i class="fas fa-users"></i> Danh sách donate
+                        </a>
+                    @endcan
                     <a href="{{ route('admin.stories.index') }}" class="back-button">
                         <i class="fas fa-arrow-left"></i> Quay lại
                     </a>
@@ -217,13 +227,10 @@
                                                             </span>
                                                         @endcan
                                                         @can('xoa_chuong')
-                                                            @include('components.delete-form', [
-                                                                'id' => $chapter->id,
-                                                                'route' => route(
-                                                                    'admin.chapters.destroy',
-                                                                    $chapter),
-                                                                'message' => "Bạn có chắc chắn muốn xóa chương '{$chapter->name}'?",
-                                                            ])
+                                                            <button class="action-icon delete-icon" data-id="{{ $chapter->id }}"
+                                                                title="Xóa">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
                                                         @else
                                                             <span class="action-icon disabled-icon" title="Không có quyền">
                                                                 <i class="fas fa-lock"></i>
@@ -598,6 +605,15 @@
             background: #28a745;
         }
 
+        .delete-icon {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-icon:hover {
+            background: #c82333;
+        }
+
         .disabled-icon {
             background: #e9ecef;
             color: #6c757d;
@@ -701,6 +717,49 @@
                             icon: 'error',
                             title: 'Lỗi',
                             text: 'Có lỗi xảy ra khi cập nhật trạng thái!'
+                        });
+                    }
+                });
+            });
+
+            // Chapter delete
+            $('.delete-icon').click(function() {
+                const chapterId = $(this).data('id');
+
+                Swal.fire({
+                    title: 'Xác nhận xóa',
+                    text: 'Bạn có chắc chắn muốn xóa chương này?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('admin.chapters.destroy', ':id') }}".replace(
+                                ':id', chapterId),
+                            type: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Thành công',
+                                    text: 'Chương đã được xóa!'
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Lỗi',
+                                    text: 'Có lỗi xảy ra khi xóa chương!'
+                                });
+                            }
                         });
                     }
                 });

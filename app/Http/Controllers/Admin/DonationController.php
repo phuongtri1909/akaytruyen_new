@@ -6,20 +6,23 @@ use App\Models\Donation;
 use App\Models\Story;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class DonationController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('canAny:xem_danh_sach_thanh_vien_donate,them_thanh_vien_donate,sua_thanh_vien_donate,xoa_thanh_vien_donate')->only('index');
+        $this->middleware('can:them_thanh_vien_donate')->only('store');
+        $this->middleware('can:sua_thanh_vien_donate')->only('update');
+        $this->middleware('can:xoa_thanh_vien_donate')->only('destroy');
+    }
+
     public function index(Request $request, $storyId)
     {
         $story = Story::findOrFail($storyId);
-        $authUser = Auth::user();
-
-        // Kiểm tra quyền: Admin hoặc tác giả của truyện
-        if (!$authUser->hasRole('Admin') && !$authUser->hasRole('Content') && $story->author_id !== $authUser->id) {
-            abort(403, 'Bạn không có quyền truy cập trang này.');
-        }
+        $authUser = Auth::user();   
 
         $donations = Donation::where('story_id', $storyId)
             ->orderBy('donated_at', 'desc')
@@ -31,17 +34,7 @@ class DonationController extends Controller
     public function store(Request $request, $storyId)
     {
         try {
-            $story = Story::findOrFail($storyId);
-            $authUser = Auth::user();
-
-            // Kiểm tra quyền: Admin hoặc tác giả của truyện
-            if (!$authUser->hasRole('Admin') && !$authUser->hasRole('Content') && $story->author_id !== $authUser->id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Bạn không có quyền thực hiện hành động này.'
-                ], 403);
-            }
-
+          
             $request->validate([
                 'name' => 'required|string|max:255',
                 'amount' => 'required|integer|min:1',
@@ -56,11 +49,7 @@ class DonationController extends Controller
             ]);
 
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Thêm donation thành công!',
-                'donation' => $donation
-            ]);
+            return redirect()->route('admin.donations.index', $storyId)->with('success', 'Thêm donation thành công!');
 
         } catch (\Exception $e) {
             Log::error('Error creating donation', [
@@ -80,17 +69,7 @@ class DonationController extends Controller
     {
         try {
             $donation = Donation::with('story')->findOrFail($donationId);
-            $story = $donation->story;
-            $authUser = Auth::user();
-
-            // Kiểm tra quyền: Admin hoặc tác giả của truyện
-            if (!$authUser->hasRole('Admin') && !$authUser->hasRole('Content') && $story->author_id !== $authUser->id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Bạn không có quyền thực hiện hành động này.'
-                ], 403);
-            }
-
+         
             $request->validate([
                 'name' => 'required|string|max:255',
                 'amount' => 'required|integer|min:1',
@@ -103,11 +82,7 @@ class DonationController extends Controller
                 'donated_at' => $request->donated_at ?? $donation->donated_at,
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Cập nhật donation thành công!',
-                'donation' => $donation
-            ]);
+            return redirect()->route('admin.donations.index', $donation->story_id)->with('success', 'Cập nhật donation thành công!');
 
         } catch (\Exception $e) {
             Log::error('Error updating donation', [
@@ -127,23 +102,10 @@ class DonationController extends Controller
     {
         try {
             $donation = Donation::with('story')->findOrFail($donationId);
-            $story = $donation->story;
-            $authUser = Auth::user();
-
-            // Kiểm tra quyền: Admin hoặc tác giả của truyện
-            if (!$authUser->hasRole('Admin') && !$authUser->hasRole('Content') && $story->author_id !== $authUser->id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Bạn không có quyền thực hiện hành động này.'
-                ], 403);
-            }
-
+        
             $donation->delete();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Xóa donation thành công!'
-            ]);
+            return redirect()->route('admin.donations.index', $donation->story_id)->with('success', 'Xóa donation thành công');
 
         } catch (\Exception $e) {
             Log::error('Error deleting donation', [
@@ -152,10 +114,7 @@ class DonationController extends Controller
                 'user_id' => Auth::id()
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra khi xóa donation.'
-            ], 500);
+            return redirect()->route('admin.donations.index', $donationId)->with('error', 'Có lỗi xảy ra khi xóa donation.');
         }
     }
 

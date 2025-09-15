@@ -263,6 +263,28 @@
                                                         <i class="fas fa-lock"></i>
                                                     </span>
                                                 @endcan
+
+                                                @canany(['xem_danh_sach_thong_tin_donate', 'them_thong_tin_donate', 'sua_thong_tin_donate', 'xoa_thong_tin_donate'])
+                                                    <a href="{{ route('admin.donate.index', $story->id) }}"
+                                                        class="action-icon donate-icon bg-warning text-decoration-none" title="Thông tin thông tin donate">
+                                                        <i class="fas fa-heart"></i>
+                                                    </a>
+                                                @else
+                                                    <span class="action-icon disabled-icon" title="Không có quyền">
+                                                        <i class="fas fa-lock"></i>
+                                                    </span>
+                                                @endcanany
+
+                                                @canany(['xem_danh_sach_thanh_vien_donate', 'them_thanh_vien_donate', 'sua_thanh_vien_donate', 'xoa_thanh_vien_donate'])
+                                                    <a href="{{ route('admin.donations.index', $story->id) }}"
+                                                        class="action-icon donation-icon bg-success text-decoration-none" title="Thông tin thanh vien donate">
+                                                        <i class="fas fa-money-bill"></i>
+                                                    </a>
+                                                @else
+                                                    <span class="action-icon disabled-icon" title="Không có quyền">
+                                                        <i class="fas fa-lock"></i>
+                                                    </span>
+                                                @endcanany
                                             </div>
                                         </td>
                                     </tr>

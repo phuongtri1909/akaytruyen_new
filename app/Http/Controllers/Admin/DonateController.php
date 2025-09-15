@@ -8,9 +8,17 @@ use App\Models\Story;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Helpers\Helper;
 
 class DonateController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('canAny:xem_danh_sach_thong_tin_donate,them_thong_tin_donate,sua_thong_tin_donate,xoa_thong_tin_donate')->only('index');
+        $this->middleware('can:them_thong_tin_donate')->only('store');
+        $this->middleware('can:sua_thong_tin_donate')->only('update');
+        $this->middleware('can:xoa_thong_tin_donate')->only('destroy');
+    }
     /**
      * Hiển thị form quản lý donate cho truyện
      */
@@ -18,11 +26,6 @@ class DonateController extends Controller
     {
         $story = Story::with('donates')->findOrFail($storyId);
         $authUser = Auth::user();
-
-        // Kiểm tra quyền: chỉ Admin hoặc tác giả của truyện mới được xem
-        if (!$authUser->hasRole('Admin') && !$authUser->hasRole('Content') && $story->author_id !== $authUser->id) {
-            abort(403, 'Bạn không có quyền truy cập trang này');
-        }
 
         return view('Admin.pages.donates.index', compact('story', 'authUser'));
     }
@@ -37,15 +40,11 @@ class DonateController extends Controller
             $story = Story::findOrFail($storyId);
             $authUser = Auth::user();
 
-            // Kiểm tra quyền
-            if (!$authUser->hasRole('Admin') && !$authUser->hasRole('Content') && $story->author_id !== $authUser->id) {
-                return response()->json(['success' => false, 'message' => 'Bạn không có quyền thực hiện hành động này']);
-            }
 
             $request->validate([
                 'bank_name' => 'required|string|max:255',
                 'donate_info' => 'nullable|string',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+                'image' => 'nullable|file|max:2048'
             ]);
 
             $data = [
@@ -59,7 +58,10 @@ class DonateController extends Controller
                 $image = $request->file('image');
                 
                 // Validate file security
-                $this->validateImageFile($image);
+                $validation = Helper::validateImageFile($image);
+                if (!$validation['valid']) {
+                    return response()->json(['success' => false, 'message' => $validation['message']], 422);
+                }
                 
                 $imageName = time() . '_' . $this->sanitizeFileName($image->getClientOriginalName());
                 $path = $image->storeAs('donates', $imageName, 'public');
@@ -68,7 +70,7 @@ class DonateController extends Controller
 
             $donate = Donate::create($data);
 
-            return response()->json(['success' => true, 'message' => 'Thêm thông tin donate thành công']);
+            return redirect()->route('admin.donate.index', $storyId)->with('success', 'Thêm thông tin donate thành công');
         } catch (\Exception $e) {
             \Log::error('Error in donate store', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json(['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()]);
@@ -83,15 +85,11 @@ class DonateController extends Controller
         $donate = Donate::with('story')->findOrFail($donateId);
         $authUser = Auth::user();
 
-        // Kiểm tra quyền
-        if (!$authUser->hasRole('Admin') && !$authUser->hasRole('Content') && $donate->story->author_id !== $authUser->id) {
-            return response()->json(['success' => false, 'message' => 'Bạn không có quyền thực hiện hành động này']);
-        }
 
         $request->validate([
             'bank_name' => 'required|string|max:255',
             'donate_info' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'image' => 'nullable|file|max:2048'
         ]);
 
         $data = [
@@ -99,7 +97,7 @@ class DonateController extends Controller
             'donate_info' => $request->donate_info
         ];
 
-                    // Xử lý upload ảnh mới
+            // Xử lý upload ảnh mới
             if ($request->hasFile('image')) {
                 // Xóa ảnh cũ nếu có
                 if ($donate->image && Storage::disk('public')->exists($donate->image)) {
@@ -109,7 +107,10 @@ class DonateController extends Controller
                 $image = $request->file('image');
                 
                 // Validate file security
-                $this->validateImageFile($image);
+                $validation = Helper::validateImageFile($image);
+                if (!$validation['valid']) {
+                    return response()->json(['success' => false, 'message' => $validation['message']], 422);
+                }
                 
                 $imageName = time() . '_' . $this->sanitizeFileName($image->getClientOriginalName());
                 $path = $image->storeAs('donates', $imageName, 'public');
@@ -118,7 +119,7 @@ class DonateController extends Controller
 
         $donate->update($data);
 
-        return response()->json(['success' => true, 'message' => 'Cập nhật thông tin donate thành công']);
+        return redirect()->route('admin.donate.index', $donate->story_id)->with('success', 'Cập nhật thông tin donate thành công');
     }
 
     /**
@@ -129,11 +130,6 @@ class DonateController extends Controller
         $donate = Donate::with('story')->findOrFail($donateId);
         $authUser = Auth::user();
 
-        // Kiểm tra quyền
-        if (!$authUser->hasRole('Admin') && !$authUser->hasRole('Content') && $donate->story->author_id !== $authUser->id) {
-            return response()->json(['success' => false, 'message' => 'Bạn không có quyền thực hiện hành động này']);
-        }
-
         // Xóa ảnh nếu có
         if ($donate->image && Storage::disk('public')->exists($donate->image)) {
             Storage::disk('public')->delete($donate->image);
@@ -141,79 +137,9 @@ class DonateController extends Controller
 
         $donate->delete();
 
-        return response()->json(['success' => true, 'message' => 'Xóa thông tin donate thành công']);
+       return redirect()->route('admin.donate.index', $donate->story_id)->with('success', 'Xóa thông tin donate thành công');
     }
 
-    /**
-     * Validate image file security
-     */
-    private function validateImageFile($file)
-    {
-        // Kiểm tra extension nguy hiểm
-        $dangerousExtensions = [
-            'php', 'php3', 'php4', 'php5', 'php7', 'phtml', 'phar',
-            'asp', 'aspx', 'ashx', 'asmx', 'jsp', 'jspx',
-            'pl', 'py', 'rb', 'sh', 'bash', 'exe', 'bat', 'cmd', 'com',
-            'js', 'vbs', 'wsf', 'htaccess', 'htpasswd', 'ini', 'log', 'sql',
-            'dll', 'so', 'dylib'
-        ];
-
-        $extension = strtolower($file->getClientOriginalExtension());
-        if (in_array($extension, $dangerousExtensions)) {
-            return response()->json([
-                'success' => false,
-                'error' => 'File không được phép upload.',
-                'message' => "File extension '$extension' không được phép upload. Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP)."
-            ], 200);
-        }
-
-        $allowedMimes = [
-            'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'
-        ];
-
-        $mimeType = $file->getMimeType();
-        if (!in_array($mimeType, $allowedMimes)) {
-            return response()->json([
-                'success' => false,
-                'error' => 'File không được phép upload.',
-                'message' => "File type '$mimeType' không được phép upload. Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP)."
-            ], 200);
-        }
-
-        if ($extension === 'png' || $extension === 'jpg' || $extension === 'jpeg' || $extension === 'gif' || $extension === 'webp') {
-            return;
-        }
-
-        $content = file_get_contents($file->getRealPath());
-        if ($this->containsPhpCode($content)) {
-            return response()->json([
-                'success' => false,
-                'error' => 'File không được phép upload.',
-                'message' => 'File chứa mã PHP không được phép upload. Chỉ chấp nhận file ảnh hợp lệ.'
-            ], 200);
-        }
-    }
-
-    private function containsPhpCode($content): bool
-    {
-        $phpPatterns = [
-            '/<\?php/i', '/<\?=/i', '/<\?/i',
-            '/phpinfo\s*\(/i', '/eval\s*\(/i', '/exec\s*\(/i',
-            '/system\s*\(/i', '/shell_exec\s*\(/i', '/passthru\s*\(/i',
-            '/base64_decode\s*\(/i', '/gzinflate\s*\(/i', '/str_rot13\s*\(/i',
-            '/file_get_contents\s*\(/i', '/file_put_contents\s*\(/i',
-            '/fopen\s*\(/i', '/fwrite\s*\(/i', '/include\s*\(/i',
-            '/require\s*\(/i', '/include_once\s*\(/i', '/require_once\s*\(/i'
-        ];
-
-        foreach ($phpPatterns as $pattern) {
-            if (preg_match($pattern, $content)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     private function sanitizeFileName($filename)
     {

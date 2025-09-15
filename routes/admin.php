@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\StoryController;
 use App\Http\Controllers\Admin\ChapterController;
+use App\Http\Controllers\Admin\DonateController;
+use App\Http\Controllers\Admin\DonationController;
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -35,6 +37,18 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // Chapter Management
     Route::resource('chapters', ChapterController::class)->except('index', 'show');
     Route::post('chapters/{chapter}/toggle-status', [ChapterController::class, 'toggleStatus'])->name('chapters.toggle-status');
+
+    // Donate Management
+    Route::get('donate/{storyId}', [DonateController::class, 'index'])->name('donate.index');
+    Route::post('donate/{storyId}', [DonateController::class, 'store'])->name('donate.store');
+    Route::put('donate/{donateId}', [DonateController::class, 'update'])->name('donate.update');
+    Route::delete('donate/{donateId}', [DonateController::class, 'destroy'])->name('donate.destroy');
+
+    // Donation Management
+    Route::get('donations/{storyId}', [DonationController::class, 'index'])->name('donations.index');
+    Route::post('donations/{storyId}', [DonationController::class, 'store'])->name('donations.store');
+    Route::put('donations/{donationId}', [DonationController::class, 'update'])->name('donations.update');
+    Route::delete('donations/{donationId}', [DonationController::class, 'destroy'])->name('donations.destroy');
 
     // Ban/Unban routes
     Route::get('users/{user}/ban-info', [UserController::class, 'getBanInfo'])->name('users.ban-info');

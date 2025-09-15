@@ -142,14 +142,12 @@ class StoryController extends Controller
         $story->load(['author', 'categories']);
         
         $query = $story->chapters()->orderBy('chapter', 'desc');
-        
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('chapter', 'like', "%{$search}%")
                   ->orWhere('name', 'like', "%{$search}%");
             });
-            
         }
         
         $chapters = $query->paginate(30);

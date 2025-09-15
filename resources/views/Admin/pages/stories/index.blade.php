@@ -78,6 +78,7 @@
                 </form>
             </div>
 
+
             <div class="card-content">
                 @if (request('name') || request('author_id') || request('category_id') || request('status'))
                     <div class="active-filters">
@@ -138,9 +139,9 @@
                             <thead>
                                 <tr>
                                     <th class="column-small">STT</th>
-                                    <th class="column-medium">Hình ảnh</th>
-                                    <th class="column-large">Tên truyện</th>
-                                    <th class="column-medium">Tác giả</th>
+                                    <th class="column-small">Hình ảnh</th>
+                                    <th class="column-medium">Tên truyện</th>
+                                    <th class="column-small">Tác giả</th>
                                     <th class="column-small text-center">Trạng thái</th>
                                     <th class="column-small text-center">Hoàn thành</th>
                                     <th class="column-small text-center">Mới</th>
@@ -221,14 +222,30 @@
                                         </td>
                                         <td>
                                             <div class="action-buttons-wrapper">
-                                                <a href="{{ route('admin.stories.show', $story) }}"
-                                                    class="action-icon view-icon text-decoration-none" title="Xem chi tiết">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
+                                                @canany(['xem_danh_sach_chuong', 'them_chuong', 'sua_chuong', 'xoa_chuong'])
+                                                    <a href="{{ route('admin.stories.show', $story) }}"
+                                                        class="action-icon view-icon text-decoration-none" title="Xem chi tiết">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                @else
+                                                    <span class="action-icon disabled-icon" title="Không có quyền">
+                                                        <i class="fas fa-lock"></i>
+                                                    </span>
+                                                @endcanany
                                                 @can('sua_truyen')
                                                     <a href="{{ route('admin.stories.edit', $story) }}"
                                                         class="action-icon edit-icon text-decoration-none" title="Chỉnh sửa">
                                                         <i class="fas fa-edit"></i>
+                                                    </a>
+                                                @else
+                                                    <span class="action-icon disabled-icon" title="Không có quyền">
+                                                        <i class="fas fa-lock"></i>
+                                                    </span>
+                                                @endcan
+                                                @can('them_chuong')
+                                                    <a href="{{ route('admin.chapters.create', ['story_id' => $story->id]) }}"
+                                                        class="action-icon chapter-icon text-decoration-none" title="Thêm chương">
+                                                        <i class="fas fa-plus"></i>
                                                     </a>
                                                 @else
                                                     <span class="action-icon disabled-icon" title="Không có quyền">
@@ -272,8 +289,8 @@
 @push('styles')
     <style>
         .story-thumbnail {
-            width: 50px;
-            height: 50px;
+            width: 70px;
+            height: 125px;
             object-fit: cover;
             border-radius: 4px;
             border: 1px solid #dee2e6;
@@ -376,6 +393,23 @@
             color: #6c757d !important;
             cursor: not-allowed !important;
             opacity: 0.5;
+        }
+
+        .action-buttons-wrapper {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            max-width: 80px;
+        }
+
+        .chapter-icon {
+            background: #17a2b8 !important;
+            color: white !important;
+        }
+
+        .chapter-icon:hover {
+            background: #138496 !important;
+            color: white !important;
         }
 
         .disabled-icon:hover {

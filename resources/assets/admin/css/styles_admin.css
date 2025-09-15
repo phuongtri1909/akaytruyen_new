@@ -2159,10 +2159,6 @@ body {
         justify-content: center;
     }
 
-    .info-item {
-        flex-direction: column;
-    }
-
     .info-label {
         margin-bottom: 0.3rem;
     }

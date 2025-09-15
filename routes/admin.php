@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\StoryController;
+use App\Http\Controllers\Admin\ChapterController;
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -30,6 +31,10 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // Story Management
     Route::resource('stories', StoryController::class);
     Route::post('stories/{story}/toggle-status', [StoryController::class, 'toggleStatus'])->name('stories.toggle-status');
+
+    // Chapter Management
+    Route::resource('chapters', ChapterController::class)->except('index', 'show');
+    Route::post('chapters/{chapter}/toggle-status', [ChapterController::class, 'toggleStatus'])->name('chapters.toggle-status');
 
     // Ban/Unban routes
     Route::get('users/{user}/ban-info', [UserController::class, 'getBanInfo'])->name('users.ban-info');

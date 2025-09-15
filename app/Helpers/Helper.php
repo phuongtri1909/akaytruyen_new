@@ -395,6 +395,47 @@ class Helper
         
         return $text;
     }
+
+    public static function processTextareaContent($text)
+    {
+        if (empty($text)) return '';
+        
+        $text = nl2br($text);
+        
+        $text = strip_tags($text, '<br>');
+        
+        $text = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+        
+        $text = str_replace('&lt;br&gt;', '<br>', $text);
+        
+        return trim($text);
+    }
+
+    public static function generateChapterSlug($chapterNumber, $chapterName, $storyId, $excludeId = null)
+    {
+        $baseSlug = $chapterNumber . '-' . \Str::slug($chapterName);
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (true) {
+            $query = \App\Models\Chapter::where('slug', $slug);
+            
+            if ($excludeId) {
+                $query->where('id', '!=', $excludeId);
+            }
+            
+            $exists = $query->exists();
+            
+            if (!$exists) {
+                break;
+            }
+            
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
     
     public static function validateImageFile($file, $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'])
     {

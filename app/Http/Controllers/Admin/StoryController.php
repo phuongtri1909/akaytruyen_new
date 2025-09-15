@@ -19,6 +19,8 @@ class StoryController extends Controller
         $this->middleware('can:them_truyen')->only('create', 'store');
         $this->middleware('can:sua_truyen')->only('edit', 'update', 'toggleStatus');
         $this->middleware('can:xoa_truyen')->only('destroy');
+
+        $this->middleware('canAny:xem_danh_sach_chuong,them_chuong,sua_chuong,xoa_chuong')->only('show');
     }
 
     public function index(Request $request)
@@ -135,11 +137,25 @@ class StoryController extends Controller
         return redirect()->route('admin.stories.index')->with('success', 'Truyện đã được tạo thành công!');
     }
 
-    public function show(Story $story)
+    public function show(Request $request, Story $story)
     {
-        $story->load(['author', 'categories', 'chapters']);
-        $story->chapters_count = $story->chapters->count();
-        return view('Admin.pages.stories.show', compact('story'));
+        $story->load(['author', 'categories']);
+        
+        $query = $story->chapters()->orderBy('chapter', 'desc');
+        
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('chapter', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%");
+            });
+            
+        }
+        
+        $chapters = $query->paginate(30);
+        $story->chapters_count = $story->chapters()->count();
+        
+        return view('Admin.pages.stories.show', compact('story', 'chapters'));
     }
 
     public function edit(Story $story)

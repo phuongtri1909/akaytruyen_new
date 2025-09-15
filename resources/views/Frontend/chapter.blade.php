@@ -210,7 +210,7 @@
         </div>
 
         <div class="section-list-category w-100">
-            @if (!Auth()->check() || (Auth()->check() && Auth()->user()->ban->comment == false))
+            @if (!Auth()->check() || (Auth()->check() && Auth()->user()->userBan->comment == false))
                 @include('Frontend.components.comment', [
                     'pinnedComments' => $pinnedComments,
                     'regularComments' => $regularComments,

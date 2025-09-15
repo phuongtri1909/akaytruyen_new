@@ -2,181 +2,283 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\Admin\StoryRequest;
-use App\Models\Story;
-use App\Repositories\Author\AuthorRepositoryInterface;
-use App\Repositories\Category\CategoryRepositoryInterface;
-use App\Repositories\Story\StoryRepositoryInterface;
-use App\Services\StoryService;
 use Illuminate\Http\Request;
+use App\Models\Story;
+use App\Models\Category;
+use App\Models\User;
 use Illuminate\Support\Str;
-use Illuminate\Support\Arr;
+use Mews\Purifier\Facades\Purifier;
+use App\Helpers\Helper;
+use Illuminate\Support\Facades\Storage;
 
 class StoryController extends Controller
 {
-    public function __construct(
-        protected StoryRepositoryInterface $repository,
-        protected StoryService $service,
-        protected AuthorRepositoryInterface $authorRepository,
-        protected CategoryRepositoryInterface $categoryRepository
-    ) {
-        $this->middleware('can:xem_story_data')->only('index');
-        $this->middleware('can:sua_story_data')->only('update', 'updateAttribute');
-        $this->middleware('can:them_story_data')->only('store');
-        $this->middleware('can:xoa_story_data')->only('destroy');
+    public function __construct()
+    {
+        $this->middleware('canAny:xem_danh_sach_truyen,them_truyen,sua_truyen,xoa_truyen')->only('index');
+        $this->middleware('can:them_truyen')->only('create', 'store');
+        $this->middleware('can:sua_truyen')->only('edit', 'update', 'toggleStatus');
+        $this->middleware('can:xoa_truyen')->only('destroy');
     }
 
     public function index(Request $request)
     {
-        $page_title = 'Story';
-        $search     = $request->get('search', []);
-        $results    = $this->repository->paginate(20, [], $search);
-        $stories = $this->service->getTable(20, ['star'], $search);
-        $categories = $this->getCategoies();
-        $authors = $this->getAuthors();
+        $query = Story::with(['author', 'categories'])->withCount('chapters');
+
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        if ($request->filled('author_id')) {
+            $query->where('author_id', $request->author_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('category_id')) {
+            $query->whereHas('categories', function($q) use ($request) {
+                $q->where('categories.id', $request->category_id);
+            });
+        }
+
+        $stories = $query->paginate(15)->withQueryString();
+        $categories = Category::all();
+        $authors = User::whereHas('roles', function($q) {
+            $q->whereIn('name', ['Admin', 'Content']);
+        })->get();
 
         return view('Admin.pages.stories.index', compact('stories', 'categories', 'authors'));
     }
 
     public function create()
     {
-        $formOptions['action'] = route('admin.story.store');
-        $formOptions['method'] = 'POST';
-        $story = null;
-        $authors = $this->getAuthors();
-        $categories = $this->getCategoies();
+        $categories = Category::all();
+        $authors = User::whereHas('roles.permissions', function($q) {
+            $q->whereIn('name', ['them_truyen']);
+        })->get();
 
-        $categories_belong = [];
-
-        return view('Admin.pages.stories.show', compact('formOptions', 'story', 'authors', 'categories', 'categories_belong'));
+        return view('Admin.pages.stories.create', compact('categories', 'authors'));
     }
 
-    public function store(StoryRequest $request)
+    public function store(Request $request)
     {
-        $attributes = $request->all();
-        $slug = Str::slug($request->input('name'));
-
-        $slug = $this->getStorySlugExist($slug);
-        $attributes['slug'] = $slug;
-
-        // Xử lý upload image nếu có
-        if ($request->hasFile('image')) {
-            $attributes['image'] = $this->service->uploadStoryImage($request->file('image'));
-        }
-
-        $story = $this->service->createStory($attributes);
-        $story->categories()->sync($request->input('category_ids'));
-
-        return redirect()->route('admin.story.index')->with('successMessage', 'Thêm mới truyện thành công');
-    }
-
-    protected function getStorySlugExist($slug) {
-        $existSlug = Story::query()->where('slug', '=', $slug)->first();
-
-        if ($existSlug) {
-            $slug = $slug . rand(1, 20);
-            $this->getStorySlugExist($slug);
-        }
-
-        return $slug;
-    }
-
-    public function show(Request $request, $id)
-    {
-        $search     = $request->get('search', []);
-        $story = $this->repository->find($id, ['categories']);
-
-        $chapters = $this->service->getTableChapters(50, $search, $story);
-
-        $formOptions['action'] = route('admin.story.update', $story->id);
-        $formOptions['method'] = 'PUT';
-        $authors = $this->getAuthors();
-        $categories = $this->getCategoies();
-
-        $categories_belong = $story->categories->pluck('name', 'id')->toArray();
-
-        return view('Admin.pages.stories.show', compact('story', 'chapters', 'story', 'formOptions', 'authors', 'categories', 'categories_belong'));
-    }
-
-    public function edit($id)
-    {
-        $item = $this->repository->find($id);
-    }
-
-    protected function getAuthors() {
-        $authors = $this->authorRepository->getAuthors();
-        $authors = Arr::prepend($authors, '-- Chọn tác giả --', '');
-        return $authors;
-    }
-
-    protected function getCategoies() {
-        $categories = $this->categoryRepository->getCategories();
-        return $categories;
-    }
-
-    public function update(Request $request, $id)
-    {
-        $attributes = $request->except('category_ids');
-        $story = $this->repository->find($id);
-
-        if ($request->hasFile('image')) {
-            // Xóa image cũ nếu có
-            if ($story->image) {
-                $this->service->deleteStoryImage($story->image);
-            }
-
-            // Upload image mới
-            $attributes['image'] = $this->service->uploadStoryImage($request->file('image'), $id);
-        }
-
-        // Update story để trigger observer
-        $story->update($attributes);
-        $story->categories()->sync($request->input('category_ids'));
-
-        return back()->with('successMessage', 'Thay đổi thành công.');
-    }
-
-    public function updateAttribute(Request $request, $id) {
-        $res = ['success' => false];
-
-        $story = $this->repository->find(intval($id));
-        if (!$story) {
-            $res['mess'] = 'Truyện không tồn tại';
-            return response()->json($res, 404);
-        }
-
-        // Validate input data
         $request->validate([
-            'name' => 'sometimes|required|max:255',
-            'desc' => 'sometimes|required|string',
-            'author_id' => 'sometimes|required|exists:authors,id',
-            'status' => 'sometimes|in:0,1',
-            'is_full' => 'sometimes|in:0,1',
-            'is_new' => 'sometimes|in:0,1',
-            'is_hot' => 'sometimes|in:0,1',
+            'name' => 'required|string|max:255|unique:stories,name',
+            'desc' => 'required|string|max:5000',
+            'author_id' => 'required|exists:users,id',
+            'categories' => 'required|array|min:1',
+            'categories.*' => 'exists:categories,id',
+            'image' => 'required|file|max:10240',
+        ], [
+            'name.required' => 'Tên truyện là bắt buộc',
+            'name.string' => 'Tên truyện phải là chuỗi',
+            'name.max' => 'Tên truyện không được vượt quá 255 ký tự',
+            'name.unique' => 'Tên truyện đã tồn tại',
+            'desc.required' => 'Mô tả là bắt buộc',
+            'desc.max' => 'Mô tả không được vượt quá 5000 ký tự',
+            'author_id.required' => 'Tác giả là bắt buộc',
+            'author_id.exists' => 'Tác giả không tồn tại',
+            'categories.required' => 'Danh mục là bắt buộc',
+            'categories.array' => 'Danh mục phải là mảng',
+            'categories.min' => 'Phải chọn ít nhất 1 danh mục',
+            'categories.*.exists' => 'Danh mục không tồn tại',
+            'image.max' => 'Hình ảnh không được vượt quá 10MB',
+            'image.required' => 'Hình ảnh là bắt buộc',
         ]);
 
-        $save = $story->update($request->input());
-        if ($save) {
-            $res['success'] = true;
-            $res['message'] = 'Cập nhật thành công';
-        } else {
-            $res['mess'] = 'Có lỗi xảy ra khi cập nhật';
+        $cleanDesc = Helper::sanitizeAdvancedContent($request->desc);
+
+        $storyData = [
+            'name' => $request->name,
+            'slug' => Str::slug($request->name),
+            'desc' => $cleanDesc,
+            'author_id' => $request->author_id,
+            'status' => $request->has('status') ? 1 : 0,
+            'is_full' => $request->has('is_full') ? 1 : 0,
+            'is_new' => $request->has('is_new') ? 1 : 0,
+            'is_hot' => $request->has('is_hot') ? 1 : 0,
+        ];
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            
+            $validation = Helper::validateImageFile($image);
+            if (!$validation['valid']) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $validation['message']
+                    ], 422);
+                }
+                return redirect()->back()->withErrors(['image' => $validation['message']]);
+            }
+            
+            $extension = strtolower($image->getClientOriginalExtension());
+            $imageName = 'story_' . time() . '_' . uniqid() . '.' . $extension;
+            $imagePath = $image->storeAs('stories', $imageName, 'public');
+            $storyData['image'] = $imagePath;
         }
 
-        return response()->json($res);
+        $story = Story::create($storyData);
+        $story->categories()->sync($request->categories);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Truyện đã được tạo thành công!',
+                'redirect' => route('admin.stories.index')
+            ]);
+        }
+
+        return redirect()->route('admin.stories.index')->with('success', 'Truyện đã được tạo thành công!');
     }
 
-    public function destroy($id)
+    public function show(Story $story)
     {
-        $res = ['success' => false];
+        $story->load(['author', 'categories', 'chapters']);
+        $story->chapters_count = $story->chapters->count();
+        return view('Admin.pages.stories.show', compact('story'));
+    }
 
-        $delete = $this->service->deleteStory($id);
+    public function edit(Story $story)
+    {
+        $categories = Category::all();
+        $authors = User::whereHas('roles.permissions', function($q) {
+            $q->whereIn('name', ['sua_truyen']);
+        })->get();
+        
+        $story->load('categories');
+        return view('Admin.pages.stories.edit', compact('story', 'categories', 'authors'));
+    }
 
-        if ($delete) {
-            $res['success'] = true;
+    public function update(Request $request, Story $story)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:stories,name,' . $story->id,
+            'desc' => 'required|string|max:5000',
+            'author_id' => 'required|exists:users,id',
+            'categories' => 'required|array|min:1',
+            'categories.*' => 'exists:categories,id',
+            'image' => 'nullable|file|max:10240',
+        ], [
+            'name.required' => 'Tên truyện là bắt buộc',
+            'name.string' => 'Tên truyện phải là chuỗi',
+            'name.max' => 'Tên truyện không được vượt quá 255 ký tự',
+            'name.unique' => 'Tên truyện đã tồn tại',
+            'desc.required' => 'Mô tả là bắt buộc',
+            'desc.max' => 'Mô tả không được vượt quá 5000 ký tự',
+            'author_id.required' => 'Tác giả là bắt buộc',
+            'author_id.exists' => 'Tác giả không tồn tại',
+            'categories.required' => 'Danh mục là bắt buộc',
+            'categories.array' => 'Danh mục phải là mảng',
+            'categories.min' => 'Phải chọn ít nhất 1 danh mục',
+            'categories.*.exists' => 'Danh mục không tồn tại',
+            'image.max' => 'Hình ảnh không được vượt quá 10MB',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            
+            $validation = Helper::validateImageFile($image);
+            if (!$validation['valid']) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $validation['message']
+                    ], 422);
+                }
+                return redirect()->back()->withErrors(['image' => $validation['message']]);
+            }
         }
 
-        return response()->json($res);
+        $cleanDesc = Helper::sanitizeAdvancedContent($request->desc);
+        
+        $storyData = [
+            'name' => $request->name,
+            'slug' => Str::slug($request->name),
+            'desc' => $cleanDesc,
+            'author_id' => $request->author_id,
+            'status' => $request->has('status') ? 1 : 0,
+            'is_full' => $request->has('is_full') ? 1 : 0,
+            'is_new' => $request->has('is_new') ? 1 : 0,
+            'is_hot' => $request->has('is_hot') ? 1 : 0,
+        ];
+
+        if ($request->hasFile('image')) {
+            if ($story->image) {
+                Storage::disk('public')->delete($story->image);
+            }
+            
+            $image = $request->file('image');
+            
+            $validation = Helper::validateImageFile($image);
+            if (!$validation['valid']) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $validation['message']
+                    ], 422);
+                }
+                return redirect()->back()->withErrors(['image' => $validation['message']]);
+            }
+            
+            $extension = strtolower($image->getClientOriginalExtension());
+            $imageName = 'story_' . time() . '_' . uniqid() . '.' . $extension;
+            $imagePath = $image->storeAs('stories', $imageName, 'public');
+            $storyData['image'] = $imagePath;
+        }
+
+        $story->update($storyData);
+        $story->categories()->sync($request->categories);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Truyện đã được cập nhật thành công!',
+                'redirect' => route('admin.stories.index')
+            ]);
+        }
+
+        return redirect()->route('admin.stories.index')->with('success', 'Truyện đã được cập nhật thành công!');
+    }
+
+    public function destroy(Story $story)
+    {
+        if ($story->image) {
+            Storage::disk('public')->delete($story->image);
+        }
+
+        $story->delete();
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Truyện đã được xóa thành công!'
+            ]);
+        }
+
+        return redirect()->route('admin.stories.index')->with('success', 'Truyện đã được xóa thành công!');
+    }
+
+    public function toggleStatus(Request $request, Story $story)
+    {
+        $request->validate([
+            'field' => 'required|in:status,is_full,is_new,is_hot',
+            'value' => 'required'
+        ]);
+
+        $field = $request->field;
+        $value = $request->value ? 1 : 0;
+
+        $story->update([$field => $value]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Trạng thái đã được cập nhật thành công!',
+            'field' => $field,
+            'value' => $value
+        ]);
     }
 }

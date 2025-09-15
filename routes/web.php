@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+require __DIR__.'/admin.php';
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Frontend\Auth\AuthController;
 use App\Http\Controllers\Frontend\{
@@ -24,8 +25,6 @@ use Livewire\Livewire;
 use App\Http\Livewire\LiveChatSection;
 
 use App\Http\Controllers\Frontend\DownloadController;
-use App\Http\Controllers\Admin\PermissionController;
-use App\Http\Controllers\Admin\RoleController;
 
 Route::get('akay/clear-cache', function () {
     Artisan::call('cache:clear');
@@ -128,7 +127,7 @@ Route::middleware(['guest'])->group(function () {
     Route::get('login/{provider}/callback', [GoogleController::class, 'handleGoogleCallback'])->name('login.callback');
 
     Route::view('/register', 'Frontend.auth.register')->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 
     Route::view('/forgot-password', 'Frontend.auth.forgot-password')->name('forgot-password');
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot.password');

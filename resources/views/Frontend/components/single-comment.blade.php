@@ -58,7 +58,7 @@
 
     {{-- Reply form --}}
     @if ($parent_id === $comment->id)
-        @if (!$authUser?->ban->comment)
+        @if (!$authUser?->userBan->comment)
             <div class="reply-form">
                 <textarea wire:model.lazy="content" class="reply-textarea"
                           placeholder="Viết phản hồi..." rows="2" maxlength="1000"></textarea>

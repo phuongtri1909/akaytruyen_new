@@ -30,7 +30,7 @@ class LiveChatSection extends Component
     {
         $this->validate();
 
-        if (Auth::user()->ban->comment) {
+        if (Auth::user()->userBan->comment) {
             return session()->flash('error', 'Bạn đã bị cấm bình luận.');
         }
 

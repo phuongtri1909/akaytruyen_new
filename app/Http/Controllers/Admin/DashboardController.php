@@ -12,9 +12,8 @@ class DashboardController extends Controller
 {
     public function __construct(
         protected RatingRepositoryInterface $ratingRepository
-    )
-    {
-        
+    ) {
+        $this->middleware('can:dashboard')->only('index');
     }
 
     public function index()
@@ -22,8 +21,8 @@ class DashboardController extends Controller
         $totalStory = Story::query()->count();
         $totalChapter = Chapter::query()->count();
         $totalViews = Chapter::query()->sum('views');
-        $totalRating = User::query()->sum('rating'); 
-       
+        $totalRating = User::query()->sum('rating');
+
         $ratingsDay = $this->ratingRepository->getRatingByType(Rating::TYPE_DAY);
         $arrStoryIdsRatingsDay = $this->getStoryIds(json_decode($ratingsDay->value ?? '', true)) ?? [];
         $storiesDay = $this->ratingRepository->getStories($arrStoryIdsRatingsDay);
@@ -49,10 +48,11 @@ class DashboardController extends Controller
             'totalRating' => $totalRating
         ];
 
-        return view('Admin.pages.dashboard.index', $data);
+        return view('Admin.pages.dashboard', $data);
     }
 
-    protected function getStoryIds($ratings) {
+    protected function getStoryIds($ratings)
+    {
         $result = [];
 
         if ($ratings) {
@@ -60,7 +60,7 @@ class DashboardController extends Controller
                 $result[] = intval($rating['id']);
             }
         }
-        
+
         return $result;
     }
 }

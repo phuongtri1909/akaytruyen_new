@@ -2,11 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Repositories\Permission\PermissionRepositoryInterface;
-use App\Services\PermissionService;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -14,138 +9,78 @@ use Spatie\Permission\PermissionRegistrar;
 
 class PermissionController extends Controller
 {
-    public function __construct(
-        protected PermissionRepositoryInterface $repository,
-        protected PermissionService             $service
-    )
+    public function __construct()
     {
         $this->middleware('can:xem_danh_sach_quyen')->only('index');
-        $this->middleware('can:them_quyen')->only('store');
-        $this->middleware('can:sua_quyen')->only('edit', 'update');
-        $this->middleware('can:xoa_quyen')->only('destroy');
-        $this->middleware('can:reset_cache_permission')->only('resetCache');
-        $this->middleware('can:xem_permissions')->only('index');
-        $this->middleware('can:them_permissions')->only('store');
-
+        $this->middleware('can:gan_quyen_cho_vai_tro')->only('getRoles', 'assignRoles');
     }
 
+    /**
+     * Display a listing of the resource.
+     */
     public function index(Request $request)
     {
-        $search      = $request->get('search', []);
-        $permissions = $this->service->getResult(['roles'], $search);
-        $roles       = Role::all();
+        $query = Permission::withCount('roles');
 
-        return view('Admin.pages.permissions.index', compact('permissions', 'roles'));
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        
+        if ($request->filled('role')) {
+            $query->whereHas('roles', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->role . '%');
+            });
+        }
+
+        $permissions = $query->paginate(15);
+        $roles = Role::all();
+        
+        
+        $totalPermissions = Permission::count();
+        $assignedPermissions = Permission::whereHas('roles')->count();
+        $unassignedPermissions = $totalPermissions - $assignedPermissions;
+
+        return view('Admin.pages.permissions.index', compact('permissions', 'roles', 'totalPermissions', 'assignedPermissions', 'unassignedPermissions'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Lấy vai trò cho gán quyền
      */
-//    public function store(Request $request)
-//    {
-//        $request->validate([
-//            'perm_name'  => ['required'],
-//            'perm_group' => ['required'],
-//            'perm_roles' => ['required'],
-//        ]);
-//        $perm_name  = $request->input('perm_name');
-//        $perm_group = $request->input('perm_group');
-//        $perm_roles = $request->input('perm_roles');
-//        $roles      = Role::query()->whereIn('id', $perm_roles)->get();
-//
-//        $permission = $this->repository->create([
-//            'name'       => Str::snake($perm_name),
-//            'name_2'     => $perm_name,
-//            'group'      => $perm_group,
-//            'guard_name' => 'web'
-//        ]);
-//        $permission->syncRoles($roles);
-//
-//        return redirect(route('admin.permissions.index'));
-//    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     * @return Application|Factory|View|\Illuminate\Foundation\Application
-     */
-    public function edit(int $id)
+    public function getRoles(Request $request)
     {
-        $roles            = Role::query()->get();
-        $permission       = Permission::query()->with('roles')->where('id', $id)->first();
-        $permission_roles = $permission->roles->pluck('id')->toArray();
+        $permissionId = $request->get('permission_id');
+        $permission = Permission::findOrFail($permissionId);
+        
+        $roles = Role::all();
+        $assignedRoles = $permission->roles->pluck('id')->toArray();
 
-        return view('Admin.pages.permissions.add-edit', compact('permission', 'roles', 'permission_roles'));
+        return response()->json([
+            'roles' => $roles,
+            'assignedRoles' => $assignedRoles
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
+     * Gán vai trò cho quyền
      */
-    public function update(Request $request, int $id)
+    public function assignRoles(Request $request)
     {
         $request->validate([
-            'group' => ['required'],
+            'permission_id' => 'required|exists:permissions,id',
+            'roles' => 'array',
+            'roles.*' => 'exists:roles,id'
         ]);
 
-        $attributes = [
-            'group' => $request->get('group', ''),
-            'roles' => $request->get('roles', []),
-        ];
-        $this->service->update($id, $attributes);
+        $permission = Permission::findOrFail($request->permission_id);
+        
+        
+        $roleNames = Role::whereIn('id', $request->roles ?? [])->pluck('name')->toArray();
+        $permission->syncRoles($roleNames);
 
-        return redirect(route('admin.permissions.index'));
+        return response()->json([
+            'success' => true,
+            'message' => 'Gán vai trò thành công!'
+        ]);
     }
-
-//    /**
-//     * Remove the specified resource from storage.
-//     *
-//     * @param int $id
-//     */
-//    public function destroy($id)
-//    {
-//        $permission = Permission::query()->where('id', $id)->first();
-//        $permission->delete();
-//
-//        app()->make(PermissionRegistrar::class)->forgetCachedPermissions();
-//
-//        return redirect(route('admin.permissions.index'));
-//    }
-
-    public function resetCache()
-    {
-        app()->make(PermissionRegistrar::class)->forgetCachedPermissions();
-
-        return redirect()->back()->with(
-            'successMessage', 'Xóa cache thành công.'
-        );
-    }
-    public function create()
-{
-    // Lấy tất cả vai trò (roles) để hiển thị trong form
-    $roles = Role::all();
-    return view('Admin.pages.permissions.create', compact('roles'));
-}
-
-public function store(Request $request)
-{
-    // Validate dữ liệu
-    $request->validate([
-        'name' => 'required|string|max:255|unique:permissions,name',
-        'group' => 'nullable|string|max:255',
-    ]);
-
-    // Tạo quyền mới
-    Permission::create([
-        'name' => $request->name,
-        'group' => $request->group,
-    ]);
-
-    return redirect()->route('admin.permissions.index')->with('success', 'Thêm quyền mới thành công!');
-}
-
-
 }

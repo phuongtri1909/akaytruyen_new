@@ -2,343 +2,397 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Helpers\Helper;
-use App\Http\Requests\Admin\CreateEditUser;
-use App\Models\User;
-use App\Repositories\User\UserRepositoryInterface;
-use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\URL;
-use Laravel\Socialite\Facades\Socialite;
+use App\Models\User;
+use App\Models\UserBan;
+use App\Models\BanIp;
+use App\Models\SMTPSetting;
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
-use App\Models\Donation;
 class UserController extends Controller
 {
-
-    public function __construct(
-        protected UserRepositoryInterface $repository,
-        protected UserService             $service
-    )
+    public function __construct()
     {
-        $this->middleware('can:xem_danh_sach_nguoi_dung')->only('index');
-        $this->middleware('can:them_nguoi_dung')->only('store');
-        $this->middleware('can:sua_nguoi_dung')->only('edit', 'update');
+        $this->middleware('canAny:xem_danh_sach_nguoi_dung,them_nguoi_dung,sua_nguoi_dung,xoa_nguoi_dung')->only('index');
+        $this->middleware('can:them_nguoi_dung')->only('create', 'store');
+        $this->middleware('can:sua_nguoi_dung')->only('edit', 'update', 'ban', 'getBanInfo', 'banIp', 'unbanIp');
         $this->middleware('can:xoa_nguoi_dung')->only('destroy');
-        $this->middleware('can:switch_user')->only('switchUserChange', 'switchUserBack');
     }
 
-    // public function index(Request $request)
-    // {
-    //     $search        = $request->get('search', []);
-    //     $user_inactive = User::query()->where('status', 0)->count();
-    //     $roles         = Role::all();
-    //     $users         = $this->service->getTable(20, [], $search);
-    //     $donations = Donation::orderBy('donated_at', 'desc')->paginate(20); // Lấy 20 donate mới nhất
-    //         // Lấy tổng số tiền donate của tất cả user
-    //     $totalUserDonations = User::sum('donate_amount');
-    //     // Lấy tổng doanh thu theo từng tháng và cộng thêm tổng donate của tất cả user
-    //     $monthlyRevenue = Donation::selectRaw('MONTH(donated_at) as month, YEAR(donated_at) as year, SUM(amount) as total')
-    //         ->groupBy('month', 'year')
-    //         ->orderBy('year', 'desc')
-    //         ->orderBy('month', 'desc')
-    //         ->get()
-    //         ->map(function ($revenue) use ($totalUserDonations) {
-    //             $revenue->total += $totalUserDonations;
-    //             return $revenue;
-    //         });
-
-
-
-    //     return view('Admin.pages.users.index', compact('users', 'roles', 'user_inactive','donations', 'monthlyRevenue','totalUserDonations'));
-    // }
-        public function index(Request $request)
+    /**
+     * Kiểm tra xem user hiện tại có phải Super Admin không
+     */
+    private function isSuperAdmin()
     {
-        $search        = $request->get('search', []);
-        $user_inactive = User::query()->where('status', 2)->count();
-        $roles         = Role::all();
-        $users         = $this->service->getTable(20, [], $search);
+        $smtpSetting = SMTPSetting::first();
+        return $smtpSetting && $smtpSetting->admin_email === auth()->user()->email;
+    }
 
-        // Lấy tổng doanh thu theo từng tháng (bao gồm cả donation và user donate)
-        $monthlyRevenue = Donation::selectRaw('MONTH(donated_at) as month, YEAR(donated_at) as year, SUM(amount) as total')
-            ->groupBy('month', 'year')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
-            ->get()
-            ->map(function ($revenue) {
-                // Thêm tổng donate từ user vào mỗi tháng
-                $userDonations = User::where('donate_amount', '>', 0)
-                    ->whereMonth('updated_at', $revenue->month)
-                    ->whereYear('updated_at', $revenue->year)
-                    ->sum('donate_amount');
-                $revenue->total += $userDonations;
-                return $revenue;
+    /**
+     * Kiểm tra xem user có phải Super Admin không
+     */
+    private function isUserSuperAdmin(User $user)
+    {
+        $smtpSetting = SMTPSetting::first();
+        return $smtpSetting && $smtpSetting->admin_email === $user->email;
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+
+        $query = User::with(['roles', 'userBan', 'banIp']);
+
+        
+        if ($request->filled('user_id')) {
+            $query->where('id', $request->user_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
             });
-
-        return view('Admin.pages.users.index', compact('users', 'roles', 'user_inactive', 'monthlyRevenue'));
-    }
-
-    public function create(Request $request)
-    {
-        $user                  = $this->repository->getModel();
-        $user_id               = 0;
-        $formOptions           = $this->service->formOptions($user);
-        $formOptions['action'] = route('admin.users.store');
-        $default_values        = $formOptions['default_values'];
-
-        $view_data = compact('formOptions', 'default_values', 'user_id');
-
-        return view('Admin.pages.users.add-edit', $view_data);
-    }
-
-    public function store(CreateEditUser $request)
-    {
-        // dd($request->input());
-        // $inputs = $request->only(['name', 'email', 'role_id', 'status']);
-        $inputs             = $request->all();
-        $inputs['password'] = Hash::make($inputs['password']);
-
-        $this->service->create($inputs);
-
-
-        return redirect(route('admin.users.index'))
-            ->with('successMessage', 'Thêm mới thành công.');
-    }
-
-    public function edit(Request $request, int $user_id)
-    {
-        $user                  = $this->repository->find($user_id, ['roles']);
-        if (!$user) {
-            return redirect()->route('admin.users.index')->with('errorMessage', 'Người dùng không tồn tại.');
         }
 
-        $formOptions           = $this->service->formOptions($user);
-        $formOptions['action'] = route('admin.users.update', $user_id);
-        $default_values        = $formOptions['default_values'];
-
-        $view_data = compact('formOptions', 'default_values', 'user_id', 'user'); // Thêm biến user
-
-        return view('Admin.pages.users.add-edit', $view_data);
-    }
-
-
-    public function destroy($id)
-{
-    $user = User::find($id);
-    if (!$user) {
-        return redirect()->back()->with('error', 'Người dùng không tồn tại.');
-    }
-
-    $user->delete();
-
-    return redirect()->route('admin.users.index')->with('success', 'Người dùng đã được xóa.');
-}
-
-public function update(CreateEditUser $request, int $user_id)
-{
-    $data = $request->all();
-
-    // Nếu password trống, không cập nhật
-    if (empty($data['password'])) {
-        unset($data['password']);
-    } else {
-        $data['password'] = Hash::make($data['password']);
-    }
-
-    // Xử lý trạng thái hạn chế
-    $data['ban_login'] = $request->has('ban_login');
-    $data['ban_comment'] = $request->has('ban_comment');
-    if (isset($data['donate_amount'])) {
-        $data['donate_amount'] = max(0, floatval($data['donate_amount']));
-    }
-    // Cập nhật user
-    $this->service->update($user_id, $data);
-    // Gán role VIP
-// 1. Xoá tất cả role hiện tại
-DB::table('model_has_roles')->where([
-    'model_id' => $user_id,
-    'model_type' => 'App\\Models\\User',
-])->delete();
-
-// 2. Gán lại role mới được chọn
-$role_id = $request->input('role_id');
-
-$data_insert = [
-    'model_id'   => $user_id,
-    'model_type' => 'App\\Models\\User',
-    'role_id'    => $role_id,
-];
-
-// Nếu là VIP thì thêm expires_at
-if ($role_id == 6) {
-    $data_insert['expires_at'] = now()->addDays(30);
-}
-
-DB::table('model_has_roles')->insert($data_insert);
-
-
-
-// Xử lý cấm IP nếu user hiện tại là admin
-if (Auth::user()->hasRole('Admin') || Auth::user()->hasRole('Mod')) {
-    // Lấy thông tin user bị cấm
-    $user = User::find($user_id);
-
-    if ($user) {
-        if ($request->input('ban_ip', false)) {
-            DB::table('banned_ips')->updateOrInsert(
-                ['user_id' => $user_id],
-                ['ip_address' => $user->ip_address, 'created_at' => now(), 'updated_at' => now()]
-            );
-        } else {
-            DB::table('banned_ips')->where('user_id', $user_id)->delete();
+        
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('email_verified_at', '!=', null);
+            } elseif ($request->status === 'inactive') {
+                $query->where('email_verified_at', null);
+            }
         }
+
+        
+        if ($request->filled('role')) {
+            $query->whereHas('roles', function($q) use ($request) {
+                $q->where('name', $request->role);
+            });
+        }
+
+        $users = $query->paginate(15)->withQueryString();
+        $roles = Role::all();
+
+        return view('Admin.pages.users.index', compact('users', 'roles'));
     }
-}
 
-
-    return redirect(route('admin.users.index'))
-        ->with('successMessage', 'Thay đổi thành công.');
-}
-
-    public function redirectToProvider($provider)
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
     {
-        $url_previous = URL::previous();
-        $url_login    = URL::to(route('login'));
-        $url_index    = URL::to(route('admin.dashboard.index'));
-
-        if ($url_previous != $url_login) {
-            session()->put('pre_url', $url_previous);
-        } else {
-            session()->put('pre_url', $url_index);
-        }
-        return Socialite::driver($provider)->redirect();
+        $roles = Role::all();
+        return view('Admin.pages.users.create', compact('roles'));
     }
 
-    public function handleProviderCallback($provider)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
     {
-        $user = Socialite::driver($provider)->user();
 
-        $authUser = $this->findOrCreateUser($user, $provider);
-        if (!$authUser) {
-            return redirect(route('login'))->withErrors(['email' => 'Người dùng không tồn tại trong hệ thống, bạn liên hệ với quản trị viên để được hỗ trợ.']);
-        }
-
-        Auth::guard()->login($authUser, true);
-        return redirect(Session::get('pre_url'));
-    }
-
-    public function findOrCreateUser($providerUser, $provider)
-    {
-        $user = $this->repository->getByEmail($providerUser->email);
-        if (!$user) {
-            return false;
-        }
-        if ($user->avatar != ($providerUser->avatar ?? '')) {
-            $user->update(['avatar' => $providerUser->avatar]);
-        }
-
-        return $user;
-    }
-
-    public function switchUser(Request $request, int $user_id)
-    {
-        $user = Helper::currentUser();
-        if ($user && $user->other_user && $user->other_user->id == $user_id) {
-            Auth::login($user->other_user, true);
-            $route = $this->routeFromUser($user->other_user);
-
-            return redirect($route)->with('successMessage', 'Đổi tài khoản thành công.');
-        }
-
-        abort(403, 'Bạn không có quyền thực hiện chức năng này.');
-    }
-
-    public function switchUserChange(Request $request)
-    {
         $request->validate([
-            'email' => ['required', 'string']
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|string|exists:roles,name',
+        ], [
+            'name.required' => 'Tên người dùng là bắt buộc',
+            'name.max' => 'Tên người dùng không được vượt quá 255 ký tự',
+            'email.required' => 'Email là bắt buộc',
+            'email.email' => 'Email không hợp lệ',
+            'email.unique' => 'Email đã tồn tại',
+            'password.required' => 'Mật khẩu là bắt buộc',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp',
+            'role.required' => 'Vai trò là bắt buộc',
+            'role.exists' => 'Vai trò không tồn tại',
         ]);
-        $email       = $request->input('email');
-        $currentUser = Helper::currentUser();
-        if ($email == $currentUser->email) {
-            return back()->with('errorMessage', 'Bạn đang ở tài khoản này.');
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        $user->assignRole($request->role);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Người dùng đã được tạo thành công!',
+                'redirect' => route('admin.users.index')
+            ]);
         }
-        $authUser = User::query()
-            ->where(function ($query) use ($email) {
-                if (str_contains($email, '@')) {
-                    $query->where('email', $email);
-                } else {
-                    $query->where('name', $email);
-                }
-            })
-            ->where('status', User::STATUS_ACTIVE)
-            ->first();
-        if ($authUser) {
-            Auth::login($authUser, true);
-            session()->put('switch_back', $currentUser->id);
 
-            $route = $this->routeFromUser($authUser);
+        return redirect()->route('admin.users.index')->with('success', 'Người dùng đã được tạo thành công!');
+    }
 
-            return redirect($route)->with('successMessage', 'Đổi tài khoản thành công.');
+    /**
+     * Display the specified resource.
+     */
+    public function show(User $user)
+    {
+
+        $user->load('roles');
+        return view('Admin.pages.users.show', compact('user'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(User $user)
+    {
+
+        if ($this->isUserSuperAdmin($user) && !$this->isSuperAdmin()) {
+            abort(403, 'Bạn không có quyền chỉnh sửa Super Admin này!');
+        }
+
+        $roles = Role::all();
+        $user->load('roles');
+        return view('Admin.pages.users.edit', compact('user', 'roles'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, User $user)
+    {
+
+        if ($this->isUserSuperAdmin($user) && !$this->isSuperAdmin()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn không có quyền chỉnh sửa Super Admin này!'
+                ], 403);
+            }
+            abort(403, 'Bạn không có quyền chỉnh sửa Super Admin này!');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users')->ignore($user->id)
+            ],
+            'password' => 'nullable|string|min:8|confirmed',
+            'role' => 'required|string|exists:roles,name',
+        ], [
+            'name.required' => 'Tên người dùng là bắt buộc',
+            'name.max' => 'Tên người dùng không được vượt quá 255 ký tự',
+            'email.required' => 'Email là bắt buộc',
+            'email.email' => 'Email không hợp lệ',
+            'email.unique' => 'Email đã tồn tại',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp',
+            'role.required' => 'Vai trò là bắt buộc',
+            'role.exists' => 'Vai trò không tồn tại',
+        ]);
+
+        $updateData = [
+            'name' => $request->name,
+            'email' => $request->email,
+        ];
+
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+
+        $user->update($updateData);
+        $user->syncRoles([$request->role]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Người dùng đã được cập nhật thành công!',
+                'redirect' => route('admin.users.index')
+            ]);
+        }
+
+        return redirect()->route('admin.users.index')->with('success', 'Người dùng đã được cập nhật thành công!');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(User $user)
+    {
+
+        if ($this->isUserSuperAdmin($user)) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không thể xóa Super Admin!'
+                ], 403);
+            }
+            abort(403, 'Không thể xóa Super Admin!');
+        }
+
+        // Admin thường không thể xóa admin khác nếu không có quyền
+        if ($user->hasRole('Admin') && !$this->isSuperAdmin()) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn không có quyền xóa admin khác!'
+                ], 403);
+            }
+            abort(403, 'Bạn không có quyền xóa admin khác!');
+        }
+
+        $user->delete();
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Người dùng đã được xóa thành công!'
+            ]);
+        }
+
+        return redirect()->route('admin.users.index')->with('success', 'Người dùng đã được xóa thành công!');
+    }
+
+    /**
+     * Ban/Unban user
+     */
+    public function ban(Request $request, User $user)
+    {
+
+        $request->validate([
+            'ban_types' => 'array',
+            'ban_types.*' => 'in:login,comment,rate,read,ip'
+        ], [
+            'ban_types.array' => 'Loại ban phải là mảng',
+            'ban_types.*.in' => 'Loại ban không hợp lệ',
+        ]);
+
+        // Không cho ban Super Admin
+        if ($this->isUserSuperAdmin($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể ban Super Admin!'
+            ], 403);
+        }
+
+        // Lấy ban hiện tại hoặc tạo mới
+        $ban = UserBan::firstOrCreate(['user_id' => $user->id]);
+
+        // Cập nhật tất cả các loại ban (cho phép mảng rỗng để unban tất cả)
+        $banTypes = $request->ban_types ?? [];
+        $updateData = [
+            'login' => in_array('login', $banTypes),
+            'comment' => in_array('comment', $banTypes),
+            'rate' => in_array('rate', $banTypes),
+            'read' => in_array('read', $banTypes),
+        ];
+
+        $ban->update($updateData);
+
+        // Xử lý ban IP
+        if (in_array('ip', $banTypes)) {
+            // Ban IP
+            if ($user->ip_address) {
+                BanIp::firstOrCreate([
+                    'ip_address' => $user->ip_address,
+                    'user_id' => $user->id
+                ]);
+            }
         } else {
-            return back()->with('errorMessage', 'Không tìm thấy tài khoản này.');
+            // Unban IP
+            if ($user->banIp) {
+                $user->banIp->delete();
+            }
         }
-    }
 
-    public function switchUserBack(Request $request, int $userId)
-    {
-        $switchBack = session()->get('switch_back');
-        if (!$switchBack || $switchBack != $userId) {
-            abort(403);
+        // Nếu tất cả đều false, xóa record
+        if (!$ban->login && !$ban->comment && !$ban->rate && !$ban->read) {
+            $ban->delete();
         }
-        $authUser = User::query()->where('id', $userId)->where('status', User::STATUS_ACTIVE)->first();
-        if ($authUser) {
-            session()->forget('switch_back');
-            Auth::login($authUser, true);
 
-            $route = $this->routeFromUser($authUser);
-
-            return redirect($route)->with('successMessage', 'Đổi tài khoản thành công.');
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Trạng thái ban đã được cập nhật thành công!'
+            ]);
         }
-        return back()->with('errorMessage', 'Không tìm thấy tài khoản này.');
+
+        return redirect()->route('admin.users.index')->with('success', 'Trạng thái ban đã được cập nhật thành công!');
     }
 
-    public function routeFromUser($user)
+    /**
+     * Get ban info for user
+     */
+    public function getBanInfo(User $user)
     {
-//        if (($user?->roles?->first()?->name ?: '') == User::ROLE_TDV) {
-//            return route('admin.tdv.dashboard');
-//        }
-//
-//        if (($user?->roles?->first()?->name ?: '') == User::ROLE_THIEN_DIEU) {
-//            return route('admin.thien_dieu.dashboard');
-//        }
 
-        return route('admin.dashboard.index');
+        $ban = $user->userBan;
+        $banIp = $user->banIp;
+        
+        return response()->json([
+            'ban' => [
+                'login' => $ban->login ?? false,
+                'comment' => $ban->comment ?? false,
+                'rate' => $ban->rate ?? false,
+                'read' => $ban->read ?? false,
+                'ip' => $banIp ? true : false,
+            ]
+        ]);
     }
-    public function getOnlineUsers()
+
+
+    /**
+     * Ban IP address
+     */
+    public function banIp(Request $request)
     {
-        $timeout = now()->subMinutes(60);
 
-        $users = \DB::table('online_users')
-            ->where('last_activity', '>=', $timeout)
-            ->leftJoin('users', 'online_users.user_id', '=', 'users.id')
-            ->select(
-                \DB::raw("COALESCE(users.name, 'Khách') as name"),
-                'online_users.ip as ip',
-                'online_users.last_activity'
-            )
-            ->orderBy('last_activity', 'desc')
-            ->distinct() // Tránh trùng dòng (ví dụ IP trùng)
-            ->get();
+        $request->validate([
+            'ip_address' => 'required|ip',
+            'user_id' => 'nullable|exists:users,id'
+        ], [
+            'ip_address.required' => 'IP là bắt buộc',
+            'ip_address.ip' => 'IP không hợp lệ',
+            'user_id.exists' => 'Người dùng không tồn tại',
+        ]);
 
-        return response()->json(['users' => $users]);
+        BanIp::create([
+            'ip_address' => $request->ip_address,
+            'user_id' => $request->user_id
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'IP đã được ban thành công!'
+            ]);
+        }
+
+        return redirect()->route('admin.users.index')->with('success', 'IP đã được ban thành công!');
     }
 
+    /**
+     * Unban IP address
+     */
+    public function unbanIp(BanIp $banIp)
+    {
 
+        $banIp->delete();
 
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'IP đã được unban thành công!'
+            ]);
+        }
 
+        return redirect()->route('admin.users.index')->with('success', 'IP đã được unban thành công!');
+    }
 }

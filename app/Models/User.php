@@ -77,14 +77,9 @@ class User extends Authenticatable
         'last_login_time'   => 'datetime',
     ];
 
-    public function ban()
+    public function getUserBanAttribute()
     {
-        return $this->hasOne(UserBan::class);
-    }
-
-    public function getBanAttribute()
-    {
-        return $this->ban()->first() ?? new UserBan([
+        return $this->userBan()->first() ?? new UserBan([
             'user_id' => $this->id,
             'login' => false,
             'comment' => false,
@@ -93,9 +88,10 @@ class User extends Authenticatable
         ]);
     }
 
-    public function banIps()
+    public function isBanned()
     {
-        return $this->hasMany(BanIp::class);
+        $ban = $this->userBan;
+        return $ban && ($ban->login || $ban->comment || $ban->rate || $ban->read);
     }
 
     public function comments()
@@ -123,6 +119,21 @@ class User extends Authenticatable
         return $this->morphMany(DatabaseNotification::class, 'notifiable')
             ->newQuery()
             ->from('user_notifications');
+    }
+
+    public function userBan()
+    {
+        return $this->hasOne(UserBan::class);
+    }
+
+    public function banIps()
+    {
+        return $this->hasMany(BanIp::class);
+    }
+
+    public function banIp()
+    {
+        return $this->hasOne(BanIp::class);
     }
 
     /**

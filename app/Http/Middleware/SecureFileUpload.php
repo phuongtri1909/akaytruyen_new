@@ -32,7 +32,7 @@ class SecureFileUpload
                                     'success' => false,
                                     'error' => 'File không được phép upload.',
                                     'message' => $errorMessage
-                                ], 200);
+                                ], 422);
                             } else {
                                 return redirect()->back()->withErrors(['image' => $errorMessage])->withInput();
                             }
@@ -49,7 +49,7 @@ class SecureFileUpload
                                 'success' => false,
                                 'error' => 'File không được phép upload.',
                                 'message' => $errorMessage
-                            ], 200);
+                            ], 422);
                         } else {
                             return redirect()->back()->withErrors(['image' => $errorMessage])->withInput();
                         }

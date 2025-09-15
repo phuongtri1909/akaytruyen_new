@@ -105,7 +105,7 @@
             <div class="auth-buttons" role="group" aria-label="Authentication buttons">
                 @if (Auth::check())
                     @if (Auth::user()->hasRole('Admin'))
-                        <a href="{{ route('admin.dashboard.index') }}" class="auth-btn auth-btn--admin">
+                        <a href="{{ route('admin.dashboard') }}" class="auth-btn auth-btn--admin">
                             <span class="auth-btn__icon">👑</span>
                             <span class="auth-btn__text">Admin</span>
                         </a>
@@ -221,7 +221,7 @@
                     <div class="auth-buttons" role="group" aria-label="Authentication buttons">
                         @if (Auth::check())
                             @if (Auth::user()->hasRole('Admin'))
-                                <a href="{{ route('admin.dashboard.index') }}" class="auth-btn auth-btn--admin">
+                                <a href="{{ route('admin.dashboard') }}" class="auth-btn auth-btn--admin">
                                     <span class="auth-btn__icon">👑</span>
                                     <span class="auth-btn__text text-white">Admin</span>
                                 </a>

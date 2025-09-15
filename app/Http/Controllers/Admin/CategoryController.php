@@ -2,79 +2,157 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Repositories\Category\CategoryRepositoryInterface;
-use App\Services\CategoryService;
 use Illuminate\Http\Request;
+use App\Models\Category;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
-    public function __construct(
-        protected CategoryRepositoryInterface $repository,
-        protected CategoryService $service
-    ) {
-        $this->middleware('can:xem_category_data')->only('index', 'show');
-        $this->middleware('can:them_category')->only('create', 'store');
-        $this->middleware('can:sua_category')->only('edit', 'update');
-        $this->middleware('can:xoa_category')->only('destroy');
+    public function __construct()
+    {
+        $this->middleware('canAny:xem_danh_sach_danh_muc,them_danh_muc,sua_danh_muc,xoa_danh_muc')->only('index', 'show');
+        $this->middleware('can:them_danh_muc')->only('create', 'store');
+        $this->middleware('can:sua_danh_muc')->only('edit', 'update');
+        $this->middleware('can:xoa_danh_muc')->only('destroy');
     }
 
+    /**
+     * Display a listing of the resource.
+     */
     public function index(Request $request)
     {
-        $page_title = 'Category';
-        $search     = $request->get('search', []);
-        $results    = $this->repository->paginate(20, [], $search);
-        $categories = $this->service->getTable(20, [], $search);
+        $query = Category::withCount('stories');
+
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        if ($request->filled('slug')) {
+            $query->where('slug', 'like', '%' . $request->slug . '%');
+        }
+
+        $categories = $query->paginate(15)->withQueryString();
 
         return view('Admin.pages.categories.index', compact('categories'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
-        $item = $this->repository->getModel();
-        $item->id = 0;
-        $action = route('admin.category.store');
-        $view_data = compact('item', 'action');
-
-        return view('Admin.pages.categories.add-edit', $view_data);
+        return view('Admin.pages.categories.create');
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        $attributes = $request->all();
-        $attributes['slug'] = Str::slug($request->input('name'));
-        $item       = $this->repository->create($attributes);
+        $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name',
+            'desc' => 'nullable|string|max:1000',
+        ], [
+            'name.required' => 'Tên danh mục là bắt buộc',
+            'name.string' => 'Tên danh mục phải là chuỗi',
+            'name.max' => 'Tên danh mục không được vượt quá 255 ký tự',
+            'name.unique' => 'Tên danh mục đã tồn tại',
+            'desc.max' => 'Mô tả không được vượt quá 1000 ký tự',
+        ]);
 
-        return redirect(route('admin.category.index'))
-            ->with('success', 'Thêm thành công.');
+        $category = Category::create([
+            'name' => $request->name,
+            'slug' => Str::slug($request->name),
+            'desc' => $request->desc,
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Danh mục đã được tạo thành công!',
+                'redirect' => route('admin.categories.index')
+            ]);
+        }
+
+        return redirect()->route('admin.categories.index')->with('success', 'Danh mục đã được tạo thành công!');
     }
 
-    public function show($id)
+    /**
+     * Display the specified resource.
+     */
+    public function show(Category $category)
     {
-        $item = $this->repository->find($id);
+        $category->load(['stories.author'])->loadCount('stories');
+        return view('Admin.pages.categories.show', compact('category'));
     }
 
-    public function edit($id)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Category $category)
     {
-        $item = $this->repository->find($id, ['stories']);
-        $action = route('admin.category.update', $id);
-        $view_data = compact('item', 'action');
-
-        return view('Admin.pages.categories.add-edit', $view_data);
+        $category->loadCount('stories');
+        return view('Admin.pages.categories.edit', compact('category'));
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Category $category)
     {
-        $attributes = $request->all();
-        $item       = $this->repository->update($id, $attributes);
+        $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'desc' => 'nullable|string|max:1000',
+        ], [
+            'name.required' => 'Tên danh mục là bắt buộc',
+            'name.string' => 'Tên danh mục phải là chuỗi',
+            'name.max' => 'Tên danh mục không được vượt quá 255 ký tự',
+            'name.unique' => 'Tên danh mục đã tồn tại',
+            'desc.max' => 'Mô tả không được vượt quá 1000 ký tự',
+        ]);
 
-        return redirect(route('admin.category.index'))
-            ->with('success', 'Thay đổi thành công.');
+        $category->update([
+            'name' => $request->name,
+            'slug' => Str::slug($request->name),
+            'desc' => $request->desc,
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Danh mục đã được cập nhật thành công!',
+                'redirect' => route('admin.categories.index')
+            ]);
+        }
+
+        return redirect()->route('admin.categories.index')->with('success', 'Danh mục đã được cập nhật thành công!');
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Category $category)
     {
-        $this->repository->delete($id);
-        return back()->with('success', 'Delete Susscessfully');
+        // Kiểm tra xem danh mục có truyện nào không
+        if ($category->stories()->count() > 0) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không thể xóa danh mục có chứa truyện!'
+                ], 422);
+            }
+            return redirect()->route('admin.categories.index')->with('error', 'Không thể xóa danh mục có chứa truyện!');
+        }
+
+        $category->delete();
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Danh mục đã được xóa thành công!'
+            ]);
+        }
+
+        return redirect()->route('admin.categories.index')->with('success', 'Danh mục đã được xóa thành công!');
     }
 }

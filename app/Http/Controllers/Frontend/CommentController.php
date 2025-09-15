@@ -70,7 +70,7 @@ class CommentController extends Controller
         }
 
         $user = auth()->user();
-        if ($user->ban->comment) {
+        if ($user->userBan->comment) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Tài khoản của bạn đã bị cấm bình luận'

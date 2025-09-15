@@ -86,7 +86,7 @@ class LiveChat extends Model
     {
         return $query->with([
             'user:id,name,email,avatar',
-            'user.ban:id,user_id,comment',
+            'user.userBan:id,user_id,comment',
             'user.roles:id,name',
             'replies' => function ($query) {
                 $query->select('id','user_id','content','parent_id','created_at')
@@ -94,7 +94,7 @@ class LiveChat extends Model
                     ->limit(5)
                     ->with([
                         'user:id,name,email,avatar',
-                        'user.ban:id,user_id,comment',
+                        'user.userBan:id,user_id,comment',
                         'user.roles:id,name'
                     ]);
             }

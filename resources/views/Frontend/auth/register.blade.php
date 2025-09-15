@@ -37,7 +37,7 @@
                 </div>
 
                 <!-- Register Form -->
-                <form action="{{ route('register') }}" method="POST" enctype="multipart/form-data" class="login-form" id="registerForm">
+                <form action="{{ route('register.store') }}" method="POST" enctype="multipart/form-data" class="login-form" id="registerForm">
                     @csrf
 
                     <!-- Email Field -->

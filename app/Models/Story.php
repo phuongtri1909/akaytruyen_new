@@ -26,9 +26,19 @@ class Story extends Model
         'status',
         'is_full',
         'is_new',
-        'is_hot',
-        'views'
+        'is_hot'
     ];
+
+    // Accessor để tương thích với các field name khác
+    public function getTitleAttribute()
+    {
+        return $this->name;
+    }
+
+    public function getDescriptionAttribute()
+    {
+        return $this->desc;
+    }
 
     protected $table = 'stories';
 

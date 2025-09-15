@@ -5,7 +5,7 @@
             <div class="comment-input-body">
                 @include('Frontend.components.user-avatar', ['user' => auth()->user()])
 
-                @if (!auth()->user()->ban->comment)
+                @if (!auth()->user()->userBan->comment)
                     <div class="input-wrapper">
                         <textarea wire:model.lazy="content" class="modern-textarea" placeholder="Viết bình luận của bạn..." rows="3"
                         maxlength="1000"></textarea>

@@ -2,22 +2,23 @@
 
 namespace App\Helpers;
 
-use App\Models\Category;
-use App\Models\Setting;
 use App\Models\User;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\URL;
+use App\Models\Setting;
+use App\Models\Category;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Cache;
-
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\URL;
+use Mews\Purifier\Facades\Purifier;
 use Artesaos\SEOTools\Facades\JsonLd;
-use Artesaos\SEOTools\Facades\JsonLdMulti;
-use Artesaos\SEOTools\Facades\OpenGraph;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Route;
+
 use Artesaos\SEOTools\Facades\SEOMeta;
+use Illuminate\Support\Facades\Cookie;
 use Artesaos\SEOTools\Facades\SEOTools;
+use Illuminate\Support\Facades\Storage;
+use Artesaos\SEOTools\Facades\OpenGraph;
+use Artesaos\SEOTools\Facades\JsonLdMulti;
 use Artesaos\SEOTools\Facades\TwitterCard;
 
 class Helper
@@ -351,6 +352,101 @@ class Helper
         return $text;
     }
     
+    public static function sanitizeAdvancedContent($text)
+    {
+        if (empty($text)) return '';
+        
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        
+        $text = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $text);
+        $text = preg_replace('/<iframe[^>]*>.*?<\/iframe>/is', '', $text);
+        $text = preg_replace('/<object[^>]*>.*?<\/object>/is', '', $text);
+        $text = preg_replace('/<embed[^>]*>.*?<\/embed>/is', '', $text);
+        $text = preg_replace('/<form[^>]*>.*?<\/form>/is', '', $text);
+        $text = preg_replace('/<input[^>]*\/?>/is', '', $text);
+        $text = preg_replace('/<textarea[^>]*>.*?<\/textarea>/is', '', $text);
+        $text = preg_replace('/<select[^>]*>.*?<\/select>/is', '', $text);
+        $text = preg_replace('/<button[^>]*>.*?<\/button>/is', '', $text);
+        
+        $text = preg_replace('/javascript\s*:/i', '', $text);
+        $text = preg_replace('/vbscript\s*:/i', '', $text);
+        $text = preg_replace('/data\s*:/i', '', $text);
+        $text = preg_replace('/mocha\s*:/i', '', $text);
+        $text = preg_replace('/livescript\s*:/i', '', $text);
+        
+        $text = preg_replace('/on\w+\s*=\s*["\'][^"\']*["\']/i', '', $text);
+        $text = preg_replace('/on\w+\s*=\s*[^\s>]+/i', '', $text);
+        
+        $text = preg_replace('/expression\s*\(/i', '', $text);
+        $text = preg_replace('/<!--.*?-->/s', '', $text);
+        
+        $text = str_replace("\0", '', $text);
+        $text = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $text);
+        
+        $text = Purifier::clean($text);
+        
+        if (preg_match('/<script[^>]*>.*?<\/script>/is', $text) || 
+            preg_match('/javascript\s*:/i', $text) ||
+            preg_match('/on\w+\s*=/i', $text)) {
+            $text = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $text);
+            $text = preg_replace('/javascript\s*:/i', '', $text);
+            $text = preg_replace('/on\w+\s*=/i', '', $text);
+        }
+        
+        return $text;
+    }
+    
+    public static function validateImageFile($file, $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'])
+    {
+        if (!$file || !$file->isValid()) {
+            return ['valid' => false, 'message' => 'File không hợp lệ'];
+        }
+        
+        $extension = strtolower($file->getClientOriginalExtension());
+        $mimeType = $file->getMimeType();
+        
+        if (!in_array($extension, $allowedTypes)) {
+            return ['valid' => false, 'message' => "Chỉ chấp nhận file ảnh (" . strtoupper(implode(', ', $allowedTypes)) . "). File của bạn có định dạng: $extension"];
+        }
+        
+        $allowedMimes = [
+            'image/jpeg',
+            'image/png', 
+            'image/gif',
+            'image/webp'
+        ];
+        
+        if (!in_array($mimeType, $allowedMimes)) {
+            return ['valid' => false, 'message' => "Chỉ chấp nhận file ảnh (" . strtoupper(implode(', ', $allowedTypes)) . "). File của bạn có định dạng: $mimeType"];
+        }
+        
+        $fileContent = file_get_contents($file->getPathname());
+        $allowedImageHeaders = [
+            "\xFF\xD8\xFF", // JPEG
+            "\x89PNG\r\n\x1a\n", // PNG
+            "GIF87a", // GIF87a
+            "GIF89a", // GIF89a
+        ];
+        
+        $isValidImage = false;
+        foreach ($allowedImageHeaders as $header) {
+            if (strpos($fileContent, $header) === 0) {
+                $isValidImage = true;
+                break;
+            }
+        }
+        
+        if (!$isValidImage && strpos($fileContent, "RIFF") === 0 && strpos($fileContent, "WEBP") !== false) {
+            $isValidImage = true;
+        }
+        
+        if (!$isValidImage) {
+            return ['valid' => false, 'message' => 'File không phải là hình ảnh hợp lệ. Vui lòng chọn file ảnh thực sự.'];
+        }
+        
+        return ['valid' => true, 'message' => 'File hợp lệ'];
+    }
+    
     /**
      * Sanitize JavaScript content for safe display
      */
@@ -469,5 +565,19 @@ class Helper
         $url .= (str_contains($url, '?') ? '&' : '?') . 'v=' . $version;
 
         return $url;
+    }
+
+    public static function cleanDescription($content, $limit = 150)
+    {
+        $content = Purifier::clean($content, 'default');
+        $text = strip_tags($content);
+
+        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+
+        $text = preg_replace('/\s+/', ' ', $text);
+
+        $text = trim($text);
+
+        return Str::limit($text, $limit);
     }
 }

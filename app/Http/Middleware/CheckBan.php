@@ -13,8 +13,8 @@ class CheckBan
         $user = auth()->user();
 
         if ($user) {
-            if ($user->ban) {
-                if ($action === 'login' && $user->ban->login) {
+            if ($user->userBan) {
+                if ($action === 'login' && $user->userBan->login) {
 
                     if($request->ajax()){
                         return response()->json(['message' => 'Tài khoản của bạn đã bị cấm đăng nhập.'], 403);
@@ -22,19 +22,19 @@ class CheckBan
 
                     abort(403, 'Tài khoản của bạn đã bị cấm đăng nhập.');
                 }
-                if ($action === 'comment' && $user->ban->comment) {
+                if ($action === 'comment' && $user->userBan->comment) {
                     if($request->ajax()){
                         return response()->json(['message' => 'Bạn đã bị cấm bình luận.'], 403);
                     }
                     abort(403, 'Bạn đã bị cấm bình luận.');
                 }
-                if ($action === 'rate' && $user->ban->rate) {
+                if ($action === 'rate' && $user->userBan->rate) {
                     if($request->ajax()){
                         return response()->json(['message' => 'Bạn đã bị cấm đánh giá.'], 403);
                     }
                     abort(403, 'Bạn đã bị cấm đánh giá.');
                 }
-                if ($action === 'read' && $user->ban->read) {
+                if ($action === 'read' && $user->userBan->read) {
                     if($request->ajax()){
                         return response()->json(['message' => 'Bạn đã bị cấm đọc nội dung.'], 403);
                     }

@@ -46,6 +46,15 @@
                         </li>
                     @endcanany
 
+                    @canany(['xem_danh_sach_binh_luan', 'xoa_binh_luan', 'ghim_binh_luan'])
+                        <li class="{{ Route::currentRouteNamed('admin.comments.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.comments.index') }}">
+                                <i class="fas fa-comments"></i>
+                                <span>Bình luận</span>
+                            </a>
+                        </li>
+                    @endcanany
+
                     @canany(['xem_danh_sach_vai_tro','them_vai_tro', 'sua_vai_tro', 'xoa_vai_tro','xem_danh_sach_quyen', 'gan_quyen_cho_vai_tro'])
                         <li
                             class="has-submenu {{ Route::currentRouteNamed(['admin.roles.*', 'admin.permissions.*', 'admin.users.*']) ? 'open' : '' }}">

@@ -47,6 +47,11 @@ class Comment extends Model
         });
     }
 
+    public function chapter()
+    {
+        return $this->belongsTo(Chapter::class);
+    }
+
     public function replies()
     {
         return $this->hasMany(Comment::class, 'reply_id')->where('level', '<', 3);

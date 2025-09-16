@@ -9,6 +9,7 @@ use App\Models\BanIp;
 use App\Models\SMTPSetting;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -121,7 +122,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $user->assignRole($request->role);
+        $this->assignRoleWithExpiry($user->id, $request->role);
 
         if ($request->ajax()) {
             return response()->json([
@@ -208,7 +209,9 @@ class UserController extends Controller
         }
 
         $user->update($updateData);
-        $user->syncRoles([$request->role]);
+        
+        // Gán role với expires_at cho VIP
+        $this->assignRoleWithExpiry($user->id, $request->role);
 
         if ($request->ajax()) {
             return response()->json([
@@ -394,5 +397,35 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.users.index')->with('success', 'IP đã được unban thành công!');
+    }
+
+    /**
+     * Gán role với expires_at cho VIP
+     */
+    private function assignRoleWithExpiry($user_id, $role_name)
+    {
+        DB::table('model_has_roles')->where([
+            'model_id' => $user_id,
+            'model_type' => 'App\\Models\\User',
+        ])->delete();
+
+        $role = Role::where('name', $role_name)->first();
+        if (!$role) {
+            return;
+        }
+
+        $role_id = $role->id;
+
+        $data_insert = [
+            'model_id'   => $user_id,
+            'model_type' => 'App\\Models\\User',
+            'role_id'    => $role_id,
+        ];
+
+        if ($role_name === 'VIP') {
+            $data_insert['expires_at'] = now()->addDays(30);
+        }
+
+        DB::table('model_has_roles')->insert($data_insert);
     }
 }

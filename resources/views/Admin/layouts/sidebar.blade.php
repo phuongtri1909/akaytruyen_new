@@ -102,7 +102,7 @@
                     @canany(['cau_hinh_smtp', 'cau_hinh_google', 'cau_hinh_seo'])
                         <!-- Cấu hình hệ thống -->
                         <li
-                            class="has-submenu {{ Route::currentRouteNamed(['admin.setting.*']) || request()->is('admin/settings*') ? 'open' : '' }}">
+                            class="has-submenu {{ Route::currentRouteNamed(['admin.setting.*', 'admin.seo.*', 'admin.activity-logs.*']) || request()->is('admin/settings*') ? 'open' : '' }}">
                             <a href="#" class="submenu-toggle">
                                 <i class="fas fa-cogs"></i>
                                 <span>Cấu hình hệ thống</span>
@@ -118,14 +118,23 @@
                                     </li>
                                 @endcanany
 
-                                @can('cau_hinh_seo')
-                                    <li class="{{ Route::currentRouteNamed('admin.seo.*') ? 'active' : '' }}">
-                                        <a href="{{ route('admin.seo.index') }}">
-                                            <i class="fas fa-search"></i>
-                                            <span>SEO</span>
-                                        </a>
-                                    </li>
-                                @endcan
+                    @can('cau_hinh_seo')
+                        <li class="{{ Route::currentRouteNamed('admin.seo.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.seo.index') }}">
+                                <i class="fas fa-search"></i>
+                                <span>SEO</span>
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('xem_log_hoat_dong')
+                        <li class="{{ Route::currentRouteNamed('admin.activity-logs.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.activity-logs.index') }}">
+                                <i class="fas fa-history"></i>
+                                <span>Log hoạt động</span>
+                            </a>
+                        </li>
+                    @endcan
                             </ul>
                         </li>
                     @endcanany

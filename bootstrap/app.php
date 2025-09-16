@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'secure.file.upload' => \App\Http\Middleware\SecureFileUpload::class,
             'ban' => \App\Http\Middleware\CheckBan::class,
             'canAny' => \App\Http\Middleware\CanAnyPermission::class,
+            'log.admin.activity' => \App\Http\Middleware\LogAdminActivity::class,
         ]);
 
         $middleware->web([

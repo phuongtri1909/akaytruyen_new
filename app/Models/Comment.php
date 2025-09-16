@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Models\CommentReaction;
+use App\Traits\LogsOldValues;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Comment extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsOldValues;
+
 
     protected $fillable = [
         'chapter_id',
@@ -45,7 +47,9 @@ class Comment extends Model
                 $comment->level = $parentComment ? $parentComment->level + 1 : 0;
             }
         });
+
     }
+
 
     public function chapter()
     {

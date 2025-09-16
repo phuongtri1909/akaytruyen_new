@@ -65,6 +65,7 @@ class PermissionSeeder extends Seeder
                 'cau_hinh_google',
                 'cau_hinh_smtp',
                 'quan_ly_admin_khac',
+                'xem_log_hoat_dong',
             ],
             'SEO' => [
                 'dashboard',
@@ -73,6 +74,7 @@ class PermissionSeeder extends Seeder
                 'sua_truyen',
                 'xem_danh_sach_danh_muc',
                 'sua_danh_muc',
+                'xem_log_hoat_dong',
             ],
             'Content' => [
                 'dashboard',

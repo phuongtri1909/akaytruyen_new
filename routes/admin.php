@@ -14,8 +14,9 @@ use App\Http\Controllers\Admin\DonationController;
 use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\RatingController;
 use App\Http\Controllers\Admin\SeoController;
+use App\Http\Controllers\Admin\ActivityLogController;
 
-Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'log.admin.activity'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
 
@@ -68,6 +69,10 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('seo', [SeoController::class, 'index'])->name('seo.index');
     Route::get('seo/{seo}/edit', [SeoController::class, 'edit'])->name('seo.edit');
     Route::put('seo/{seo}', [SeoController::class, 'update'])->name('seo.update');
+
+    // Activity Logs
+    Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+    Route::get('activity-logs/{id}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
 
     // Ban/Unban routes
     Route::get('users/{user}/ban-info', [UserController::class, 'getBanInfo'])->name('users.ban-info');

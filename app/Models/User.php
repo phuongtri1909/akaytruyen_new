@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\LogsOldValues;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -11,7 +12,7 @@ use Illuminate\Notifications\DatabaseNotification;
 
 class User extends Authenticatable
 {
-    use HasFactory, HasRoles, Notifiable;
+    use HasFactory, HasRoles, Notifiable, LogsOldValues;
 
     const ROLE_ADMIN       = 'Admin';
     const ROLE_ADMIN_BRAND = 'Admin Brand';

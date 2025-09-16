@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\LogsOldValues;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Story extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsOldValues;
 
     const STATUS_ACTIVE = 1;
     const STATUS_INACTIVE = 0;

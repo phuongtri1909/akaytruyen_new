@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Http\ViewComposers\LayoutComposer;
@@ -69,6 +70,19 @@ class AppServiceProvider extends ServiceProvider
         //Setting::observe(SettingObserver::class);
         BanIp::observe(BannedIpObserver::class);
         //Status::observe(StatusObserver::class);
+
+        // Global event listener to capture old values
+        Event::listen(['eloquent.updating: *', 'eloquent.deleting: *'], function ($eventName, $data) {
+            $model = $data[0];
+            $key = get_class($model) . ':' . $model->getKey();
+            
+            if (str_contains($eventName, 'updating')) {
+                session()->put("old_values.{$key}", $model->getOriginal());
+            } elseif (str_contains($eventName, 'deleting')) {
+                session()->put("old_values.{$key}", $model->getAttributes());
+            }
+        });
+
 
         // Calculate stats with caching
         $stats = Cache::remember('app:stats', now()->addMinutes(10), function () {

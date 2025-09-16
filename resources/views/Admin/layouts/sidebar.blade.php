@@ -55,6 +55,15 @@
                         </li>
                     @endcanany
 
+                    @canany(['xem_danh_sach_danh_gia', 'sua_danh_gia', 'xoa_danh_gia'])
+                        <li class="{{ Route::currentRouteNamed('admin.ratings.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.ratings.index') }}">
+                                <i class="fas fa-star"></i>
+                                <span>Đánh giá</span>
+                            </a>
+                        </li>
+                    @endcanany
+
                     @canany(['xem_danh_sach_vai_tro','them_vai_tro', 'sua_vai_tro', 'xoa_vai_tro','xem_danh_sach_quyen', 'gan_quyen_cho_vai_tro'])
                         <li
                             class="has-submenu {{ Route::currentRouteNamed(['admin.roles.*', 'admin.permissions.*', 'admin.users.*']) ? 'open' : '' }}">

@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ChapterController;
 use App\Http\Controllers\Admin\DonateController;
 use App\Http\Controllers\Admin\DonationController;
 use App\Http\Controllers\Admin\CommentController;
+use App\Http\Controllers\Admin\RatingController;
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -57,6 +58,10 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('comments/bulk-delete', [CommentController::class, 'bulkDelete'])->name('comments.bulk-delete');
     Route::post('comments/{comment}/toggle-pin', [CommentController::class, 'togglePin'])->name('comments.toggle-pin');
     Route::get('chapters-by-story/{storyId}', [CommentController::class, 'getChaptersByStory'])->name('chapters.by-story');
+
+    // Rating Management
+    Route::get('ratings', [RatingController::class, 'index'])->name('ratings.index');
+    Route::post('ratings/update', [RatingController::class, 'update'])->name('ratings.update');
 
     // Ban/Unban routes
     Route::get('users/{user}/ban-info', [UserController::class, 'getBanInfo'])->name('users.ban-info');

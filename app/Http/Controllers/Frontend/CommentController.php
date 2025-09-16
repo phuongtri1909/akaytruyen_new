@@ -198,7 +198,7 @@ class CommentController extends Controller
 
         $totalComments = Comment::count();
 
-        return view('admin.pages.comments.index', compact('comments', 'users', 'totalComments'));
+        return view('Admin.pages.comments.index', compact('comments', 'users', 'totalComments'));
     }
 
     /**

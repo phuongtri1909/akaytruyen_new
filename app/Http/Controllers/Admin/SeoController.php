@@ -21,7 +21,7 @@ class SeoController extends Controller
         $seoSettings = SeoSetting::orderBy('page_key')->get();
         $pageKeys = SeoSetting::getPageKeys();
         
-        return view('admin.pages.seo.index', compact('seoSettings', 'pageKeys'));
+        return view('Admin.pages.seo.index', compact('seoSettings', 'pageKeys'));
     }
 
 
@@ -32,7 +32,7 @@ class SeoController extends Controller
     {
         $pageKeys = SeoSetting::getPageKeys();
         
-        return view('admin.pages.seo.edit', compact('seo', 'pageKeys'));
+        return view('Admin.pages.seo.edit', compact('seo', 'pageKeys'));
     }
 
     /**

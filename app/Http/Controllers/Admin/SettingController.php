@@ -31,7 +31,7 @@ class SettingController extends Controller
             $googleSetting = GoogleSetting::first() ?? new GoogleSetting();
         }
 
-        return view('admin.pages.settings.index', compact(
+        return view('Admin.pages.settings.index', compact(
             'smtpSetting',
             'googleSetting'
         ));

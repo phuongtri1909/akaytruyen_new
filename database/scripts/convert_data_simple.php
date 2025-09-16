@@ -402,6 +402,14 @@ class ConvertDataSimple
                     $chapter = DB::table('chapters')->where('slug', $comment->chapter_id)->first();
                     if ($chapter) {
                         $chapterId = $chapter->id;
+                    } else {
+                        // Nếu không tìm thấy theo slug, thử tìm theo ID (trường hợp hiếm)
+                        if (is_numeric($comment->chapter_id)) {
+                            $chapter = DB::table('chapters')->where('id', $comment->chapter_id)->first();
+                            if ($chapter) {
+                                $chapterId = $chapter->id;
+                            }
+                        }
                     }
                 }
                 
@@ -423,9 +431,9 @@ class ConvertDataSimple
                     }
                 }
                 
-                // Xử lý edited_by - chỉ chấp nhận số nguyên và kiểm tra tồn tại
+                // Xử lý edited_by - kiểm tra xem cột có tồn tại không
                 $editedBy = null;
-                if (is_numeric($comment->edited_by) && $comment->edited_by > 0) {
+                if (property_exists($comment, 'edited_by') && is_numeric($comment->edited_by) && $comment->edited_by > 0) {
                     $editedByExists = DB::table('users')->where('id', $comment->edited_by)->exists();
                     if ($editedByExists) {
                         $editedBy = (int)$comment->edited_by;
@@ -441,13 +449,13 @@ class ConvertDataSimple
                             'user_id' => $userId,
                             'comment' => $comment->comment ?: '',
                             'reply_id' => $replyId,
-                            'level' => $comment->level ?: 0,
-                            'is_pinned' => $comment->is_pinned ?: 0,
-                            'pinned_at' => $comment->pinned_at,
-                            'is_edited' => $comment->is_edited ?: 0,
-                            'edited_at' => $comment->edited_at,
+                            'level' => property_exists($comment, 'level') ? ($comment->level ?: 0) : 0,
+                            'is_pinned' => property_exists($comment, 'is_pinned') ? ($comment->is_pinned ?: 0) : 0,
+                            'pinned_at' => property_exists($comment, 'pinned_at') ? $comment->pinned_at : null,
+                            'is_edited' => property_exists($comment, 'is_edited') ? ($comment->is_edited ?: 0) : 0,
+                            'edited_at' => property_exists($comment, 'edited_at') ? $comment->edited_at : null,
                             'edited_by' => $editedBy,
-                            'edit_count' => $comment->edit_count ?: 0,
+                            'edit_count' => property_exists($comment, 'edit_count') ? ($comment->edit_count ?: 0) : 0,
                             'created_at' => $comment->created_at,
                             'updated_at' => $comment->updated_at,
                         ]);
@@ -467,6 +475,15 @@ class ConvertDataSimple
     private function convertCommentReactions()
     {
         echo "👍 Chuyển đổi dữ liệu comment_reactions...\n";
+        
+        // Kiểm tra xem bảng có tồn tại không
+        $hasTable = DB::connection('temp')
+            ->select("SHOW TABLES LIKE 'comment_reactions'");
+        
+        if (empty($hasTable)) {
+            echo "   ⚠️ Không tìm thấy bảng comment_reactions\n";
+            return;
+        }
         
         $oldReactions = DB::connection('temp')->table('comment_reactions')->get();
         $count = 0;
@@ -514,6 +531,15 @@ class ConvertDataSimple
     {
         echo "📝 Chuyển đổi dữ liệu comment_edit_histories...\n";
         
+        // Kiểm tra xem bảng có tồn tại không
+        $hasTable = DB::connection('temp')
+            ->select("SHOW TABLES LIKE 'comment_edit_histories'");
+        
+        if (empty($hasTable)) {
+            echo "   ⚠️ Không tìm thấy bảng comment_edit_histories\n";
+            return;
+        }
+        
         $oldHistories = DB::connection('temp')->table('comment_edit_histories')->get();
         $count = 0;
         
@@ -528,9 +554,9 @@ class ConvertDataSimple
                     $commentId = $commentExists ? (int)$history->comment_id : null;
                 }
                 
-                // Xử lý edited_by - kiểm tra tồn tại trong bảng users
+                // Xử lý edited_by - kiểm tra xem cột có tồn tại không
                 $editedBy = null;
-                if (is_numeric($history->edited_by) && $history->edited_by > 0) {
+                if (property_exists($history, 'edited_by') && is_numeric($history->edited_by) && $history->edited_by > 0) {
                     $editedByExists = DB::table('users')->where('id', $history->edited_by)->exists();
                     $editedBy = $editedByExists ? (int)$history->edited_by : null;
                 }
@@ -559,6 +585,15 @@ class ConvertDataSimple
     {
         echo "💰 Chuyển đổi dữ liệu donates...\n";
         
+        // Kiểm tra xem bảng có tồn tại không
+        $hasTable = DB::connection('temp')
+            ->select("SHOW TABLES LIKE 'donates'");
+        
+        if (empty($hasTable)) {
+            echo "   ⚠️ Không tìm thấy bảng donates\n";
+            return;
+        }
+        
         $oldDonates = DB::connection('temp')->table('donates')->get();
         echo "   📊 Tìm thấy " . $oldDonates->count() . " donates trong database tạm thời\n";
         
@@ -568,13 +603,12 @@ class ConvertDataSimple
             $existingDonate = DB::table('donates')->where('id', $donate->id)->first();
             
             if (!$existingDonate) {
-                // Xử lý story_id - kiểm tra tồn tại trong bảng stories hoặc cho phép null
+                // Xử lý story_id - kiểm tra xem cột có tồn tại không
                 $storyId = null;
-                if (is_numeric($donate->story_id) && $donate->story_id > 0) {
+                if (property_exists($donate, 'story_id') && is_numeric($donate->story_id) && $donate->story_id > 0) {
                     $storyExists = DB::table('stories')->where('id', $donate->story_id)->exists();
                     $storyId = $storyExists ? (int)$donate->story_id : null;
                 }
-                // Nếu story_id là null hoặc 0, giữ nguyên null
                 
                 DB::table('donates')->insert([
                     'id' => $donate->id,
@@ -596,6 +630,15 @@ class ConvertDataSimple
     {
         echo "🎁 Chuyển đổi dữ liệu donations...\n";
         
+        // Kiểm tra xem bảng có tồn tại không
+        $hasTable = DB::connection('temp')
+            ->select("SHOW TABLES LIKE 'donations'");
+        
+        if (empty($hasTable)) {
+            echo "   ⚠️ Không tìm thấy bảng donations\n";
+            return;
+        }
+        
         $oldDonations = DB::connection('temp')->table('donations')->get();
         echo "   📊 Tìm thấy " . $oldDonations->count() . " donations trong database tạm thời\n";
         
@@ -605,13 +648,8 @@ class ConvertDataSimple
             $existingDonation = DB::table('donations')->where('id', $donation->id)->first();
             
             if (!$existingDonation) {
-                // Xử lý story_id - kiểm tra tồn tại trong bảng stories hoặc cho phép null
+                // Database cũ không có cột story_id, set null
                 $storyId = null;
-                if (is_numeric($donation->story_id) && $donation->story_id > 0) {
-                    $storyExists = DB::table('stories')->where('id', $donation->story_id)->exists();
-                    $storyId = $storyExists ? (int)$donation->story_id : null;
-                }
-                // Nếu story_id là null hoặc 0, giữ nguyên null
                 
                 DB::table('donations')->insert([
                     'id' => $donation->id,

@@ -2,8 +2,6 @@
 
 
 @push('custom_schema')
-    {{-- {!! SEOMeta::generate() !!} --}}
-    {{-- {!! JsonLd::generate() !!} --}}
     {!! SEO::generate() !!}
 @endpush
 

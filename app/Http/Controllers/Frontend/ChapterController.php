@@ -12,6 +12,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Artesaos\SEOTools\Facades\OpenGraph;
+use Artesaos\SEOTools\Facades\TwitterCard;
+use Artesaos\SEOTools\Facades\SEOTools;
+use Artesaos\SEOTools\Facades\SEOMeta;
 
 class ChapterController extends Controller
 {
@@ -41,22 +45,29 @@ class ChapterController extends Controller
         $chapterBefore = $chapter->chapterBefore ?? null;
         $chapterAfter = $chapter->chapterAfter ?? null;
 
-        // $setting = Helper::getSetting();
-        // $objectSEO = (object) [
-        //     'name' => $chapter->name,
-        //     'description' => Str::limit($story->desc, 30),
-        //     'keywords' => 'doc truyen, doc truyen online, truyen hay, truyen chu',
-        //     'no_index' => $setting ? !$setting->index : env('NO_INDEX'),
-        //     'meta_type' => 'Book',
-        //     'url_canonical' => url()->current(),
-        //     'image' => Helper::getStoryImageUrl($story->image),
-        //     'site_name' => $chapter->name,
-        // ];
-        // $objectSEO->article = [
-        //     'author' => $story->author?->name ?? 'Chưa xác định',
-        //     'published_time' => $story->created_at->toAtomString(),
-        // ];
-        // Helper::setSEO($objectSEO);
+        // SEO for chapter page
+        $title = "Chương {$chapter->chapter}: {$chapter->name} - {$story->name} - Akay Truyện";
+        $description = Str::limit(strip_tags($story->desc), 160);
+        $keywords = "chương {$chapter->chapter}, {$story->name}, doc truyen, doc truyen online, truyen hay, truyen chu";
+        
+        SEOTools::setTitle($title);
+        SEOTools::setDescription($description);
+        SEOMeta::setKeywords($keywords);
+        SEOTools::setCanonical(url()->current());
+
+        OpenGraph::setTitle($title);
+        OpenGraph::setDescription($description);
+        OpenGraph::setUrl(url()->current());
+        OpenGraph::addProperty('type', 'article');
+        OpenGraph::addImage(Helper::getStoryImageUrl($story->image));
+        OpenGraph::addProperty('article:author', $story->author?->name ?? 'Chưa xác định');
+        OpenGraph::addProperty('article:published_time', $chapter->created_at->toAtomString());
+        OpenGraph::addProperty('article:section', $story->name);
+
+        TwitterCard::setTitle($title);
+        TwitterCard::setDescription($description);
+        TwitterCard::setSite('@AkayTruyen');
+        TwitterCard::addImage(Helper::getStoryImageUrl($story->image));
 
         $cleanContent = strip_tags($chapter->content);
         $words = preg_split('/\s+/u', trim($cleanContent));

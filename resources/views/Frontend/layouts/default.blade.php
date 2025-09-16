@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    
+    <title>Akay Truyện - Đọc truyện online miễn phí</title>
+    
     @stack('custom_schema')
 
     <link href="https://fonts.googleapis.com/css2?family=Mooli&family=Patrick+Hand&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Noto+Sans:wght@400;700&family=Noto+Serif:wght@400;700&family=Lora:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">

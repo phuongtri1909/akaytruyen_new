@@ -19,6 +19,7 @@ class SeoSettingSeeder extends Seeder
                 'title' => 'Trang chủ - AkayTruyen',
                 'description' => 'Đọc truyện online, truyện hay. Akay Truyện luôn tổng hợp và cập nhật các chương truyện một cách nhanh nhất.',
                 'keywords' => 'doc truyen, doc truyen online, truyen hay, truyen chu, akay truyen',
+                'thumbnail' => 'images/logo/Logoakay.png',
                 'is_active' => true
             ],
         ];

@@ -141,6 +141,10 @@
 
 
                     <li class="mt-4">
+                        <a href="{{ route('home') }}">
+                            <i class="fas fa-home"></i>
+                            <span>Trang chủ</span>
+                        </a>
                         <a href="{{ route('profile') }}">
                             <i class="fas fa-user"></i>
                             <span>{{ auth()->user()->name }}</span>

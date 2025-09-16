@@ -1,5 +1,9 @@
 @extends('Frontend.layouts.default')
 
+@push('custom_schema')
+{!! SEO::generate() !!}
+@endpush
+
 @section('content')
     <div class="container">
         <div class="row align-items-start">

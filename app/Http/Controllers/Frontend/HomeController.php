@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\TwitterCard;
 use Artesaos\SEOTools\Facades\SEOTools;
+use Artesaos\SEOTools\Facades\SEOMeta;
 
 use App\Models\Donation;
 
@@ -28,17 +29,43 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
-        SEOTools::setTitle('Trang chủ - Akay Truyện');
-        SEOTools::setDescription('Đọc truyện miễn phí với giao diện đẹp, cập nhật nhanh nhất.');
-        SEOTools::setCanonical(url()->current());
+        // Load SEO settings from database for home page
+        $seoSetting = \App\Models\SeoSetting::getByPageKey('home');
+        
+        if ($seoSetting) {
+            SEOTools::setTitle($seoSetting->title);
+            SEOTools::setDescription($seoSetting->description);
+            SEOMeta::setKeywords($seoSetting->keywords);
+            SEOTools::setCanonical(url()->current());
 
-        OpenGraph::setTitle('Trang chủ - Akay Truyện');
-        OpenGraph::setDescription('Đọc truyện miễn phí với giao diện đẹp, cập nhật nhanh nhất.');
-        OpenGraph::setUrl(url()->current());
-        OpenGraph::addProperty('type', 'website');
+            OpenGraph::setTitle($seoSetting->title);
+            OpenGraph::setDescription($seoSetting->description);
+            OpenGraph::setUrl(url()->current());
+            OpenGraph::addProperty('type', 'website');
+            if ($seoSetting->thumbnail) {
+                OpenGraph::addImage($seoSetting->thumbnail_url);
+            }
 
-        TwitterCard::setTitle('Trang chủ - Akay Truyện');
-        TwitterCard::setSite('@AkayTruyen');
+            TwitterCard::setTitle($seoSetting->title);
+            TwitterCard::setDescription($seoSetting->description);
+            TwitterCard::setSite('@AkayTruyen');
+            if ($seoSetting->thumbnail) {
+                TwitterCard::addImage($seoSetting->thumbnail_url);
+            }
+        } else {
+            // Fallback SEO
+            SEOTools::setTitle('Trang chủ - Akay Truyện');
+            SEOTools::setDescription('Đọc truyện miễn phí với giao diện đẹp, cập nhật nhanh nhất.');
+            SEOTools::setCanonical(url()->current());
+
+            OpenGraph::setTitle('Trang chủ - Akay Truyện');
+            OpenGraph::setDescription('Đọc truyện miễn phí với giao diện đẹp, cập nhật nhanh nhất.');
+            OpenGraph::setUrl(url()->current());
+            OpenGraph::addProperty('type', 'website');
+
+            TwitterCard::setTitle('Trang chủ - Akay Truyện');
+            TwitterCard::setSite('@AkayTruyen');
+        }
 
         // $setting = Helper::getCachedSetting();
 
@@ -205,7 +232,28 @@ class HomeController extends Controller
 
     public function mainSearchStory(Request $request)
     {
-        $stories = $this->storyRepository->getStoryWithByKeyWord($request->get('key_word'));
+        $keyWord = $request->get('key_word');
+        $stories = $this->storyRepository->getStoryWithByKeyWord($keyWord);
+
+        // SEO for search page
+        $title = "Tìm kiếm: {$keyWord} - Akay Truyện";
+        $description = "Kết quả tìm kiếm cho từ khóa '{$keyWord}'. Tìm thấy " . count($stories) . " truyện phù hợp.";
+        
+        SEOTools::setTitle($title);
+        SEOTools::setDescription($description);
+        SEOMeta::setKeywords("tìm kiếm, {$keyWord}, doc truyen, doc truyen online, truyen hay, truyen chu");
+        SEOTools::setCanonical(url()->current());
+
+        OpenGraph::setTitle($title);
+        OpenGraph::setDescription($description);
+        OpenGraph::setUrl(url()->current());
+        OpenGraph::addProperty('type', 'website');
+        OpenGraph::addImage(asset('images/logo/Logoakay.png'));
+
+        TwitterCard::setTitle($title);
+        TwitterCard::setDescription($description);
+        TwitterCard::setSite('@AkayTruyen');
+        TwitterCard::addImage(asset('images/logo/Logoakay.png'));
 
         $storiesIds = [];
         if (count($stories) > 0) {
@@ -216,7 +264,7 @@ class HomeController extends Controller
 
         $data = [
             'stories' => $stories,
-            'keyWord' => $request->get('key_word')
+            'keyWord' => $keyWord
         ];
         return view('Frontend.main_search', $data);
     }

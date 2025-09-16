@@ -13,6 +13,10 @@ use App\Repositories\Rating\RatingRepositoryInterface;
 use App\Repositories\Story\StoryRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Artesaos\SEOTools\Facades\OpenGraph;
+use Artesaos\SEOTools\Facades\TwitterCard;
+use Artesaos\SEOTools\Facades\SEOTools;
+use Artesaos\SEOTools\Facades\SEOMeta;
 
 class StoryController extends Controller
 {
@@ -52,23 +56,28 @@ class StoryController extends Controller
         $arrStoryIdsRatingsAllTime = $this->getStoryIds(json_decode($ratingsAllTime->value ?? '', true)) ?? [];
         $storiesAllTime = $this->ratingRepository->getStories($arrStoryIdsRatingsAllTime) ?? [];
 
-        // $setting = Helper::getSetting();
-        // $objectSEO = (object) [
-        //     'name' => $story->name,
-        //     'description' => Str::limit($story->desc, 30),
-        //     'keywords' => str_replace('-', ' ', $story->slug) . ', ' . 'doc truyen, doc truyen online, truyen hay, truyen chu',
-        //     'no_index' => $setting ? !$setting->index : env('NO_INDEX'),
-        //     'meta_type' => 'Book',
-        //     'url_canonical' => url()->current(),
-        //     'image' => Helper::getStoryImageUrl($story->image),
-        //     'site_name' => $story->name,
-        // ];
+        // SEO for story page
+        $title = "{$story->name} - Akay Truyện";
+        $description = Str::limit(strip_tags($story->desc), 160);
+        $keywords = str_replace('-', ' ', $story->slug) . ', doc truyen, doc truyen online, truyen hay, truyen chu';
+        
+        SEOTools::setTitle($title);
+        SEOTools::setDescription($description);
+        SEOMeta::setKeywords($keywords);
+        SEOTools::setCanonical(url()->current());
 
+        OpenGraph::setTitle($title);
+        OpenGraph::setDescription($description);
+        OpenGraph::setUrl(url()->current());
+        OpenGraph::addProperty('type', 'book');
+        OpenGraph::addImage(Helper::getStoryImageUrl($story->image));
+        OpenGraph::addProperty('book:author', $story->author?->name ?? 'Chưa xác định');
+        OpenGraph::addProperty('book:release_date', $story->created_at->toAtomString());
 
-        // $objectSEO->article   = [
-        //     'author'         => $story->author->name,
-        //     'published_time' => $story->created_at->toAtomString(),
-        // ];
+        TwitterCard::setTitle($title);
+        TwitterCard::setDescription($description);
+        TwitterCard::setSite('@AkayTruyen');
+        TwitterCard::addImage(Helper::getStoryImageUrl($story->image));
 
         // Use cached story stats instead of individual queries
         $storyStats = $this->storyRepository->getCachedStoryStats($story->id);
@@ -117,6 +126,26 @@ class StoryController extends Controller
         } else {
             $title = 'Trên ' . $request->input('value')[0] . ' chương';
         }
+
+        // SEO for chapter count page
+        $seoTitle = "Truyện {$title} - Akay Truyện";
+        $description = "Danh sách truyện có {$title}. Tìm thấy " . count($stories) . " truyện phù hợp.";
+        
+        SEOTools::setTitle($seoTitle);
+        SEOTools::setDescription($description);
+        SEOMeta::setKeywords("truyen {$title}, doc truyen, doc truyen online, truyen hay, truyen chu");
+        SEOTools::setCanonical(url()->current());
+
+        OpenGraph::setTitle($seoTitle);
+        OpenGraph::setDescription($description);
+        OpenGraph::setUrl(url()->current());
+        OpenGraph::addProperty('type', 'website');
+        OpenGraph::addImage(asset('images/logo/Logoakay.png'));
+
+        TwitterCard::setTitle($seoTitle);
+        TwitterCard::setDescription($description);
+        TwitterCard::setSite('@AkayTruyen');
+        TwitterCard::addImage(asset('images/logo/Logoakay.png'));
 
         $ratingsDay = $this->ratingRepository->getRatingByType(Rating::TYPE_DAY);
         $arrStoryIdsRatingsDay = $this->getStoryIds(json_decode($ratingsDay->value, true));

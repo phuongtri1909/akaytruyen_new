@@ -1,8 +1,6 @@
 @extends('Frontend.layouts.default')
 
 @push('custom_schema')
-    {{-- {!! SEOMeta::generate() !!} --}}
-    {{-- {!! JsonLd::generate() !!} --}}
     {!! SEO::generate() !!}
 @endpush
 

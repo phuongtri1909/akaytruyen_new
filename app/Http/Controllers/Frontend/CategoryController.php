@@ -8,6 +8,10 @@ use App\Repositories\Category\CategoryRepositoryInterface;
 use App\Repositories\Chapter\ChapterRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Artesaos\SEOTools\Facades\OpenGraph;
+use Artesaos\SEOTools\Facades\TwitterCard;
+use Artesaos\SEOTools\Facades\SEOTools;
+use Artesaos\SEOTools\Facades\SEOMeta;
 
 class CategoryController extends Controller
 {
@@ -32,19 +36,26 @@ class CategoryController extends Controller
             $stories = $category->stories->where('status', '=', Story::STATUS_ACTIVE);
         }
 
-        $setting = Helper::getSetting();
-        $objectSEO = (object) [
-            'name' => $category->name,
-            'description' => 'Đọc truyện online, truyện hay. Akay Truyện luôn tổng hợp và cập nhật các chương truyện một cách nhanh nhất.',
-            'keywords' => str_replace('-', ' ', $category->slug) .', '.'doc truyen, doc truyen online, truyen hay, truyen chu',
-            'no_index' => $setting ? !$setting->index : env('NO_INDEX'),
-            'meta_type' => 'WebPage',
-            'url_canonical' => url()->current(),
-            'image' => asset('assets/frontend/images/logo_text.png'),
-            'site_name' => $category->name,
-        ];
+        // SEO for category page
+        $title = "{$category->name} - Akay Truyện";
+        $description = Str::limit(strip_tags($category->desc), 160) ?: "Đọc truyện {$category->name} online, truyện hay. Akay Truyện luôn tổng hợp và cập nhật các chương truyện một cách nhanh nhất.";
+        $keywords = str_replace('-', ' ', $category->slug) . ', doc truyen, doc truyen online, truyen hay, truyen chu';
+        
+        SEOTools::setTitle($title);
+        SEOTools::setDescription($description);
+        SEOMeta::setKeywords($keywords);
+        SEOTools::setCanonical(url()->current());
 
-        Helper::setSEO($objectSEO);
+        OpenGraph::setTitle($title);
+        OpenGraph::setDescription($description);
+        OpenGraph::setUrl(url()->current());
+        OpenGraph::addProperty('type', 'website');
+        OpenGraph::addImage(asset('images/logo/Logoakay.png'));
+
+        TwitterCard::setTitle($title);
+        TwitterCard::setDescription($description);
+        TwitterCard::setSite('@AkayTruyen');
+        TwitterCard::addImage(asset('images/logo/Logoakay.png'));
 
         // $storiesIds = [];
         // if (count($stories) > 0) {

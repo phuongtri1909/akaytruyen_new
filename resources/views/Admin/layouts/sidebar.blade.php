@@ -19,7 +19,7 @@
                         </a>
                     </li>
 
-                    @canany(['xem_danh_sach_nguoi_dung','them_nguoi_dung', 'sua_nguoi_dung', 'xoa_nguoi_dung'])
+                    @canany(['xem_danh_sach_nguoi_dung', 'them_nguoi_dung', 'sua_nguoi_dung', 'xoa_nguoi_dung'])
                         <li class="{{ Route::currentRouteNamed('admin.users.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.users.index') }}">
                                 <i class="fas fa-user-friends"></i>
@@ -28,7 +28,7 @@
                         </li>
                     @endcanany
 
-                    @canany(['xem_danh_sach_danh_muc','them_danh_muc', 'sua_danh_muc', 'xoa_danh_muc'])
+                    @canany(['xem_danh_sach_danh_muc', 'them_danh_muc', 'sua_danh_muc', 'xoa_danh_muc'])
                         <li class="{{ Route::currentRouteNamed('admin.categories.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.categories.index') }}">
                                 <i class="fas fa-folder"></i>
@@ -37,7 +37,7 @@
                         </li>
                     @endcanany
 
-                    @canany(['xem_danh_sach_truyen','them_truyen', 'sua_truyen', 'xoa_truyen'])
+                    @canany(['xem_danh_sach_truyen', 'them_truyen', 'sua_truyen', 'xoa_truyen'])
                         <li class="{{ Route::currentRouteNamed('admin.stories.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.stories.index') }}">
                                 <i class="fas fa-book"></i>
@@ -64,7 +64,10 @@
                         </li>
                     @endcanany
 
-                    @canany(['xem_danh_sach_vai_tro','them_vai_tro', 'sua_vai_tro', 'xoa_vai_tro','xem_danh_sach_quyen', 'gan_quyen_cho_vai_tro'])
+
+
+                    @canany(['xem_danh_sach_vai_tro', 'them_vai_tro', 'sua_vai_tro', 'xoa_vai_tro', 'xem_danh_sach_quyen',
+                        'gan_quyen_cho_vai_tro'])
                         <li
                             class="has-submenu {{ Route::currentRouteNamed(['admin.roles.*', 'admin.permissions.*', 'admin.users.*']) ? 'open' : '' }}">
                             <a href="#" class="submenu-toggle">
@@ -74,7 +77,7 @@
                             </a>
                             <ul class="submenu">
 
-                                @canany(['xem_danh_sach_vai_tro','them_vai_tro', 'sua_vai_tro', 'xoa_vai_tro'])
+                                @canany(['xem_danh_sach_vai_tro', 'them_vai_tro', 'sua_vai_tro', 'xoa_vai_tro'])
                                     <li class="{{ Route::currentRouteNamed('admin.roles.*') ? 'active' : '' }}">
                                         <a href="{{ route('admin.roles.index') }}">
                                             <i class="fas fa-users"></i>
@@ -96,7 +99,7 @@
                         </li>
                     @endcanany
 
-                    @canany(['cau_hinh_smtp', 'cau_hinh_google'])
+                    @canany(['cau_hinh_smtp', 'cau_hinh_google', 'cau_hinh_seo'])
                         <!-- Cấu hình hệ thống -->
                         <li
                             class="has-submenu {{ Route::currentRouteNamed(['admin.setting.*']) || request()->is('admin/settings*') ? 'open' : '' }}">
@@ -114,6 +117,15 @@
                                         </a>
                                     </li>
                                 @endcanany
+
+                                @can('cau_hinh_seo')
+                                    <li class="{{ Route::currentRouteNamed('admin.seo.*') ? 'active' : '' }}">
+                                        <a href="{{ route('admin.seo.index') }}">
+                                            <i class="fas fa-search"></i>
+                                            <span>SEO</span>
+                                        </a>
+                                    </li>
+                                @endcan
                             </ul>
                         </li>
                     @endcanany

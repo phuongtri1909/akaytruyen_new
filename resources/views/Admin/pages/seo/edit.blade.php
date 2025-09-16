@@ -37,98 +37,50 @@
                 @csrf
                 @method('PUT')
                 
-                <!-- Vietnamese Title -->
+                <!-- Title -->
                 <div class="form-group">
-                    <label for="title_vi" class="form-label-custom">
-                        Title (Tiếng Việt) <span class="required-mark">*</span>
+                    <label for="title" class="form-label-custom">
+                        Title <span class="required-mark">*</span>
                     </label>
-                    <input type="text" class="custom-input {{ $errors->has('title.vi') ? 'input-error' : '' }}" 
-                        id="title_vi" name="title[vi]" value="{{ old('title.vi', $seo->getTranslation('title', 'vi')) }}" required maxlength="255">
+                    <input type="text" class="custom-input {{ $errors->has('title') ? 'input-error' : '' }}" 
+                        id="title" name="title" value="{{ old('title', $seo->title) }}" required maxlength="255">
                     <div class="form-hint">
                         <i class="fas fa-info-circle"></i>
-                        <span>Tiêu đề trang bằng tiếng Việt (tối đa 255 ký tự).</span>
+                        <span>Tiêu đề trang (tối đa 255 ký tự).</span>
                     </div>
-                    @error('title.vi')
+                    @error('title')
                         <div class="error-message">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <!-- English Title -->
+                <!-- Description -->
                 <div class="form-group">
-                    <label for="title_en" class="form-label-custom">
-                        Title (English) <span class="required-mark">*</span>
+                    <label for="description" class="form-label-custom">
+                        Description <span class="required-mark">*</span>
                     </label>
-                    <input type="text" class="custom-input {{ $errors->has('title.en') ? 'input-error' : '' }}" 
-                        id="title_en" name="title[en]" value="{{ old('title.en', $seo->getTranslation('title', 'en')) }}" required maxlength="255">
+                    <textarea class="custom-input {{ $errors->has('description') ? 'input-error' : '' }}" 
+                        id="description" name="description" rows="3" required maxlength="500">{{ old('description', $seo->description) }}</textarea>
                     <div class="form-hint">
                         <i class="fas fa-info-circle"></i>
-                        <span>Page title in English (max 255 characters).</span>
+                        <span>Mô tả trang (tối đa 500 ký tự).</span>
                     </div>
-                    @error('title.en')
+                    @error('description')
                         <div class="error-message">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <!-- Vietnamese Description -->
+                <!-- Keywords -->
                 <div class="form-group">
-                    <label for="description_vi" class="form-label-custom">
-                        Description (Tiếng Việt) <span class="required-mark">*</span>
+                    <label for="keywords" class="form-label-custom">
+                        Keywords <span class="required-mark">*</span>
                     </label>
-                    <textarea class="custom-input {{ $errors->has('description.vi') ? 'input-error' : '' }}" 
-                        id="description_vi" name="description[vi]" rows="3" required maxlength="500">{{ old('description.vi', $seo->getTranslation('description', 'vi')) }}</textarea>
+                    <input type="text" class="custom-input {{ $errors->has('keywords') ? 'input-error' : '' }}" 
+                        id="keywords" name="keywords" value="{{ old('keywords', $seo->keywords) }}" required maxlength="500">
                     <div class="form-hint">
                         <i class="fas fa-info-circle"></i>
-                        <span>Mô tả trang bằng tiếng Việt (tối đa 500 ký tự).</span>
+                        <span>Từ khóa, phân cách bằng dấu phẩy (tối đa 500 ký tự).</span>
                     </div>
-                    @error('description.vi')
-                        <div class="error-message">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- English Description -->
-                <div class="form-group">
-                    <label for="description_en" class="form-label-custom">
-                        Description (English) <span class="required-mark">*</span>
-                    </label>
-                    <textarea class="custom-input {{ $errors->has('description.en') ? 'input-error' : '' }}" 
-                        id="description_en" name="description[en]" rows="3" required maxlength="500">{{ old('description.en', $seo->getTranslation('description', 'en')) }}</textarea>
-                    <div class="form-hint">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Page description in English (max 500 characters).</span>
-                    </div>
-                    @error('description.en')
-                        <div class="error-message">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Vietnamese Keywords -->
-                <div class="form-group">
-                    <label for="keywords_vi" class="form-label-custom">
-                        Keywords (Tiếng Việt) <span class="required-mark">*</span>
-                    </label>
-                    <input type="text" class="custom-input {{ $errors->has('keywords.vi') ? 'input-error' : '' }}" 
-                        id="keywords_vi" name="keywords[vi]" value="{{ old('keywords.vi', $seo->getTranslation('keywords', 'vi')) }}" required maxlength="500">
-                    <div class="form-hint">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Từ khóa bằng tiếng Việt, phân cách bằng dấu phẩy (tối đa 500 ký tự).</span>
-                    </div>
-                    @error('keywords.vi')
-                        <div class="error-message">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- English Keywords -->
-                <div class="form-group">
-                    <label for="keywords_en" class="form-label-custom">
-                        Keywords (English) <span class="required-mark">*</span>
-                    </label>
-                    <input type="text" class="custom-input {{ $errors->has('keywords.en') ? 'input-error' : '' }}" 
-                        id="keywords_en" name="keywords[en]" value="{{ old('keywords.en', $seo->getTranslation('keywords', 'en')) }}" required maxlength="500">
-                    <div class="form-hint">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Keywords in English, separated by commas (max 500 characters).</span>
-                    </div>
-                    @error('keywords.en')
+                    @error('keywords')
                         <div class="error-message">{{ $message }}</div>
                     @enderror
                 </div>

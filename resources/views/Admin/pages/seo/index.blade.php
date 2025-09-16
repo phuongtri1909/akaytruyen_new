@@ -55,8 +55,7 @@
                                     </td>
                                     <td>
                                         <div class="seo-title">
-                                            <div class="title-vi">{{ $seo->getTranslation('title', 'vi') }}</div>
-                                            <div class="title-en text-muted">{{ $seo->getTranslation('title', 'en') }}</div>
+                                            <div class="title-text">{{ $seo->title }}</div>
                                         </div>
                                     </td>
                                     <td class="text-center">
@@ -80,11 +79,6 @@
                                             <a href="{{ route('admin.seo.edit', $seo) }}" class="action-icon edit-icon text-decoration-none" title="Chỉnh sửa">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            @include('components.delete-form', [
-                                                'id' => $seo->id,
-                                                'route' => route('admin.seo.destroy', $seo),
-                                                'message' => "Bạn có chắc chắn muốn xóa SEO settings này?"
-                                            ])
                                         </div>
                                     </td>
                                 </tr>
@@ -121,16 +115,10 @@
     gap: 4px;
 }
 
-.title-vi {
+.title-text {
     font-weight: 500;
     color: #333;
     font-size: 13px;
-    line-height: 1.3;
-}
-
-.title-en {
-    font-size: 12px;
-    color: #6c757d;
     line-height: 1.3;
 }
 

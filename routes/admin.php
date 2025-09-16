@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\DonateController;
 use App\Http\Controllers\Admin\DonationController;
 use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\RatingController;
+use App\Http\Controllers\Admin\SeoController;
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -62,6 +63,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // Rating Management
     Route::get('ratings', [RatingController::class, 'index'])->name('ratings.index');
     Route::post('ratings/update', [RatingController::class, 'update'])->name('ratings.update');
+
+    // SEO Management
+    Route::get('seo', [SeoController::class, 'index'])->name('seo.index');
+    Route::get('seo/{seo}/edit', [SeoController::class, 'edit'])->name('seo.edit');
+    Route::put('seo/{seo}', [SeoController::class, 'update'])->name('seo.update');
 
     // Ban/Unban routes
     Route::get('users/{user}/ban-info', [UserController::class, 'getBanInfo'])->name('users.ban-info');

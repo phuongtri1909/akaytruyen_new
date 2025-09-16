@@ -63,9 +63,11 @@ Route::middleware(['ban:login'])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/the-loai/{slug}', [CategoryController::class, 'index'])->name('category');
     Route::get('/truyen/{slug}', [StoryController::class, 'index'])->name('story');
+    Route::post('/truyen/{story}/toggle-vip', [StoryController::class, 'toggleVip'])->name('story.toggle-vip')->middleware('auth');
 
+    Route::get('/{slugStory}/{slugChapter}', [ChapterController::class, 'index'])->name('chapter');
+    
     Route::middleware(['ban:read'])->group(function () {
-        Route::get('/{slugStory}/{slugChapter}', [ChapterController::class, 'index'])->name('chapter');
         // ajax search chapters
         Route::get('/truyen/{slug}/search-chapters', [HomeController::class, 'searchChapters'])->name('chapters.search');
 

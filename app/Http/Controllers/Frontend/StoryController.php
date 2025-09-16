@@ -132,4 +132,20 @@ class StoryController extends Controller
 
         return view('Frontend.follow_chapter_count', compact('title', 'stories', 'ratingsDay', 'ratingsMonth', 'ratingsAllTime', 'storiesDay', 'storiesMonth', 'storiesAllTime'));
     }
+
+    public function toggleVip(Request $request, Story $story)
+    {
+        $user = auth()->user();
+        
+        if (!$user->can('sua_truyen')) {
+            return response()->json(['message' => 'Bạn không có quyền thực hiện thao tác này'], 403);
+        }
+        
+        $isVip = $request->input('is_vip', 0);
+        $story->update(['is_vip' => $isVip]);
+        
+        $message = $isVip ? 'Đã bật chế độ VIP cho truyện' : 'Đã tắt chế độ VIP cho truyện';
+        
+        return response()->json(['message' => $message]);
+    }
 }

@@ -82,7 +82,8 @@
         <div class="">
 
             <?php
-            $chapter->content = html_entity_decode(htmlspecialchars_decode($chapter->content), ENT_QUOTES, 'UTF-8');
+            if ($chapter->content) {
+                $chapter->content = html_entity_decode(htmlspecialchars_decode($chapter->content), ENT_QUOTES, 'UTF-8');
 
             $word_special_chars = [
                 '&ldquo;' => '“',
@@ -111,47 +112,27 @@
             $chapter->content = '<p>' . $chapter->content . '</p>';
 
             $chapter->content = preg_replace('/<p>\s*<\/p>/', '', $chapter->content);
+            }
             ?>
-
-
-            @php
-                $restrictedSlug = 'con-duong-ba-chu-ngoai-truyen';
-                $allowedRoles = ['Admin', 'vip', 'Mod', 'SEO', 'Content', 'VIP PRO', 'VIP PRO MAX', 'VIP SIÊU VIỆT'];
-            @endphp
 
             <div id="chapter-content" class="chapter-content mb-4 p-3 border-0 rounded"
                 style="font-size: 1.5rem; min-height: 500px; line-height: 2; position: relative; top: -54px;">
-                @if ($slugStory === $restrictedSlug)
-                    @if (auth()->check() && auth()->user()->hasAnyRole($allowedRoles))
+                
+                    @if ($chapter->content)
                         {!! \App\Helpers\Helper::sanitizeChapterContent($chapter->content) !!}
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function() {
-
-                                document.addEventListener('contextmenu', function(event) {
-                                    event.preventDefault();
-                                });
-
-
-                                document.addEventListener('keydown', function(event) {
-                                    if ((event.ctrlKey && ['c', 'x', 'u', 'a'].includes(event.key.toLowerCase())) || event
-                                        .key === 'F12') {
-                                        event.preventDefault();
-                                    }
-                                });
-
-
-                                document.getElementById('chapter-content').style.userSelect = 'none';
-                            });
-                        </script>
                     @else
-                        <div class="alert alert-success text-center" style="border: 2px dashed #28a745;">
-                            <strong>Bạn vui lòng nâng cấp lên VIP ở đây hoặc trên kênh Youtube để đọc toàn bộ truyện
-                                này.</strong>
+                        <div class="alert alert-custom text-center rounded-4" style="border: 2px dashed #14425d;">
+                            <div class="mb-3">
+                                <i class="fas fa-lock fa-3x text-primary-custom"></i>
+                            </div>
+                            <h5 class="text-warning mb-3">Bạn không có quyền xem nội dung chương này</h5>
+                            <p class="mb-3">Vui lòng liên hệ Quản trị viên để được hỗ trợ.</p>
+                            <a href="https://m.me/596014326928548" target="_blank" rel="noreferrer" class="btn btn-outline-primary btn-sm">
+                                
+                                <span class="ml-1">Liên Hệ QTV</span>
+                            </a>
                         </div>
                     @endif
-                @else
-                    {!! \App\Helpers\Helper::sanitizeChapterContent($chapter->content) !!}
-                @endif
             </div>
 
 
@@ -201,7 +182,7 @@
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
                     let chapterContent = document.getElementById("chapter-content");
-                    if (chapterContent) {
+                    if (chapterContent && chapterContent.innerHTML.trim() !== '') {
                         chapterContent.innerHTML = chapterContent.innerHTML.replace(/([^\s])\./g, "$1. ");
                     }
                 });
@@ -228,6 +209,10 @@
 @once
     @push('styles')
         <style>
+            .alert-custom {
+                background-color: #eef9ff;
+            }
+
             .fs-8 {
                 font-size: 0.8em;
             }
@@ -620,11 +605,14 @@
                 $('.chapter-content').each(function() {
                     const $this = $(this);
                     const html = $this.html();
-                    const newHtml = html.replace(regex, function(matched) {
-                        matches.push(matched);
-                        return `<span class="highlight">${matched}</span>`;
-                    });
-                    $this.html(newHtml);
+                    
+                    if (html && !html.includes('Bạn không có quyền xem nội dung chương này')) {
+                        const newHtml = html.replace(regex, function(matched) {
+                            matches.push(matched);
+                            return `<span class="highlight">${matched}</span>`;
+                        });
+                        $this.html(newHtml);
+                    }
                 });
 
                 if (matches.length > 0) {

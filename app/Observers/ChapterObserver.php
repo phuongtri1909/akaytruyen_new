@@ -42,42 +42,49 @@ class ChapterObserver
     {
         if (!$chapter->story_id) return;
 
-                        // Clear story-specific caches affected by chapter changes
         $story = $chapter->story;
         if ($story) {
-            Cache::forget("story:detail:{$story->slug}");
+            $this->clearCacheVariants("story:detail:{$story->slug}");
             Cache::forget("story:stats:{$chapter->story_id}");
-            Cache::forget("story:chapters_new:{$chapter->story_id}");
+            
+            $this->clearCacheVariants("story:chapters_new:{$chapter->story_id}");
             Cache::forget("story:chapter_ranges:{$chapter->story_id}");
 
-                        // Clear chapter navigation cache
-            Cache::forget("chapter:with_nav:{$chapter->story_id}:{$chapter->slug}");
+            $this->clearCacheVariants("chapter:with_nav:{$chapter->story_id}:{$chapter->slug}");
 
-            // Clear chapter data cache
-            Cache::forget("chapter:data:{$chapter->story_id}:{$chapter->slug}");
+            $this->clearCacheVariants("chapter:data:{$chapter->story_id}:{$chapter->slug}");
 
-            // Clear chapter last cache
             Cache::forget("chapter:last:{$chapter->story_id}");
 
-            // Clear navigation cache for adjacent chapters
             $adjacentChapters = [$chapter->chapter - 1, $chapter->chapter + 1];
             foreach ($adjacentChapters as $chapterNum) {
                 if ($chapterNum > 0) {
                     $adjacentChapter = \App\Models\Chapter::where('story_id', $chapter->story_id)
                         ->where('chapter', $chapterNum)->first();
                     if ($adjacentChapter) {
-                        Cache::forget("chapter:with_nav:{$chapter->story_id}:{$adjacentChapter->slug}");
+                        $this->clearCacheVariants("chapter:with_nav:{$chapter->story_id}:{$adjacentChapter->slug}");
                     }
                 }
             }
 
-            // Clear chapter pagination cache for this story
             for ($page = 1; $page <= 10; $page++) {
-                Cache::forget("story:chapters:{$chapter->story_id}:page:{$page}:order:asc");
-                Cache::forget("story:chapters:{$chapter->story_id}:page:{$page}:order:desc");
+                $this->clearCacheVariants("story:chapters:{$chapter->story_id}:page:{$page}:order:asc");
+                $this->clearCacheVariants("story:chapters:{$chapter->story_id}:page:{$page}:order:desc");
             }
         }
     }
+
+        protected function clearCacheVariants(string $baseKey): void
+        {
+            Cache::forget($baseKey);
+            Cache::forget($baseKey . ':banned');
+            Cache::forget($baseKey . ':novip');
+            Cache::forget($baseKey . ':guest');
+            Cache::forget($baseKey . ':banned:novip');
+            Cache::forget($baseKey . ':banned:guest');
+            Cache::forget($baseKey . ':novip:guest');
+            Cache::forget($baseKey . ':banned:novip:guest');
+        }
 
     protected function flushGlobal(): void
     {

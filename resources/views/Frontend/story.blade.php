@@ -95,6 +95,27 @@
                                     <strong>Trạng thái:</strong>
                                     <span class="text-info">{{ $story->is_full ? 'Full' : 'Đang ra' }}</span>
                                 </p>
+                                
+                                @if(auth()->check() && (auth()->user()->id == $story->author_id || auth()->user()->can('sua_truyen')))
+                                    <div class="vip-toggle-container mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <strong class="me-2">Truyện VIP:</strong>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="vipToggle" 
+                                                       {{ $story->is_vip ? 'checked' : '' }} 
+                                                       data-story-id="{{ $story->id }}">
+                                                <label class="form-check-label" for="vipToggle">
+                                                    {{ $story->is_vip ? 'Có' : 'Không' }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @elseif($story->is_vip)
+                                    <p class="mb-1">
+                                        <strong>Truyện VIP:</strong>
+                                        <span class="text-warning">Có</span>
+                                    </p>
+                                @endif
                             </div>
 
 
@@ -664,6 +685,34 @@
             link.click();
             document.body.removeChild(link);
         }
+
+        // VIP Toggle functionality
+        $('#vipToggle').change(function() {
+            const isVip = $(this).is(':checked');
+            const storyId = $(this).data('story-id');
+            const label = $(this).siblings('label');
+            
+            $.ajax({
+                url: `/truyen/${storyId}/toggle-vip`,
+                type: 'POST',
+                data: {
+                    is_vip: isVip ? 1 : 0,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    label.text(isVip ? 'Có' : 'Không');
+                    showToast(response.message, 'success');
+                },
+                error: function(xhr) {
+                    // Revert toggle state
+                    $('#vipToggle').prop('checked', !isVip);
+                    label.text(!isVip ? 'Có' : 'Không');
+                    
+                    const response = xhr.responseJSON;
+                    showToast(response?.message || 'Có lỗi xảy ra', 'error');
+                }
+            });
+        });
 
         // Toast notification function
         function showToast(message, type = 'info') {

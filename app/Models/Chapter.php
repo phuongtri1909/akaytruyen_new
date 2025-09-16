@@ -43,6 +43,10 @@ class Chapter extends Model
             return null;
         }
         
+        if ($user && $this->story && $this->story->is_vip && !$user->can('xem_chuong_truyen_vip')) {
+            return null;
+        }
+        
         return $value;
     }
     

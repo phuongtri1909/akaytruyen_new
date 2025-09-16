@@ -165,6 +165,12 @@
                                     <span class="checkmark"></span>
                                     Truyện hot
                                 </label>
+                                <label class="status-checkbox">
+                                    <input type="checkbox" name="is_vip" value="1" 
+                                           {{ old('is_vip', $story->is_vip) ? 'checked' : '' }}>
+                                    <span class="checkmark"></span>
+                                    Truyện VIP
+                                </label>
                             </div>
                         </div>
 

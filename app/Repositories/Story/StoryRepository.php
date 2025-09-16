@@ -158,8 +158,12 @@ class StoryRepository extends BaseRepository implements StoryRepositoryInterface
     public function getCachedStoryDetail($slug)
     {
         $user = auth()->user();
+        $story = $this->getStoryBySlugOptimized($slug);
+        
         $banSuffix = $user && $user->userBan && $user->userBan->read ? ':banned' : '';
-        $cacheKey = "story:detail:{$slug}" . $banSuffix;
+        $vipSuffix = $user && $story && $story->is_vip && !$user->can('xem_chuong_truyen_vip') ? ':novip' : '';
+        $guestSuffix = !$user && $story && $story->is_vip ? ':guest' : '';
+        $cacheKey = "story:detail:{$slug}" . $banSuffix . $vipSuffix . $guestSuffix;
         
         return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($slug) {
             return $this->getStoryBySlugOptimized($slug);
@@ -169,8 +173,12 @@ class StoryRepository extends BaseRepository implements StoryRepositoryInterface
     public function getCachedStoryChapters($storyId, $page = 1, $isOldFirst = false)
     {
         $user = auth()->user();
+        $story = $this->getModel()->find($storyId);
+        
         $banSuffix = $user && $user->userBan && $user->userBan->read ? ':banned' : '';
-        $cacheKey = "story:chapters:{$storyId}:page:{$page}:order:" . ($isOldFirst ? 'asc' : 'desc') . $banSuffix;
+        $vipSuffix = $user && $story && $story->is_vip && !$user->can('xem_chuong_truyen_vip') ? ':novip' : '';
+        $guestSuffix = !$user && $story && $story->is_vip ? ':guest' : '';
+        $cacheKey = "story:chapters:{$storyId}:page:{$page}:order:" . ($isOldFirst ? 'asc' : 'desc') . $banSuffix . $vipSuffix . $guestSuffix;
 
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($storyId, $isOldFirst) {
             $chapters = $this->getModel()
@@ -178,14 +186,6 @@ class StoryRepository extends BaseRepository implements StoryRepositoryInterface
                 ->chapters()
                 ->orderBy('chapter', $isOldFirst ? 'asc' : 'desc')
                 ->paginate(50);
-            
-            $user = auth()->user();
-            if ($user && $user->userBan && $user->userBan->read) {
-                $chapters->getCollection()->transform(function ($chapter) {
-                    $chapter->setAttribute('content', null);
-                    return $chapter;
-                });
-            }
             
             return $chapters;
         });

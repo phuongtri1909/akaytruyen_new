@@ -20,6 +20,7 @@ class Story extends Model
     const FULL = 1;
     const IS_NEW = 1;
     const IS_HOT = 1;
+    const IS_VIP = 1;
 
     protected $fillable = [
         'slug',
@@ -30,7 +31,8 @@ class Story extends Model
         'status',
         'is_full',
         'is_new',
-        'is_hot'
+        'is_hot',
+        'is_vip'
     ];
 
     // Accessor để tương thích với các field name khác
@@ -62,19 +64,23 @@ class Story extends Model
         $query = $this->hasMany(Chapter::class, 'story_id');
         
         $user = Auth::user();
-        if ($user && $user->userBan && $user->userBan->read) {
-            $columns = Schema::getColumnListing('chapters');
-            $selectColumns = [];
-            
-            foreach ($columns as $column) {
-                if ($column === 'content') {
-                    $selectColumns[] = DB::raw('NULL as content');
-                } else {
-                    $selectColumns[] = $column;
+        if ($user) {
+            if (($user->userBan && $user->userBan->read) || 
+                ($this->is_vip && !$user->can('xem_chuong_truyen_vip'))) {
+                
+                $columns = Schema::getColumnListing('chapters');
+                $selectColumns = [];
+                
+                foreach ($columns as $column) {
+                    if ($column === 'content') {
+                        $selectColumns[] = DB::raw('NULL as content');
+                    } else {
+                        $selectColumns[] = $column;
+                    }
                 }
+                
+                $query->select($selectColumns);
             }
-            
-            $query->select($selectColumns);
         }
         
         return $query;
@@ -90,8 +96,11 @@ class Story extends Model
         $chapter = $this->getRelationValue('latestChapter');
         
         $user = Auth::user();
-        if ($chapter && $user && $user->userBan && $user->userBan->read) {
-            $chapter->setAttribute('content', null);
+        if ($chapter && $user) {
+            if (($user->userBan && $user->userBan->read) || 
+                ($this->is_vip && !$user->can('xem_chuong_truyen_vip'))) {
+                $chapter->setAttribute('content', null);
+            }
         }
         
         return $chapter;

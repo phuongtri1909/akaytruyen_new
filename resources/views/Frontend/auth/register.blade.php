@@ -28,20 +28,30 @@
                 <div class="logo-section">
                     <div class="logo-container">
                         <a href="{{ route('home') }}" class="logo-link">
-                            <img src="{{ asset('images/logo/Logoakay.png') }}" alt="AKAY TRUYỆN"
-                                class="logo-image">
+                            <img src="{{ asset('images/logo/Logoakay.png') }}" alt="AKAY TRUYỆN" class="logo-image">
                         </a>
                     </div>
                     <h1 class="welcome-text">Chào mừng bạn!</h1>
                     <p class="welcome-subtitle">Đăng ký để bắt đầu hành trình đọc truyện</p>
                 </div>
 
+                <a href="{{ route('login.google') }}" class="btn w-100 auth-btn border text-dark">
+                    <img src="{{ asset('images/svg/google_2025.svg') }}" alt="Google" class="me-2" height="30">
+                    Đăng nhập với Google
+                </a>
+
+                <div class="d-flex align-items-center text-center my-4">
+                    <hr class="flex-grow-1 border-top border-secondary">
+                    <span class="px-2 text-dark">hoặc</span>
+                    <hr class="flex-grow-1 border-top border-secondary">
+                </div>
+
                 <!-- Register Form -->
-                <form action="{{ route('register.store') }}" method="POST" enctype="multipart/form-data" class="login-form" id="registerForm">
+                <form class="login-form" id="registerForm">
                     @csrf
 
                     <!-- Email Field -->
-                    <div class="form-group">
+                    <div class="form-group" id="emailGroup">
                         <div class="input-wrapper">
                             <div class="input-icon">
                                 <i class="fas fa-envelope"></i>
@@ -59,49 +69,14 @@
                         @enderror
                     </div>
 
-                    <!-- Name Field -->
-                    <div class="form-group">
-                        <div class="input-wrapper">
-                            <div class="input-icon">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <input type="text" name="name" id="name"
-                                class="form-input @error('name') error @enderror" placeholder="Nhập họ và tên"
-                                value="{{ old('name') }}" required>
-                            <div class="input-line"></div>
-                        </div>
-                        @error('name')
-                            <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ $message }}
-                            </div>
-                        @enderror
-                    </div>
-
-                    <!-- Password Field -->
-                    <div class="form-group">
-                        <div class="input-wrapper">
-                            <div class="input-icon">
-                                <i class="fas fa-lock"></i>
-                            </div>
-                            <input type="password" name="password" id="password"
-                                class="form-input @error('password') error @enderror" placeholder="Nhập mật khẩu" required>
-                            <div class="input-line"></div>
-                            <button type="button" class="password-toggle" id="togglePassword">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                        @error('password')
-                            <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {{ $message }}
-                            </div>
-                        @enderror
+                    <!-- OTP and Additional Fields Container -->
+                    <div id="otpPasswordContainer" class="overflow-hidden" style="display: none;">
+                        <!-- OTP inputs will be inserted here via JavaScript -->
                     </div>
 
                     <!-- Submit Button -->
                     <button type="submit" class="login-btn" id="registerBtn">
-                        <span class="btn-text">Đăng ký</span>
+                        <span class="btn-text">Tiếp tục</span>
                         <div class="btn-loader">
                             <div class="spinner"></div>
                         </div>
@@ -382,6 +357,7 @@
             font-size: 14px;
             margin-top: 8px;
             animation: fadeIn 0.3s ease;
+            width: 100%;
         }
 
         @keyframes fadeIn {
@@ -542,6 +518,82 @@
             text-decoration: underline;
         }
 
+        /* OTP Inputs */
+        .otp-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .otp-input {
+            width: 45px;
+            height: 45px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .otp-input:focus {
+            border-color: #14425d;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .otp-input.error {
+            border-color: #e53e3e;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        /* Avatar Upload */
+        .avatar-upload {
+            position: relative;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-preview {
+            width: 120px;
+            height: 120px;
+            border: 2px dashed #ccc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .avatar-preview:hover {
+            border-color: #14425d;
+            opacity: 0.8;
+        }
+
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-helper {
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .avatar-helper small {
+            color: #718096;
+            font-size: 12px;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .login-card {
@@ -590,36 +642,130 @@
                 showToast('{{ session('error') }}', 'error');
             @endif
 
-            // Password toggle
-            $('#togglePassword').on('click', function() {
-                const passwordInput = $('#password');
-                const icon = $(this).find('i');
+            // Form submission with OTP flow
+            $('#registerForm').on('submit', function(e) {
+                e.preventDefault();
+                const emailInput = $('#email');
+                const email = emailInput.val();
+                const submitButton = $('#registerBtn');
 
-                if (passwordInput.attr('type') === 'password') {
-                    passwordInput.attr('type', 'text');
-                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
-                } else {
-                    passwordInput.attr('type', 'password');
-                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                // Clear old error messages
+                const oldInvalidFeedback = emailInput.closest('.form-group').find('.error-message');
+                emailInput.removeClass('error');
+                if (oldInvalidFeedback.length) {
+                    oldInvalidFeedback.remove();
                 }
-            });
 
-            // Form submission with loading state
-            $('#registerForm').on('submit', function() {
-                const btn = $('#registerBtn');
-                const btnText = $('.btn-text');
+                // Set loading state
+                submitButton.addClass('loading');
+                $('.btn-text').text('Đang xử lý...');
 
-                // Add loading state
-                btn.addClass('loading');
-                btnText.text('Đang đăng ký...');
+                $.ajax({
+                    url: '{{ route('register') }}',
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    data: JSON.stringify({
+                        email: email
+                    }),
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            showToast(response.message, 'success');
 
-                // Re-enable after 3 seconds if no response
-                setTimeout(() => {
-                    if (btn.hasClass('loading')) {
-                        btn.removeClass('loading');
-                        btnText.text('Đăng ký');
+                            // Hide email group and show OTP form
+                            $('#emailGroup').hide();
+                            $('#otpPasswordContainer').show().html(`
+                                <div class="text-center mb-3">
+                                    <span class="text-muted">${response.message}</span>
+                                </div>
+                                <div class="otp-container" id="input-otp">
+                                    <input type="text" maxlength="1" class="otp-input" oninput="handleInput(this)" />
+                                    <input type="text" maxlength="1" class="otp-input" oninput="handleInput(this)" />
+                                    <input type="text" maxlength="1" class="otp-input" oninput="handleInput(this)" />
+                                    <input type="text" maxlength="1" class="otp-input" oninput="handleInput(this)" />
+                                    <input type="text" maxlength="1" class="otp-input" oninput="handleInput(this)" />
+                                    <input type="text" maxlength="1" class="otp-input" oninput="handleInput(this)" />
+                                </div>
+                                
+                                <!-- Avatar Upload -->
+                                <div class="text-center mb-4">
+                                    <div class="avatar-upload">
+                                        <input type="file" class="d-none" id="avatarInput" name="avatar" accept="image/*">
+                                        <div id="avatarPreview" class="avatar-preview">
+                                            <i class="fas fa-camera fa-2x text-muted"></i>
+                                        </div>
+                                    </div>
+                                    <div class="avatar-helper">
+                                        <small>Click để chọn ảnh đại diện (không bắt buộc)</small>
+                                    </div>
+                                </div>
+
+                                <!-- Name Field -->
+                                <div class="form-group">
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <input type="text" name="name" id="name"
+                                            class="form-input" placeholder="Nhập họ và tên" required>
+                                        <div class="input-line"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Password Field -->
+                                <div class="form-group">
+                                    <div class="input-wrapper">
+                                        <div class="input-icon">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <input type="password" name="password" id="password"
+                                            class="form-input" placeholder="Nhập mật khẩu" required>
+                                        <div class="input-line"></div>
+                                        <button type="button" class="password-toggle" id="togglePassword">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `);
+
+                            // Update button
+                            submitButton.removeClass('loading');
+                            $('.btn-text').text('Xác nhận');
+                            submitButton.attr('id', 'submitOtpPassword');
+
+                            // Setup avatar upload
+                            setupAvatarUpload();
+
+                            // Setup password toggle
+                            setupPasswordToggle();
+
+                            // Setup OTP submission
+                            setupOtpSubmission(email);
+                        } else {
+                            showToast(response.message, 'error');
+                            submitButton.removeClass('loading');
+                            $('.btn-text').text('Tiếp tục');
+                        }
+                    },
+                    error: function(xhr) {
+                        const response = xhr.responseJSON;
+                        if (response && response.message && response.message.email) {
+                            response.message.email.forEach(error => {
+                                const errorDiv = $(`<div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    ${error}
+                                </div>`);
+                                emailInput.addClass('error').closest('.form-group').append(errorDiv);
+                            });
+                        } else {
+                            showToast('Đã xảy ra lỗi, vui lòng thử lại.', 'error');
+                        }
+                        submitButton.removeClass('loading');
+                        $('.btn-text').text('Tiếp tục');
                     }
-                }, 3000);
+                });
             });
 
             // Input focus effects
@@ -637,6 +783,175 @@
                 });
             });
         });
+
+        // OTP Input Handler
+        function handleInput(input) {
+            const inputs = document.querySelectorAll('.otp-input');
+            const currentIndex = Array.from(inputs).indexOf(input);
+
+            if (input.value.length === 1 && currentIndex < inputs.length - 1) {
+                inputs[currentIndex + 1].focus();
+            }
+
+            if (input.value.length === 0 && currentIndex > 0) {
+                inputs[currentIndex - 1].focus();
+            }
+        }
+
+        // Setup Avatar Upload
+        function setupAvatarUpload() {
+            const avatarPreview = document.getElementById('avatarPreview');
+            const avatarInput = document.getElementById('avatarInput');
+
+            if (avatarPreview && avatarInput) {
+                avatarPreview.addEventListener('click', function() {
+                    avatarInput.click();
+                });
+
+                avatarInput.addEventListener('change', function(e) {
+                    if (e.target.files && e.target.files[0]) {
+                        const reader = new FileReader();
+                        $('.avatar-helper').find('.error-message').remove();
+
+                        reader.onload = function(e) {
+                            avatarPreview.innerHTML =
+                                `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                            avatarPreview.style.border = 'none';
+                        }
+                        reader.readAsDataURL(e.target.files[0]);
+                    }
+                });
+            }
+        }
+
+        // Setup Password Toggle
+        function setupPasswordToggle() {
+            $('#togglePassword').on('click', function() {
+                const passwordInput = $('#password');
+                const icon = $(this).find('i');
+
+                if (passwordInput.attr('type') === 'password') {
+                    passwordInput.attr('type', 'text');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    passwordInput.attr('type', 'password');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+        }
+
+        // Setup OTP Submission
+        function setupOtpSubmission(email) {
+            $('#submitOtpPassword').on('click', function() {
+                const otpInputs = $('.otp-input');
+                const input_otp = $('#input-otp');
+                const passwordInput = $('#password');
+                const nameInput = $('#name');
+                const avatarInput = $('#avatarInput')[0];
+
+                let otp = '';
+                otpInputs.each(function() {
+                    otp += $(this).val();
+                });
+
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('otp', otp);
+                formData.append('password', passwordInput.val());
+                formData.append('name', nameInput.val());
+                if (avatarInput.files[0]) {
+                    formData.append('avatar', avatarInput.files[0]);
+                }
+
+                // Clear old errors
+                removeInvalidFeedback(passwordInput);
+                input_otp.find('.error-message').remove();
+                removeInvalidFeedback(nameInput);
+                $('.avatar-helper').find('.error-message').remove();
+
+                // Set loading state
+                $(this).addClass('loading');
+                $('.btn-text').text('Đang xác nhận...');
+
+                $.ajax({
+                    url: '{{ route('register') }}',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            showToast(response.message, 'success');
+                            window.location.href = response.url;
+                        } else {
+                            showToast(response.message, 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        const response = xhr.responseJSON;
+                        if (response && response.status === 'error') {
+                            if (response.message.email) {
+                                response.message.email.forEach(error => {
+                                    const errorDiv = $(`<div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        ${error}
+                                    </div>`);
+                                    $('#email').addClass('error').closest('.form-group').append(errorDiv);
+                                });
+                            }
+                            if (response.message.otp) {
+                                input_otp.append(
+                                    `<div class="error-message text-center">${response.message.otp[0]}</div>`
+                                    );
+                            }
+                            if (response.message.password) {
+                                response.message.password.forEach(error => {
+                                    const errorDiv = $(`<div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        ${error}
+                                    </div>`);
+                                    passwordInput.addClass('error').closest('.form-group').append(errorDiv);
+                                });
+                            }
+                            if (response.message.name) {
+                                response.message.name.forEach(error => {
+                                    const errorDiv = $(`<div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        ${error}
+                                    </div>`);
+                                    nameInput.addClass('error').closest('.form-group').append(errorDiv);
+                                });
+                            }
+                            if (response.message.avatar) {
+                                response.message.avatar.forEach(error => {
+                                    const errorDiv = $(`<div class="error-message text-center">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        ${error}
+                                    </div>`);
+                                    $('.avatar-helper').append(errorDiv);
+                                });
+                            }
+                        } else {
+                            showToast('Đã xảy ra lỗi, vui lòng thử lại.', 'error');
+                        }
+                        $('#submitOtpPassword').removeClass('loading');
+                        $('.btn-text').text('Xác nhận');
+                    }
+                });
+            });
+        }
+
+        // Remove Invalid Feedback
+        function removeInvalidFeedback(input) {
+            const oldInvalidFeedback = input.closest('.form-group').find('.error-message');
+            input.removeClass('error');
+            if (oldInvalidFeedback.length) {
+                oldInvalidFeedback.remove();
+            }
+        }
 
         // Toast function
         function showToast(message, type = 'info') {

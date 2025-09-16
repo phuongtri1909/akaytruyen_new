@@ -31,8 +31,8 @@
                     <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
                         @can('cau_hinh_smtp')
                             <li class="nav-item" role="presentation">
-                                <a class="nav-link {{ request('tab') == 'smtp' || !request('tab') ? 'active' : '' }}" id="smtp-tab"
-                                    data-toggle="tab" href="#smtp" role="tab">
+                                <a class="nav-link {{ request('tab') == 'smtp' || !request('tab') ? 'active' : '' }}"
+                                    id="smtp-tab" data-toggle="tab" href="#smtp" role="tab">
                                     <i class="fas fa-envelope"></i> SMTP
                                 </a>
                             </li>
@@ -48,86 +48,87 @@
                     </ul>
 
                     <div class="tab-content mt-4" id="settingsTabContent">
-                    
+
                         <!-- SMTP Settings Tab -->
-                        <div class="tab-pane fade {{ request('tab') == 'smtp' || !request('tab') ? 'show active' : '' }}" id="smtp"
-                            role="tabpanel">
+                        <div class="tab-pane fade {{ request('tab') == 'smtp' || !request('tab') ? 'show active' : '' }}"
+                            id="smtp" role="tabpanel">
                             @can('cau_hinh_smtp')
                                 <form action="{{ route('admin.setting.update.smtp') }}" method="POST">
                                     @csrf
                                     @method('PUT')
 
-                                <div class="form-group">
-                                    <label for="mailer">Mailer</label>
-                                    <input type="text" id="mailer" name="mailer" class="form-control"
-                                        value="{{ $smtpSetting->mailer ?? 'smtp' }}" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="host">Host</label>
-                                    <input type="text" id="host" name="host" class="form-control"
-                                        value="{{ $smtpSetting->host ?? '' }}" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="port">Port</label>
-                                    <input type="text" id="port" name="port" class="form-control"
-                                        value="{{ $smtpSetting->port ?? '' }}" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="username">Username</label>
-                                    <input type="text" id="username" name="username" class="form-control"
-                                        value="{{ $smtpSetting->username ?? '' }}" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="password">Password</label>
-                                    <input type="password" id="password" name="password" class="form-control"
-                                        value="{{ $smtpSetting->password ?? '' }}" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="encryption">Encryption</label>
-                                    <select id="encryption" name="encryption" class="form-control">
-                                        <option value="">None</option>
-                                        <option value="tls"
-                                            {{ ($smtpSetting->encryption ?? '') == 'tls' ? 'selected' : '' }}>TLS</option>
-                                        <option value="ssl"
-                                            {{ ($smtpSetting->encryption ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="from_address">From Address</label>
-                                    <input type="email" id="from_address" name="from_address" class="form-control"
-                                        value="{{ $smtpSetting->from_address ?? '' }}" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="from_name">From Name</label>
-                                    <input type="text" id="from_name" name="from_name" class="form-control"
-                                        value="{{ $smtpSetting->from_name ?? '' }}">
-                                </div>
-
-                                @can('cau_hinh_smtp')
                                     <div class="form-group">
-                                        <label for="admin_email">Admin Email</label>
-                                        @if($smtpSetting->admin_email && $smtpSetting->admin_email !== auth()->user()->email)
-                                            <input type="email" id="admin_email" name="admin_email" class="form-control"
-                                                value="{{ $smtpSetting->admin_email ?? '' }}" readonly>
-                                            <small class="form-text text-muted">
-                                                <i class="fas fa-lock"></i> Chỉ {{ $smtpSetting->admin_email }} mới có quyền chỉnh sửa
-                                            </small>
-                                        @else
-                                            <input type="email" id="admin_email" name="admin_email" class="form-control"
-                                                value="{{ $smtpSetting->admin_email ?? '' }}" required>
-                                            <small class="form-text text-muted">
-                                                <i class="fas fa-crown"></i> Email này sẽ có quyền cao nhất trong hệ thống
-                                            </small>
-                                        @endif
+                                        <label for="mailer">Mailer</label>
+                                        <input type="text" id="mailer" name="mailer" class="form-control"
+                                            value="{{ $smtpSetting->mailer ?? 'smtp' }}" required>
                                     </div>
-                                @endcan
+
+                                    <div class="form-group">
+                                        <label for="host">Host</label>
+                                        <input type="text" id="host" name="host" class="form-control"
+                                            value="{{ $smtpSetting->host ?? '' }}" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="port">Port</label>
+                                        <input type="text" id="port" name="port" class="form-control"
+                                            value="{{ $smtpSetting->port ?? '' }}" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="username">Username</label>
+                                        <input type="text" id="username" name="username" class="form-control"
+                                            value="{{ $smtpSetting->username ?? '' }}" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="password">Password</label>
+                                        <input type="password" id="password" name="password" class="form-control"
+                                            value="{{ $smtpSetting->password ?? '' }}" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="encryption">Encryption</label>
+                                        <select id="encryption" name="encryption" class="form-control">
+                                            <option value="">None</option>
+                                            <option value="tls"
+                                                {{ ($smtpSetting->encryption ?? '') == 'tls' ? 'selected' : '' }}>TLS</option>
+                                            <option value="ssl"
+                                                {{ ($smtpSetting->encryption ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="from_address">From Address</label>
+                                        <input type="email" id="from_address" name="from_address" class="form-control"
+                                            value="{{ $smtpSetting->from_address ?? '' }}" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="from_name">From Name</label>
+                                        <input type="text" id="from_name" name="from_name" class="form-control"
+                                            value="{{ $smtpSetting->from_name ?? '' }}">
+                                    </div>
+
+                                    @can('cau_hinh_smtp')
+                                        <div class="form-group">
+                                            <label for="admin_email">Admin Email</label>
+                                            @if ($smtpSetting->admin_email && $smtpSetting->admin_email !== auth()->user()->email)
+                                                <input type="email" id="admin_email" name="admin_email" class="form-control"
+                                                    value="{{ $smtpSetting->admin_email ?? '' }}" readonly>
+                                                <small class="form-text text-muted">
+                                                    <i class="fas fa-lock"></i> Chỉ {{ $smtpSetting->admin_email }} mới có quyền
+                                                    chỉnh sửa
+                                                </small>
+                                            @else
+                                                <input type="email" id="admin_email" name="admin_email" class="form-control"
+                                                    value="{{ $smtpSetting->admin_email ?? '' }}" required>
+                                                <small class="form-text text-muted">
+                                                    <i class="fas fa-crown"></i> Email này sẽ có quyền cao nhất trong hệ thống
+                                                </small>
+                                            @endif
+                                        </div>
+                                    @endcan
 
 
                                     <div class="form-actions">
@@ -151,29 +152,21 @@
                                     @csrf
                                     @method('PUT')
 
-                                <div class="form-group">
-                                    <label for="google_client_id">Client ID</label>
-                                    <input type="text" id="google_client_id" name="google_client_id"
-                                        class="form-control" value="{{ $googleSetting->google_client_id ?? '' }}"
-                                        required>
-                                </div>
+                                    <div class="form-group">
+                                        <label for="google_client_id">Client ID</label>
+                                        <input type="text" id="google_client_id" name="google_client_id"
+                                            class="form-control" value="{{ $googleSetting->google_client_id ?? '' }}"
+                                            required>
+                                    </div>
 
-                                <div class="form-group">
-                                    <label for="google_client_secret">Client Secret</label>
-                                    <input type="password" id="google_client_secret" name="google_client_secret"
-                                        class="form-control" value="{{ $googleSetting->google_client_secret ?? '' }}"
-                                        required>
-                                </div>
+                                    <div class="form-group">
+                                        <label for="google_client_secret">Client Secret</label>
+                                        <input type="password" id="google_client_secret" name="google_client_secret"
+                                            class="form-control" value="{{ $googleSetting->google_client_secret ?? '' }}"
+                                            required>
+                                    </div>
 
-                                <div class="form-group">
-                                    <label for="google_redirect">Redirect URL</label>
-                                    <input type="text" id="google_redirect" name="google_redirect"
-                                        class="form-control"
-                                        value="{{ $googleSetting->google_redirect ?? 'auth/google/callback' }}" required>
-                                    <small class="form-text text-muted">
-                                        URL relative to your site (e.g., auth/google/callback)
-                                    </small>
-                                </div>
+
 
                                     <div class="form-actions">
                                         <button type="submit" class="action-button">

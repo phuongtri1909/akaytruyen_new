@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-require __DIR__.'/admin.php';
+
+require __DIR__ . '/admin.php';
+
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Frontend\Auth\AuthController;
 use App\Http\Controllers\Frontend\{
@@ -41,38 +43,56 @@ Route::get('sitemap-stories.xml', [SitemapController::class, 'stories'])->name('
 Route::get('sitemap-chapters.xml', [SitemapController::class, 'chapters'])->name('sitemap.chapters.alt');
 Route::get('sitemap-main-pages.xml', [SitemapController::class, 'mainPages'])->name('sitemap.main.pages');
 
-// Public routes
-Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/the-loai/{slug}', [CategoryController::class, 'index'])->name('category');
-Route::get('/truyen/{slug}', [StoryController::class, 'index'])->name('story');
-Route::get('/{slugStory}/{slugChapter}', [ChapterController::class, 'index'])->name('chapter');
-// ajax search chapters
-Route::get('/truyen/{slug}/search-chapters', [HomeController::class, 'searchChapters'])->name('chapters.search');
+// Guest routes
+Route::middleware(['guest'])->group(function () {
+    Route::view('/login', 'Frontend.auth.login')->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('user.login');
 
-// Donation routes for stories
-Route::get('/truyen/{storySlug}/donations', [DonationController::class, 'getStoryDonations'])->name('story.donations');
+    Route::view('/register', 'Frontend.auth.register')->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 
-Route::get('/tim-kiem', [HomeController::class, 'mainSearchStory'])->name('main.search.story');
-Route::get('/phan-loai-theo-chuong', [StoryController::class, 'followChaptersCount'])->name('get.list.story.with.chapters.count');
+    Route::view('/forgot-password', 'Frontend.auth.forgot-password')->name('forgot-password');
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot.password');
 
-// Route xem lịch sử edit comment (không cần đăng nhập)
-Route::get('/comments/{comment}/edit-history', [CommentEditController::class, 'getEditHistory'])->name('comments.edit.history');
+    Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('login.google');
+    Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+});
 
-// Ajax Routes
-Route::post('/ajax/get-chapters', [ChapterController::class, 'getChapters'])->name('get.chapters');
-Route::post('/get-list-story-hot', [HomeController::class, 'getListStoryHot'])->name('get.list.story.hot');
+Route::middleware(['ban:login'])->group(function () {
+    // Public routes
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+    Route::get('/the-loai/{slug}', [CategoryController::class, 'index'])->name('category');
+    Route::get('/truyen/{slug}', [StoryController::class, 'index'])->name('story');
 
-Route::post('/ajax/search-story', [HomeController::class, 'searchStory'])->name('search.story');
-Route::post('/ajax/load-more-comments', [CommentController::class, 'loadMoreComments'])->name('comments.load.more.ajax');
+    Route::middleware(['ban:read'])->group(function () {
+        Route::get('/{slugStory}/{slugChapter}', [ChapterController::class, 'index'])->name('chapter');
+        // ajax search chapters
+        Route::get('/truyen/{slug}/search-chapters', [HomeController::class, 'searchChapters'])->name('chapters.search');
+
+        Route::post('/ajax/get-chapters', [ChapterController::class, 'getChapters'])->name('get.chapters');
+    });
+    // Donation routes for stories
+    Route::get('/truyen/{storySlug}/donations', [DonationController::class, 'getStoryDonations'])->name('story.donations');
+
+    Route::get('/tim-kiem', [HomeController::class, 'mainSearchStory'])->name('main.search.story');
+    Route::get('/phan-loai-theo-chuong', [StoryController::class, 'followChaptersCount'])->name('get.list.story.with.chapters.count');
+
+    // Route xem lịch sử edit comment (không cần đăng nhập)
+    Route::get('/comments/{comment}/edit-history', [CommentEditController::class, 'getEditHistory'])->name('comments.edit.history');
+
+    // Ajax Routes
+    Route::post('/get-list-story-hot', [HomeController::class, 'getListStoryHot'])->name('get.list.story.hot');
+
+    Route::post('/ajax/search-story', [HomeController::class, 'searchStory'])->name('search.story');
+    Route::post('/ajax/load-more-comments', [CommentController::class, 'loadMoreComments'])->name('comments.load.more.ajax');
 
 
-Livewire::component('live-chat-section', LiveChatSection::class);
+    Livewire::component('live-chat-section', LiveChatSection::class);
 
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::middleware(['ban:login'])->group(function () {
         Route::get('/notifications', [NotificationController::class, 'getNotifications']);
         Route::post('/notifications/read', [NotificationController::class, 'markAsRead']);
 
@@ -83,9 +103,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('update-profile/update-name-or-phone', [UserController::class, 'updateNameOrPhone'])->name('update.name.or.phone');
         Route::post('update-avatar', [UserController::class, 'updateAvatar'])->name('update.avatar');
         Route::post('update-password', [UserController::class, 'updatePassword'])->name('update.password');
-        Route::post('update-profile/update-name-or-phone', [UserController::class, 'updateNameOrPhone'])->name('update.name.or.phone');
-
-
 
         Route::middleware(['ban:comment'])->group(function () {
 
@@ -96,13 +113,13 @@ Route::middleware(['auth'])->group(function () {
             // Routes cho edit comment
             Route::get('/comments/{comment}/edit-form', [CommentEditController::class, 'getEditForm'])->name('comments.edit.form');
             Route::post('/comments/{comment}/edit', [CommentEditController::class, 'edit'])->name('comments.edit');
-        
+
             // Route ghim comment (pin/unpin)
             Route::post('/comments/{comment}/pin', [CommentController::class, 'togglePin'])->name('comments.pin');
 
             // admin delete comment
             Route::delete('/delete-comments/{comment}', [CommentController::class, 'deleteComment'])->name('delete.comments');
-        
+
             Route::post('comment/store', [CommentController::class, 'storeClient'])->name('comment.store.client');
         });
 
@@ -112,23 +129,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::middleware(['ban:read'])->group(function () {
             Route::get('/{slugStory}/{slugChapter}/download-epub', [DownloadController::class, 'generateEpub'])
-            ->name('download.epub');
+                ->name('download.epub');
         });
-
     });
-});
-
-// Guest routes
-Route::middleware(['guest'])->group(function () {
-    Route::view('/login', 'Frontend.auth.login')->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('user.login');
-
-    Route::get('login/{provider}', [GoogleController::class, 'redirectToGoogle'])->name('login.redirect');;
-    Route::get('login/{provider}/callback', [GoogleController::class, 'handleGoogleCallback'])->name('login.callback');
-
-    Route::view('/register', 'Frontend.auth.register')->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->name('register.store');
-
-    Route::view('/forgot-password', 'Frontend.auth.forgot-password')->name('forgot-password');
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot.password');
 });

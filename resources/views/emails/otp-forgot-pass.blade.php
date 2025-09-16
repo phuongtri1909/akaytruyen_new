@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Your OTP Code - Forgot Password</title>
+    <title>Mã OTP Active - Đổi mật khẩu</title>
     <style>
         body {
             background-color: #f3f4f6;
@@ -55,12 +55,12 @@
 <body>
     <div class="container">
         <img src="https://akaytruyen.com/images/logo/Logoakay.png" alt="Website Logo" class="logo">
-        <h1>Forgot Password Request</h1>
-        <p>Your OTP code is:</p>
+        <h1>Yêu cầu đổi mật khẩu</h1>
+        <p>Mã OTP của bạn là:</p>
         <div class="otp">{{ $otp }}</div>
         <p>Mã này có hiệu lực trong 3 phút</p>
         <div class="footer">
-            © {{ date('Y') }} Your Website. All rights reserved.
+            © {{ date('Y') }} {{ env('APP_NAME') }}. All rights reserved.
         </div>
     </div>
 </body>

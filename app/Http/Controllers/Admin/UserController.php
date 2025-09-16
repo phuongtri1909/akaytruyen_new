@@ -61,12 +61,11 @@ class UserController extends Controller
             });
         }
 
-        
         if ($request->filled('status')) {
-            if ($request->status === 'active') {
-                $query->where('email_verified_at', '!=', null);
-            } elseif ($request->status === 'inactive') {
-                $query->where('email_verified_at', null);
+            if ($request->status == 'active') {
+                $query->where('active', '=', 'active');
+            } elseif ($request->status == 'inactive') {
+                $query->where('active', '=', 'inactive');
             }
         }
 
@@ -77,7 +76,7 @@ class UserController extends Controller
             });
         }
 
-        $users = $query->paginate(15)->withQueryString();
+        $users = $query->paginate(20)->withQueryString();
         $roles = Role::all();
 
         return view('Admin.pages.users.index', compact('users', 'roles'));

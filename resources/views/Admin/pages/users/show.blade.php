@@ -63,7 +63,7 @@
                                         <i class="fas fa-crown"></i>
                                         Super Admin
                                     </span>
-                                @elseif($user->status)
+                                @elseif($user->active == 'active')
                                     <span class="status-badge status-active">
                                         <i class="fas fa-check-circle"></i>
                                         Đã xác thực
@@ -173,7 +173,7 @@
                                 <div class="detail-item">
                                     <span class="detail-label">Trạng thái:</span>
                                     <span class="detail-value">
-                                        @if($user->status)
+                                        @if($user->active == 'active')
                                             <span class="text-success">Hoạt động</span>
                                         @else
                                             <span class="text-warning">Chờ xác thực</span>

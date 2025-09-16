@@ -80,13 +80,16 @@ class User extends Authenticatable
 
     public function getUserBanAttribute()
     {
-        return $this->userBan()->first() ?? new UserBan([
-            'user_id' => $this->id,
-            'login' => false,
-            'comment' => false,
-            'rate' => false,
-            'read' => false,
-        ]);
+        if (!isset($this->attributes['_user_ban_cache'])) {
+            $this->attributes['_user_ban_cache'] = $this->userBan()->first() ?? new UserBan([
+                'user_id' => $this->id,
+                'login' => false,
+                'comment' => false,
+                'rate' => false,
+                'read' => false,
+            ]);
+        }
+        return $this->attributes['_user_ban_cache'];
     }
 
     public function isBanned()

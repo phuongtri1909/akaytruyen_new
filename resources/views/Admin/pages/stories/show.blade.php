@@ -89,7 +89,7 @@
                             <div class="detail-item">
                                 <span class="detail-label">Trạng thái:</span>
                                 <div class="status-badges">
-                                    @if ($story->status)
+                                    @if ($story->active == 'active')
                                         <span class="status-badge status-active">Hoạt động</span>
                                     @else
                                         <span class="status-badge status-inactive">Tạm dừng</span>

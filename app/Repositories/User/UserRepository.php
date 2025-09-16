@@ -20,7 +20,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         return $this->model::query()
             ->where('email', $email)
-            ->where('status', User::STATUS_ACTIVE)
+            ->where('active', 'active')
             ->first();
     }
 }

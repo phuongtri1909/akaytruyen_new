@@ -36,6 +36,18 @@
                     <p class="welcome-subtitle">Đăng nhập để tiếp tục hành trình đọc truyện</p>
                 </div>
 
+                <a href="{{ route('login.google') }}" class="btn w-100 auth-btn border text-dark">
+                    <img src="{{ asset('images/svg/google_2025.svg') }}" alt="Google" class="me-2"
+                        height="30">
+                    Đăng nhập với Google
+                </a>
+
+                <div class="d-flex align-items-center text-center my-4">
+                    <hr class="flex-grow-1 border-top border-secondary">
+                    <span class="px-2 text-dark">hoặc</span>
+                    <hr class="flex-grow-1 border-top border-secondary">
+                </div>
+
                 <!-- Login Form -->
                 <form action="{{ route('user.login') }}" method="post" class="login-form" id="loginForm">
                     @csrf

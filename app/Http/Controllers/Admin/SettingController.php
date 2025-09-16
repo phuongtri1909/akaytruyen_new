@@ -76,7 +76,6 @@ class SettingController extends Controller
         $request->validate([
             'google_client_id' => 'required|string',
             'google_client_secret' => 'required|string',
-            'google_redirect' => 'required|string',
         ]);
 
         $googleSetting = GoogleSetting::first();

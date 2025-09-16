@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Chapter extends Model
 {
@@ -33,6 +34,17 @@ class Chapter extends Model
         'updated_at',
         'updated_content_at'
     ];
+
+    public function getContentAttribute($value)
+    {
+        $user = Auth::user();
+        
+        if ($user && $user->userBan && $user->userBan->read) {
+            return null;
+        }
+        
+        return $value;
+    }
     
     public function story() {
         return $this->belongsTo(Story::class, 'story_id', 'id');

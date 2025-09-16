@@ -143,7 +143,7 @@
                             <div class="status-options">
                                 <label class="status-checkbox">
                                     <input type="checkbox" name="status" value="1" 
-                                           {{ old('status', $story->status) ? 'checked' : '' }}>
+                                           {{ old('status', $story->active) == 'active' ? 'checked' : '' }}>
                                     <span class="checkmark"></span>
                                     Hoạt động
                                 </label>

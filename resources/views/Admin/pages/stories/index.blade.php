@@ -181,7 +181,7 @@
                                             <div class="switch-container">
                                                 <label class="switch">
                                                     <input type="checkbox" 
-                                                           {{ $story->status ? 'checked' : '' }}
+                                                           {{ $story->active == 'active' ? 'checked' : '' }}
                                                            onchange="toggleStatus({{ $story->id }}, 'status', this.checked)">
                                                     <span class="slider round"></span>
                                                 </label>

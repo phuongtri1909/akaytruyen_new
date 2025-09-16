@@ -560,14 +560,21 @@
                         _token: '{{ csrf_token() }}'
                     },
                     success: function(res) {
-
                         if (res.status === 'success') {
                             highlightStars(rating);
                             $('.rating-score').text(rating + '/5');
+                            showToast('Đánh giá thành công!', 'success');
+                        } else {
+                            showToast(res.message || 'Có lỗi xảy ra', 'error');
                         }
                     },
                     error: function(xhr) {
-                        console.log(xhr);
+                        const response = xhr.responseJSON;
+                        if (response && response.message) {
+                            showToast(response.message, 'error');
+                        } else {
+                            showToast('Có lỗi xảy ra, vui lòng thử lại', 'error');
+                        }
                     }
                 });
             });
@@ -726,5 +733,44 @@
                 });
             }
         });
+
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toast = $(`
+                <div class="toast-notification ${type}" style="
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'success' ? '#48bb78' : '#e53e3e'};
+                    color: white;
+                    padding: 16px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 9999;
+                    transform: translateX(100%);
+                    transition: transform 0.3s ease;
+                    max-width: 300px;
+                    font-weight: 500;
+                ">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                        <span>${message}</span>
+                    </div>
+                </div>
+            `);
+
+            $('body').append(toast);
+
+            // Animate in
+            setTimeout(() => {
+                toast.css('transform', 'translateX(0)');
+            }, 100);
+
+            // Remove after 4 seconds
+            setTimeout(() => {
+                toast.css('transform', 'translateX(100%)');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
     </script>
 @endpush

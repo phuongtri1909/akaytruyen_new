@@ -56,7 +56,7 @@
     <h2>{{ $otp }}</h2>
     <p>Mã này có hiệu lực trong 3 phút.</p>
     <div class="footer">
-      © {{ date('Y') }} akaytruyen.com . All rights reserved.
+      © {{ date('Y') }} {{ env('APP_NAME') }}. All rights reserved.
     </div>
   </div>
 </body>

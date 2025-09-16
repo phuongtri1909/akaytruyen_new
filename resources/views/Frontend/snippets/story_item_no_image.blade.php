@@ -54,7 +54,6 @@
                 {{ $story->updated_at->diffInMinutes(now()) }} phút trước
             @endif
         @endif
-        {{-- Debug: {{ $story->chapter_last ? 'Has chapter' : 'No chapter' }} --}}
     </div>
 </div>
 @once

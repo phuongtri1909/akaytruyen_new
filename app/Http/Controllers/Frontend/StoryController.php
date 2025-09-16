@@ -38,6 +38,7 @@ class StoryController extends Controller
         $chapters = $this->storyRepository->getCachedStoryChapters($story->id, $page, $isOldFirst);
         $chaptersNew = $this->chapterRepository->getChaptersNewByStoryId($story->id);
 
+
         // Cache ratings data
         $ratingsDay = $this->ratingRepository->getRatingByType(Rating::TYPE_DAY);
         $arrStoryIdsRatingsDay = $this->getStoryIds(json_decode($ratingsDay->value ?? '', true)) ?? [];

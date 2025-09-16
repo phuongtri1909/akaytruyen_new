@@ -157,21 +157,37 @@ class StoryRepository extends BaseRepository implements StoryRepositoryInterface
 
     public function getCachedStoryDetail($slug)
     {
-        return Cache::remember("story:detail:{$slug}", now()->addMinutes(60), function () use ($slug) {
+        $user = auth()->user();
+        $banSuffix = $user && $user->userBan && $user->userBan->read ? ':banned' : '';
+        $cacheKey = "story:detail:{$slug}" . $banSuffix;
+        
+        return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($slug) {
             return $this->getStoryBySlugOptimized($slug);
         });
     }
 
     public function getCachedStoryChapters($storyId, $page = 1, $isOldFirst = false)
     {
-        $cacheKey = "story:chapters:{$storyId}:page:{$page}:order:" . ($isOldFirst ? 'asc' : 'desc');
+        $user = auth()->user();
+        $banSuffix = $user && $user->userBan && $user->userBan->read ? ':banned' : '';
+        $cacheKey = "story:chapters:{$storyId}:page:{$page}:order:" . ($isOldFirst ? 'asc' : 'desc') . $banSuffix;
 
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($storyId, $isOldFirst) {
-            return $this->getModel()
+            $chapters = $this->getModel()
                 ->find($storyId)
                 ->chapters()
                 ->orderBy('chapter', $isOldFirst ? 'asc' : 'desc')
                 ->paginate(50);
+            
+            $user = auth()->user();
+            if ($user && $user->userBan && $user->userBan->read) {
+                $chapters->getCollection()->transform(function ($chapter) {
+                    $chapter->setAttribute('content', null);
+                    return $chapter;
+                });
+            }
+            
+            return $chapters;
         });
     }
 

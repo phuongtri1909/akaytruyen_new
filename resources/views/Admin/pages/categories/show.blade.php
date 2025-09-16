@@ -84,7 +84,7 @@
                                                 </span>
                                                 <span class="story-status">
                                                     <i class="fas fa-info-circle"></i> 
-                                                    @if($story->status)
+                                                    @if($story->active == 'active')
                                                         <span class="text-success">Hoạt động</span>
                                                     @else
                                                         <span class="text-muted">Tạm dừng</span>

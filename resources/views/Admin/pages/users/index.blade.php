@@ -212,7 +212,7 @@
                                                         ban IP
                                                     </span>
                                                 @endif
-                                            @elseif($user->status)
+                                            @elseif($user->active == 'active')
                                                 <span class="status-badge status-active">
                                                     <i class="fas fa-check-circle"></i>
                                                     Hoạt động
@@ -225,7 +225,11 @@
                                             @endif
                                         </td>
                                         <td class="user-date">
-                                            {{ $user->last_login_time->format('d/m/Y H:i') }}
+                                            @if ($user->last_login_time)
+                                                {{ $user->last_login_time->format('d/m/Y H:i') }}
+                                            @else
+                                                N/A
+                                            @endif
                                         </td>
                                       
                                         <td>

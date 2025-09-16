@@ -256,6 +256,7 @@ class HomeController extends Controller
                 ->orderBy('chapter', 'desc')
                 ->paginate(50);
 
+
             return response()->json([
                 'html' => view('Frontend.components.search-results', compact('chapters', 'story'))->render()
             ]);

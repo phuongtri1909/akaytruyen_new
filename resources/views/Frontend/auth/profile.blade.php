@@ -49,7 +49,7 @@
 
                                     $borderMap = [
                                         'Admin' => 'admin-vip-8.png',
-                                        'Mod' => 'avt_mod.png',
+                                        'Mod' => 'vien_mod.png',
                                         'Content' => 'avt_content.png',
                                         'vip' => 'avt_admin.png',
                                         'VIP PRO' => 'avt_pro_vip.png',
@@ -660,6 +660,33 @@
             outline: none;
         }
 
+        .invalid-otp {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #feb2b2;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .profile-card {
@@ -863,6 +890,9 @@
                     </div>
                 `);
 
+                // Disable button and show loading
+                $('#btn-send-otpPW').addClass('loading').prop('disabled', true);
+                
                 $.ajax({
                     url: "{{ route('update.password') }}",
                     type: 'POST',
@@ -876,10 +906,18 @@
                         } else {
                             $('.title-otp-pw').text(response.message).removeClass('text-success').addClass('text-danger');
                         }
+                        $('#btn-send-otpPW').removeClass('loading').prop('disabled', false);
 
                         // Handle OTP submission
                         $('#otpPWForm').on('submit', function(e) {
                             e.preventDefault();
+                            
+                            // Disable button and show loading
+                            $('#btn-send-otpPW').addClass('loading').prop('disabled', true);
+                            
+                            // Clear previous error messages
+                            $('.invalid-otp').remove();
+                            
                             var otp = '';
                             $('#otpPWForm .otp-input').each(function() {
                                 otp += $(this).val();
@@ -919,10 +957,15 @@
                                         `);
 
                                         $('#btn-send-otpPW .btn-text').text('Lưu thay đổi');
+                                        $('#btn-send-otpPW').removeClass('loading').prop('disabled', false);
 
                                         // Handle password change submission
                                         $('#otpPWForm').off('submit').on('submit', function(e) {
                                             e.preventDefault();
+                                            
+                                            // Disable button and show loading
+                                            $('#btn-send-otpPW').addClass('loading').prop('disabled', true);
+                                            
                                             var formData = new FormData(this);
                                             formData.append('otp', otp);
 
@@ -942,31 +985,43 @@
                                                     } else {
                                                         showToast(response.message, 'error');
                                                     }
+                                                    $('#btn-send-otpPW').removeClass('loading').prop('disabled', false);
                                                 },
                                                 error: function(xhr) {
                                                     showToast('Có lỗi xảy ra, vui lòng thử lại.', 'error');
+                                                    $('#btn-send-otpPW').removeClass('loading').prop('disabled', false);
                                                 }
                                             });
                                         });
                                     } else {
                                         showToast(response.message, 'error');
+                                        $('#btn-send-otpPW').removeClass('loading').prop('disabled', false);
                                     }
                                 },
                                 error: function(xhr) {
                                     const response = xhr.responseJSON;
                                     if (response && response.status === 'error' && response.message.otp) {
-                                        $('#input-otp-pw').append(`
-                                            <div class="invalid-otp text-danger mt-2">${response.message.otp[0]}</div>
+                                        // Clear previous error messages first
+                                        $('.invalid-otp').remove();
+                                        
+                                        // Add error message below OTP inputs
+                                        $('#input-otp-pw').after(`
+                                            <div class="invalid-otp text-danger mt-2 text-center">
+                                                <i class="fas fa-exclamation-circle"></i>
+                                                ${response.message.otp[0]}
+                                            </div>
                                         `);
                                     } else {
                                         showToast('Thao tác sai, hãy thử lại', 'error');
                                     }
+                                    $('#btn-send-otpPW').removeClass('loading').prop('disabled', false);
                                 }
                             });
                         });
                     },
                     error: function(xhr) {
                         showToast('Thao tác sai, hãy thử lại', 'error');
+                        $('#btn-send-otpPW').removeClass('loading').prop('disabled', false);
                     }
                 });
             });

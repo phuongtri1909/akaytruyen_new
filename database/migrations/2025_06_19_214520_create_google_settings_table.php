@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('google_client_id');
             $table->text('google_client_secret');
-            $table->string('google_redirect')->default('auth/google/callback');
+            $table->string('google_redirect')->default('auth.google.callback');
             $table->timestamps();
         });
     }

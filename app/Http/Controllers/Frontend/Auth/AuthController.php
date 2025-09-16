@@ -1,82 +1,174 @@
 <?php
 
 namespace App\Http\Controllers\Frontend\Auth;
-use App\Http\Controllers\Frontend\Controller;
+use Exception;
+use App\Models\User;
+use App\Mail\OTPMail;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Mail\OTPForgotPWMail;
+use Illuminate\Support\Carbon;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use App\Models\User;
-use App\Mail\OTPForgotPWMail;
-use Illuminate\Support\Facades\Auth;
-use App\Mail\OTPMail;
-use Exception;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Frontend\Controller;
 
 
 class AuthController extends Controller
-
 {
 
     public function register(Request $request)
     {
-        if ($request->has('email') && $request->has('password')) {
-            $request->validate([
-                'email' => 'required|email',
-                'password' => 'required|min:6',
-                'name' => 'required|max:255',
-                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
-            ], [
-                'email.required' => 'Hãy nhập email của bạn vào đi',
-                'email.email' => 'Email bạn nhập không hợp lệ rồi',
-                'password.required' => 'Hãy nhập mật khẩu của bạn vào đi',
-                'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
-                'name.required' => 'Hãy nhập tên của bạn vào đi',
-                'name.max' => 'Tên của bạn quá dài rồi',
-                'avatar.image' => 'Ảnh bạn chọn không hợp lệ',
-                'avatar.mimes' => 'Ảnh bạn chọn phải có định dạng jpeg, png, jpg, gif, svg, webp',
-            ]);
 
-            $user = User::where('email', $request->email)->first();
-            if ($user) {
-                return redirect()->back()
-                    ->withErrors(['email' => 'Email này đã tồn tại, hãy dùng email khác'])
-                    ->withInput();
+        if ($request->has('email') && $request->has('otp') && $request->has('password')) {
+            try {
+                $request->validate([
+                    'email' => 'required|email',
+                    'otp' => 'required',
+                    'password' => 'required|min:6',
+                    'name' => 'required|max:255',
+                    'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+                ], [
+                    'email.required' => 'Hãy nhập email của bạn vào đi',
+                    'email.email' => 'Email bạn nhập không hợp lệ rồi',
+                    'otp.required' => 'Hãy nhập mã OTP của bạn vào đi',
+                    'password.required' => 'Hãy nhập mật khẩu của bạn vào đi',
+                    'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
+                    'name.required' => 'Hãy nhập tên của bạn vào đi',
+                    'name.max' => 'Tên của bạn quá dài rồi',
+                    'avatar.required' => 'Hãy chọn ảnh đại diện của bạn',
+                    'avatar.image' => 'Ảnh bạn chọn không hợp lệ',
+                    'avatar.mimes' => 'Ảnh bạn chọn phải có định dạng jpeg, png, jpg, gif, webp',
+                ]);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $e->errors()
+                ], 422);
             }
 
             try {
-                $user = new User();
-                $user->email = $request->email;
+                $user = User::where('email', $request->email)->first();
+                if (!$user) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => ['email' => ['Email này không hợp lệ']],
+                    ], 422);
+                }
+
+                if (!password_verify($request->otp, $user->key_active)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => ['otp' => ['Mã OTP không chính xác']],
+                    ], 422);
+                }
+                $user->key_active = null;
                 $user->name = $request->name;
                 $user->password = bcrypt($request->password);
                 $user->active = 'active';
 
-                // Xử lý ảnh đại diện nếu có
                 if ($request->hasFile('avatar')) {
-                    $avatar = $request->file('avatar');
-                    
-                    // Validate file security
-                    $this->validateImageFile($avatar);
-                    
-                    $imageName = time() . '.' . $avatar->extension();
-                    $avatarPath = $avatar->storeAs('avatars', $imageName, 'public');
-                    $user->avatar = $avatarPath;
+                    try {
+                        $this->validateImageFile($request->avatar);
+                        
+                        $pathInfo = $this->generateAvatarPath($request->avatar);
+                        
+                        $avatarPath = $request->avatar->storeAs($pathInfo['path'], $pathInfo['fileName'], 'public');
+                        $user->avatar = $avatarPath;
+                    } catch (\Exception $e) {
+                        \Log::error('Error processing avatar:', ['error' => $e->getMessage()]);
+                    }
                 }
 
+                $user->ip_address = $request->ip();
+                $user->last_login_time = Carbon::now();
+
+                $roleUser = Role::where('name', 'User')->first();
+                $user->assignRole($roleUser);
+
                 $user->save();
-                $user->assignRole('User');
 
                 Auth::login($user);
 
-                return redirect()->route('home')->with('success', 'Đăng ký thành công! Chào mừng bạn.');
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Đăng ký thành công, chào mừng bạn đến với ' . env('APP_NAME'),
+                    'url' => route('home'),
+                ]);
             } catch (Exception $e) {
-                return redirect()->back()->with('error', 'Đã xảy ra lỗi. Vui lòng thử lại sau.' . $e->getMessage());
+                Log::error('Registration error:', ['error' => $e->getMessage()]);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại sau.',
+                    'error' => 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại sau.',
+                ], 500);
             }
         }
+        try {
+            $request->validate([
+                'email' => 'required|email',
+            ], [
+                'email.required' => 'Hãy nhập email của bạn vào đi',
+                'email.email' => 'Email bạn nhập không hợp lệ rồi',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->errors()
+            ], 422);
+        }
 
-        return redirect()->back()->with('error', 'Dữ liệu không hợp lệ');
+        try {
+            $user = User::where('email', $request->email)->first();
+            if ($user) {
+                if ($user->active == 'active') {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => ['email' => ['Email này đã tồn tại, hãy dùng email khác']],
+                    ], 422);
+                }
+
+                if (!$user->updated_at->lt(Carbon::now()->subMinutes(3)) && $user->key_active != null) {
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Dùng lại OTP đã gửi trước đó, nhận OTP mới sau 3 phút',
+                    ], 200);
+                }
+            } else {
+                $user = new User();
+                $user->email = $request->email;
+                
+                $timestamp = now()->timestamp;
+                $randomSuffix = substr(md5(uniqid()), 0, 6);
+                $user->name = "akaytruyen{$timestamp}{$randomSuffix}";
+            }
+
+            $randomPassword = Str::random(10);
+            $user->password = bcrypt($randomPassword);
+
+            $otp = $this->generateRandomOTP();
+            $user->save();
+
+            Mail::to($user->email)->send(new OTPMail($user, $otp));
+            $user->key_active = bcrypt($otp);
+            $user->save();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Đăng ký thành công, hãy kiểm tra email của bạn để lấy mã OTP',
+            ]);
+        } catch (Exception $e) {
+            Log::error('Registration error:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại sau.',
+                'error' => 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại sau.',
+            ], 500);
+        }
     }
 
 
@@ -92,10 +184,10 @@ class AuthController extends Controller
         ]);
 
         $credentials = $request->only('email', 'password');
-        $remember = $request->has('remember'); // Kiểm tra xem người dùng có chọn "Remember Me" không
+        $remember = $request->has('remember');
 
         if (Auth::attempt($credentials, $remember)) {
-            return redirect()->route('home'); // Điều hướng sau khi đăng nhập thành công
+            return redirect()->route('home');
         }
 
         try {
@@ -122,6 +214,7 @@ class AuthController extends Controller
             Auth::login($user);
 
             $user->ip_address = $request->ip();
+            $user->last_login_time = Carbon::now();
             $user->save();
 
             return redirect()->route('home');
@@ -209,6 +302,8 @@ class AuthController extends Controller
 
                             $user->key_reset_password = null;
                             $user->password = bcrypt($request->password);
+                            $user->ip_address = $request->ip();
+                            $user->last_login_time = Carbon::now();
                             $user->save();
 
                             Auth::login($user);
@@ -263,7 +358,22 @@ class AuthController extends Controller
         }
     }
 
-    public function changePassword() {}
+    private function generateAvatarPath($file)
+    {
+        $now = now();
+        $yearMonth = $now->format('Y/m');
+        
+        $timestamp = $now->timestamp;
+        $randomString = substr(md5(uniqid()), 0, 8);
+        $extension = $file->getClientOriginalExtension();
+        $fileName = "{$timestamp}_{$randomString}.{$extension}";
+        
+        return [
+            'path' => "avatars/{$yearMonth}",
+            'fileName' => $fileName,
+            'fullPath' => "avatars/{$yearMonth}/{$fileName}"
+        ];
+    }
 
     private function validateImageFile($file)
     {

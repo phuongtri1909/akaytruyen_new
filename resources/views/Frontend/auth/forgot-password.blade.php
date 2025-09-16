@@ -571,8 +571,6 @@
     /* Button styling for forgot password form only */
     .forgot-container .btn {
         width: 100%;
-        padding: 16px;
-        background: linear-gradient(135deg, #667eea, #14425d);
         border: none;
         border-radius: 12px;
         color: white;
@@ -668,6 +666,18 @@
                     </div>
                     <h1 class="welcome-text">Bạn quên mật khẩu rồi à?</h1>
                     <p class="welcome-subtitle">Đừng lo lắng, chúng tôi sẽ giúp bạn lấy lại mật khẩu</p>
+                </div>
+
+                <a href="{{ route('login.google') }}" class="btn w-100 auth-btn border text-dark">
+                    <img src="{{ asset('images/svg/google_2025.svg') }}" alt="Google" class="me-2"
+                        height="30">
+                    Đăng nhập với Google
+                </a>
+
+                <div class="d-flex align-items-center text-center my-4">
+                    <hr class="flex-grow-1 border-top border-secondary">
+                    <span class="px-2 text-dark">hoặc</span>
+                    <hr class="flex-grow-1 border-top border-secondary">
                 </div>
 
                 <!-- Forgot Password Form -->

@@ -37,6 +37,7 @@ class ChapterController extends Controller
             return abort(404, 'Không tồn tại chương truyện này!');
         }
 
+
         $chapterBefore = $chapter->chapterBefore ?? null;
         $chapterAfter = $chapter->chapterAfter ?? null;
 

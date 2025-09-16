@@ -19,10 +19,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'ban' => \App\Http\Middleware\CheckBan::class,
             'canAny' => \App\Http\Middleware\CanAnyPermission::class,
             'log.admin.activity' => \App\Http\Middleware\LogAdminActivity::class,
+            'check.active' => \App\Http\Middleware\CheckActive::class,
         ]);
 
         $middleware->web([
-            \App\Http\Middleware\SecureFileUpload::class,            
+            \App\Http\Middleware\SecureFileUpload::class,
+            \App\Http\Middleware\CheckBan::class,
+            \App\Http\Middleware\CheckActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -26,9 +26,7 @@ use App\Observers\ChapterObserver;
 use App\Observers\DonationObserver;
 use App\Observers\UserObserver;
 use App\Observers\CategoryObserver;
-use App\Observers\SettingObserver;
 use App\Observers\BannedIpObserver;
-use App\Observers\StatusObserver;
 use App\Observers\LiveChatObserver;
 use App\Observers\NotificationObserver;
 use App\Observers\UserTaggedObserver;
@@ -67,9 +65,7 @@ class AppServiceProvider extends ServiceProvider
         Notification::observe(NotificationObserver::class);
         UserTagged::observe(UserTaggedObserver::class);
         Category::observe(CategoryObserver::class);
-        //Setting::observe(SettingObserver::class);
         BanIp::observe(BannedIpObserver::class);
-        //Status::observe(StatusObserver::class);
 
         // Global event listener to capture old values
         Event::listen(['eloquent.updating: *', 'eloquent.deleting: *'], function ($eventName, $data) {

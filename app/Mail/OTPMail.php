@@ -11,17 +11,18 @@ class OTPMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $otp;
     public $user;
+    public $otp;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($user)
+    public function __construct($user, $otp = null)
     {
         $this->user = $user;
+        $this->otp = $otp;
     }
 
     /**
@@ -31,13 +32,11 @@ class OTPMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Xác thực tài khoản của bạn')
-    ->view('emails.verify_email')
-    ->with([
-        'verificationUrl' => $this->user->verification_token 
-            ? route('verify.email', ['token' => $this->user->verification_token]) 
-            : null,
-    ]);
-
+        return $this->subject('Mã OTP đăng ký tài khoản')
+            ->view('emails.otp')
+            ->with([
+                'user' => $this->user,
+                'otp' => $this->otp,
+            ]);
     }
 }

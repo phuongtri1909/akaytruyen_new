@@ -5,7 +5,10 @@ namespace App\Models;
 use App\Traits\LogsOldValues;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class Story extends Model
@@ -56,7 +59,25 @@ class Story extends Model
 
     public function chapters()
     {
-        return $this->hasMany(Chapter::class, 'story_id');
+        $query = $this->hasMany(Chapter::class, 'story_id');
+        
+        $user = Auth::user();
+        if ($user && $user->userBan && $user->userBan->read) {
+            $columns = Schema::getColumnListing('chapters');
+            $selectColumns = [];
+            
+            foreach ($columns as $column) {
+                if ($column === 'content') {
+                    $selectColumns[] = DB::raw('NULL as content');
+                } else {
+                    $selectColumns[] = $column;
+                }
+            }
+            
+            $query->select($selectColumns);
+        }
+        
+        return $query;
     }
 
     public function latestChapter()
@@ -66,7 +87,14 @@ class Story extends Model
 
     public function getChapterLastAttribute()
     {
-        return $this->getRelationValue('latestChapter');
+        $chapter = $this->getRelationValue('latestChapter');
+        
+        $user = Auth::user();
+        if ($chapter && $user && $user->userBan && $user->userBan->read) {
+            $chapter->setAttribute('content', null);
+        }
+        
+        return $chapter;
     }
 
     public function getLatestChapter()

@@ -52,14 +52,28 @@ class ChapterRepository extends BaseRepository implements ChapterRepositoryInter
 
     public function getChaptersNewByStoryId($storyId)
     {
-        return Cache::remember("story:chapters_new:{$storyId}", now()->addMinutes(30), function () use ($storyId) {
-            return $this->getModel()
+        $user = auth()->user();
+        $banSuffix = $user && $user->userBan && $user->userBan->read ? ':banned' : '';
+        $cacheKey = "story:chapters_new:{$storyId}" . $banSuffix;
+        
+        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($storyId) {
+            $chapters = $this->getModel()
                 ->query()
                 ->where('story_id', '=', $storyId)
                 ->where('is_new', '=', Chapter::IS_NEW)
                 ->orderBy('chapter', 'desc')
                 ->select('id', 'name', 'slug')
                 ->get();
+            
+            $user = auth()->user();
+            if ($user && $user->userBan && $user->userBan->read) {
+                $chapters->transform(function ($chapter) {
+                    $chapter->setAttribute('content', null);
+                    return $chapter;
+                });
+            }
+            
+            return $chapters;
         });
     }
 
@@ -74,13 +88,21 @@ class ChapterRepository extends BaseRepository implements ChapterRepositoryInter
 
     public function getCachedChapterWithNavigation($storyId, $slug)
     {
-        $cacheKey = "chapter:with_nav:{$storyId}:{$slug}";
+        $user = auth()->user();
+        $banSuffix = $user && $user->userBan && $user->userBan->read ? ':banned' : '';
+        $cacheKey = "chapter:with_nav:{$storyId}:{$slug}" . $banSuffix;
 
         return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($storyId, $slug) {
             $chapter = $this->getChapterSingle($storyId, $slug);
 
             if (!$chapter) {
                 return null;
+            }
+
+            // Nếu user bị ban read, set content = null
+            $user = auth()->user();
+            if ($user && $user->userBan && $user->userBan->read) {
+                $chapter->setAttribute('content', null);
             }
 
             $chapterInt = $chapter->chapter;
@@ -112,7 +134,9 @@ class ChapterRepository extends BaseRepository implements ChapterRepositoryInter
 
     public function getCachedChapterData($storyId, $slugChapter)
     {
-        $cacheKey = "chapter:data:{$storyId}:{$slugChapter}";
+        $user = auth()->user();
+        $banSuffix = $user && $user->userBan && $user->userBan->read ? ':banned' : '';
+        $cacheKey = "chapter:data:{$storyId}:{$slugChapter}" . $banSuffix;
 
         return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($storyId, $slugChapter) {
             $chapter = $this->getModel()
@@ -124,6 +148,12 @@ class ChapterRepository extends BaseRepository implements ChapterRepositoryInter
 
             if (!$chapter) {
                 return null;
+            }
+
+            // Nếu user bị ban read, set content = null
+            $user = auth()->user();
+            if ($user && $user->userBan && $user->userBan->read) {
+                $chapter->setAttribute('content', null);
             }
 
             $chapterInt = $chapter->chapter;

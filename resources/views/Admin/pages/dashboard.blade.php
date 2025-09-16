@@ -1,4 +1,4 @@
-@extends('admin.layouts.sidebar')
+@extends('Admin.layouts.sidebar')
 
 @section('title', 'Dashboard')
 

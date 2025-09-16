@@ -195,7 +195,7 @@
                                         <td>
                                             <div class="story-chapter-info">
                                                 @if ($comment->chapter->story)
-                                                    <a href="{{ route('story', $comment->chapter->story->id) }}"
+                                                    <a href="{{ route('story', $comment->chapter->story->slug) }}"
                                                         class="story-name text-decoration-none">{{ $comment->chapter->story->name ?? 'N/A' }}</a>
                                                 @else
                                                     <span class="story-name text-decoration-none">N/A</span>

@@ -76,6 +76,58 @@ class UserController extends Controller
             });
         }
 
+        // Filter ban status
+        if ($request->filled('ban')) {
+            $banType = $request->ban;
+            
+            if ($banType === 'no_ban') {
+                // Không bị ban: không có userBan hoặc tất cả ban = false
+                $query->whereDoesntHave('userBan', function($q) {
+                    $q->where('login', true)
+                      ->orWhere('comment', true)
+                      ->orWhere('rate', true)
+                      ->orWhere('read', true);
+                })->whereDoesntHave('banIp');
+            } elseif ($banType === 'any_ban') {
+                // Bị ban bất kỳ loại nào
+                $query->where(function($q) {
+                    $q->whereHas('userBan', function($subQ) {
+                        $subQ->where('login', true)
+                             ->orWhere('comment', true)
+                             ->orWhere('rate', true)
+                             ->orWhere('read', true);
+                    })->orWhereHas('banIp');
+                });
+            } else {
+                // Ban cụ thể
+                switch ($banType) {
+                    case 'ban_login':
+                        $query->whereHas('userBan', function($q) {
+                            $q->where('login', true);
+                        });
+                        break;
+                    case 'ban_comment':
+                        $query->whereHas('userBan', function($q) {
+                            $q->where('comment', true);
+                        });
+                        break;
+                    case 'ban_rate':
+                        $query->whereHas('userBan', function($q) {
+                            $q->where('rate', true);
+                        });
+                        break;
+                    case 'ban_read':
+                        $query->whereHas('userBan', function($q) {
+                            $q->where('read', true);
+                        });
+                        break;
+                    case 'ban_ip':
+                        $query->whereHas('banIp');
+                        break;
+                }
+            }
+        }
+
         $users = $query->paginate(20)->withQueryString();
         $roles = Role::all();
 

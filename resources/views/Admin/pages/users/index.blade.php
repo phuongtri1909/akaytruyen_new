@@ -62,6 +62,21 @@
                             </select>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-3">
+                            <label for="ban_filter">Trạng thái ban</label>
+                            <select id="ban_filter" name="ban" class="filter-input">
+                                <option value="">Tất cả</option>
+                                <option value="no_ban" {{ request('ban') == 'no_ban' ? 'selected' : '' }}>Không bị ban</option>
+                                <option value="ban_login" {{ request('ban') == 'ban_login' ? 'selected' : '' }}>Ban đăng nhập</option>
+                                <option value="ban_comment" {{ request('ban') == 'ban_comment' ? 'selected' : '' }}>Ban bình luận</option>
+                                <option value="ban_rate" {{ request('ban') == 'ban_rate' ? 'selected' : '' }}>Ban đánh giá</option>
+                                <option value="ban_read" {{ request('ban') == 'ban_read' ? 'selected' : '' }}>Ban đọc truyện</option>
+                                <option value="ban_ip" {{ request('ban') == 'ban_ip' ? 'selected' : '' }}>Ban IP</option>
+                                <option value="any_ban" {{ request('ban') == 'any_ban' ? 'selected' : '' }}>Bị ban (bất kỳ loại nào)</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="filter-actions">
                         <button type="submit" class="filter-btn">
                             <i class="fas fa-filter"></i> Lọc
@@ -74,7 +89,7 @@
             </div>
 
             <div class="card-content">
-                @if (request('user_id') || request('search') || request('status') || request('role'))
+                @if (request('user_id') || request('search') || request('status') || request('role') || request('ban'))
                     <div class="active-filters">
                         <span class="active-filters-title">Đang lọc: </span>
                         @if (request('user_id'))
@@ -106,6 +121,24 @@
                                     class="remove-filter">×</a>
                             </span>
                         @endif
+                        @if (request('ban'))
+                            <span class="filter-tag">
+                                <span>Ban: 
+                                    @switch(request('ban'))
+                                        @case('no_ban') Không bị ban @break
+                                        @case('ban_login') Ban đăng nhập @break
+                                        @case('ban_comment') Ban bình luận @break
+                                        @case('ban_rate') Ban đánh giá @break
+                                        @case('ban_read') Ban đọc truyện @break
+                                        @case('ban_ip') Ban IP @break
+                                        @case('any_ban') Bị ban (bất kỳ loại nào) @break
+                                        @default {{ request('ban') }} @break
+                                    @endswitch
+                                </span>
+                                <a href="{{ request()->url() }}?{{ http_build_query(request()->except('ban')) }}"
+                                    class="remove-filter">×</a>
+                            </span>
+                        @endif
                     </div>
                 @endif
 
@@ -114,7 +147,7 @@
                         <div class="empty-state-icon">
                             <i class="fas fa-users"></i>
                         </div>
-                        @if (request('user_id') || request('search') || request('status') || request('role'))
+                        @if (request('user_id') || request('search') || request('status') || request('role') || request('ban'))
                             <h4>Không tìm thấy người dùng nào</h4>
                             <p>Không có người dùng nào phù hợp với bộ lọc hiện tại.</p>
                             <a href="{{ route('admin.users.index') }}" class="action-button">
@@ -451,6 +484,10 @@
         });
 
         document.getElementById('role_filter').addEventListener('change', function() {
+            document.querySelector('.filter-form').submit();
+        });
+
+        document.getElementById('ban_filter').addEventListener('change', function() {
             document.querySelector('.filter-form').submit();
         });
 

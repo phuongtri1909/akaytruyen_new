@@ -83,6 +83,125 @@
             </div>
         </div>
 
+        <!-- Donation Statistics -->
+        <div class="content-card">
+            <div class="card-top">
+                <div class="card-title">
+                    <i class="fas fa-heart icon-title"></i>
+                    <h5>Thống kê Donation</h5>
+                </div>
+                <div class="donation-filters">
+                    <form method="GET" class="d-flex ">
+                        <select name="donation_month" class="form-select">
+                            @for($i = 1; $i <= 12; $i++)
+                                <option value="{{ $i }}" {{ $selectedMonth == $i ? 'selected' : '' }}>
+                                    Tháng {{ $i }}
+                                </option>
+                            @endfor
+                        </select>
+                        <select name="donation_year" class="form-select">
+                            @for($year = date('Y'); $year >= date('Y') - 5; $year--)
+                                <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>
+                                    {{ $year }}
+                                </option>
+                            @endfor
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">Xem</button>
+                    </form>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="donation-stats-grid">
+                    <!-- Total Donations -->
+                    <div class="stat-card donation-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ number_format($donationStats['total_donations']) }}</h3>
+                            <p>Tổng số donation</p>
+                        </div>
+                    </div>
+
+                    <!-- Total Amount -->
+                    <div class="stat-card donation-card highlight">
+                        <div class="stat-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ number_format($donationStats['total_amount']) }} VND</h3>
+                            <p>Tổng số tiền</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="donation-details-grid">
+                    <!-- Top Donors -->
+                    <div class="donation-detail-card">
+                        <div class="detail-header">
+                            <h6><i class="fas fa-trophy"></i> Top Donors</h6>
+                        </div>
+                        <div class="detail-content">
+                            @if($donationStats['top_donors']->count() > 0)
+                                <ul class="donor-list">
+                                    @foreach($donationStats['top_donors'] as $index => $donor)
+                                        <li class="donor-item">
+                                            <div class="donor-rank">
+                                                @if($index === 0)
+                                                    🥇
+                                                @elseif($index === 1)
+                                                    🥈
+                                                @elseif($index === 2)
+                                                    🥉
+                                                @else
+                                                    <span class="rank-number">{{ $index + 1 }}</span>
+                                                @endif
+                                            </div>
+                                            <div class="donor-info">
+                                                <h6 class="donor-name">{{ $donor['name'] }}</h6>
+                                                <p class="donor-amount">{{ number_format($donor['total_amount']) }} VND</p>
+                                                <small class="donor-count">{{ $donor['donation_count'] }} lần</small>
+                                            </div>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <div class="empty-donation">
+                                    <p>Chưa có donation trong tháng này</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Top Stories -->
+                    <div class="donation-detail-card">
+                        <div class="detail-header">
+                            <h6><i class="fas fa-book"></i> Top Stories</h6>
+                        </div>
+                        <div class="detail-content">
+                            @if($donationStats['top_stories']->count() > 0)
+                                <ul class="story-donation-list">
+                                    @foreach($donationStats['top_stories'] as $story)
+                                        <li class="story-donation-item">
+                                            <div class="story-info">
+                                                <h6 class="story-name">{{ $story['story_name'] }}</h6>
+                                                <p class="story-amount">{{ number_format($story['total_amount']) }} VND</p>
+                                                <small class="story-count">{{ $story['donation_count'] }} donation</small>
+                                            </div>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <div class="empty-donation">
+                                    <p>Chưa có donation cho truyện nào</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Story Rankings -->
         <div class="content-card">
@@ -246,6 +365,142 @@
             gap: 20px;
         }
 
+        /* Donation Filters */
+        .donation-filters {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-select {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 120px;
+            width: auto;
+        }
+
+        /* Donation Stats Grid */
+        .donation-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .donation-card {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            border: none;
+        }
+
+        /* Donation Details Grid */
+        .donation-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .donation-detail-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .detail-header {
+            margin-bottom: 15px;
+        }
+
+        .detail-header h6 {
+            margin: 0;
+            color: #333;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .donor-list, .story-donation-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .donor-item, .story-donation-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .donor-item:last-child, .story-donation-item:last-child {
+            border-bottom: none;
+        }
+
+        .donor-rank {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .rank-number {
+            background: #007bff;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .donor-info, .story-info {
+            flex: 1;
+        }
+
+        .donor-name, .story-name {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .user-badge {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .donor-amount, .story-amount {
+            margin: 0 0 3px 0;
+            font-size: 13px;
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .donor-count, .story-count {
+            margin: 0;
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        .empty-donation {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
         /* Rankings Grid */
         .rankings-grid {
             display: grid;
@@ -406,12 +661,32 @@
                 grid-template-columns: 1fr;
                 gap: 15px;
             }
+
+            .donation-stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .donation-details-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .donation-filters {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
             
             .stat-card {
                 padding: 15px;
             }
             
             .ranking-card {
+                padding: 15px;
+            }
+
+            .donation-detail-card {
                 padding: 15px;
             }
             

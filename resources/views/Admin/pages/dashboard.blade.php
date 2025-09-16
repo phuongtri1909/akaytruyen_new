@@ -98,7 +98,7 @@
                     <div class="ranking-card">
                         <div class="ranking-header">
                             <h6><i class="fas fa-calendar-day"></i> Xếp hạng ngày</h6>
-                            <a href="" class="ranking-link">
+                            <a href="{{ route('ratings.index') }}" class="ranking-link">
                                 <i class="fas fa-external-link-alt"></i>
                             </a>
                         </div>
@@ -128,7 +128,7 @@
                     <div class="ranking-card">
                         <div class="ranking-header">
                             <h6><i class="fas fa-calendar-alt"></i> Xếp hạng tháng</h6>
-                            <a href="" class="ranking-link">
+                            <a href="{{ route('ratings.index') }}" class="ranking-link">
                                 <i class="fas fa-external-link-alt"></i>
                             </a>
                         </div>
@@ -158,7 +158,7 @@
                     <div class="ranking-card">
                         <div class="ranking-header">
                             <h6><i class="fas fa-crown"></i> Xếp hạng all time</h6>
-                            <a href="" class="ranking-link">
+                            <a href="{{ route('ratings.index') }}" class="ranking-link">
                                 <i class="fas fa-external-link-alt"></i>
                             </a>
                         </div>

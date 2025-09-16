@@ -41,17 +41,38 @@
         @endif
     </div>
     <div class="hidden-xs hidden-sm col-md-2 col-time">
+
         @if ($story->chapter_last && $story->chapter_last->created_at)
-            @if ($story->chapter_last->created_at->diffInMinutes(now()) > 60)
-                {{ $story->chapter_last->created_at->diffInHours(now()) }} giờ trước
+            @php
+                $timeDiff = $story->chapter_last->created_at->diffInMinutes(now());
+                $isFuture = $story->chapter_last->created_at > now();
+            @endphp
+            @if ($isFuture)
+                Vừa xong
+            @elseif ($timeDiff < 1)
+                Vừa xong
+            @elseif ($timeDiff < 60)
+                {{ $timeDiff }} phút trước
+            @elseif ($timeDiff < 1440)
+                {{ round($timeDiff / 60) }} giờ trước
             @else
-                {{ $story->chapter_last->created_at->diffInMinutes(now()) }} phút trước
+                {{ round($timeDiff / 1440) }} ngày trước
             @endif
         @elseif ($story->updated_at)
-            @if ($story->updated_at->diffInMinutes(now()) > 60)
-                {{ $story->updated_at->diffInHours(now()) }} giờ trước
+            @php
+                $timeDiff = $story->updated_at->diffInMinutes(now());
+                $isFuture = $story->updated_at > now();
+            @endphp
+            @if ($isFuture)
+                Vừa xong
+            @elseif ($timeDiff < 1)
+                Vừa xong
+            @elseif ($timeDiff < 60)
+                {{ $timeDiff }} phút trước
+            @elseif ($timeDiff < 1440)
+                {{ round($timeDiff / 60) }} giờ trước
             @else
-                {{ $story->updated_at->diffInMinutes(now()) }} phút trước
+                {{ round($timeDiff / 1440) }} ngày trước
             @endif
         @endif
     </div>

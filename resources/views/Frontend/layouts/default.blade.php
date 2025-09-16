@@ -11,15 +11,28 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    
+
     <title>Akay Truyện - Đọc truyện online miễn phí</title>
-    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.ga4.measurement_id') }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+        gtag('config', '{{ config('services.ga4.measurement_id') }}');
+    </script>
+
     @stack('custom_schema')
 
-    <link href="https://fonts.googleapis.com/css2?family=Mooli&family=Patrick+Hand&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Noto+Sans:wght@400;700&family=Noto+Serif:wght@400;700&family=Lora:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Mooli&family=Patrick+Hand&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Noto+Sans:wght@400;700&family=Noto+Serif:wght@400;700&family=Lora:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    
+
     @vite(['resources/assets/frontend/css/styles.css'])
     @vite(['resources/assets/frontend/css/app.css'])
 

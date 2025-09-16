@@ -41,4 +41,8 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'ga4' => [
+        'measurement_id' => env('GA_MEASUREMENT_ID', 'G-XXXXXXX'),
+    ],
+
 ];

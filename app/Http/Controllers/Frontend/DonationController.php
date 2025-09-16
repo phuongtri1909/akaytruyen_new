@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Models\Donation;
 use App\Models\Story;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -20,7 +19,6 @@ class DonationController extends Controller
 
         $cacheTtl = now()->addMinutes(5);
 
-        // Lấy danh sách các tháng có donate cho truyện này (tối ưu query)
         $months = Cache::remember("story:{$story->id}:donations:months", $cacheTtl, function () use ($story) {
             return Donation::where('story_id', $story->id)
                 ->selectRaw('MONTH(donated_at) as month, YEAR(donated_at) as year')
@@ -30,23 +28,12 @@ class DonationController extends Controller
                 ->get();
         });
 
-        // Lấy danh sách donate theo tháng được chọn cho truyện này (tối ưu query)
-        $usersDonate = User::where('donate_amount', '>', 0)
-            ->whereMonth('updated_at', $selectedMonth)
-            ->whereYear('updated_at', $selectedYear)
-            ->selectRaw("CAST(name AS CHAR CHARACTER SET utf8mb4) as name, donate_amount, updated_at")
-            ->orderBy('donate_amount', 'desc');
-
-        $guestDonate = Donation::where('story_id', $story->id)
-            ->whereMonth('donated_at', $selectedMonth)
-            ->whereYear('donated_at', $selectedYear)
-            ->selectRaw("CAST(name AS CHAR CHARACTER SET utf8mb4) as name, amount as donate_amount, donated_at as updated_at");
-
-        // Gộp hai danh sách lại và lấy toàn bộ dữ liệu (tối ưu query)
-        $topDonors = Cache::remember("story:{$story->id}:donors:top:{$selectedYear}-{$selectedMonth}", $cacheTtl, function () use ($usersDonate, $guestDonate) {
-            return $usersDonate->union($guestDonate)
+        $topDonors = Cache::remember("story:{$story->id}:donors:top:{$selectedYear}-{$selectedMonth}", $cacheTtl, function () use ($story, $selectedMonth, $selectedYear) {
+            return Donation::where('story_id', $story->id)
+                ->whereMonth('donated_at', $selectedMonth)
+                ->whereYear('donated_at', $selectedYear)
+                ->selectRaw("CAST(name AS CHAR CHARACTER SET utf8mb4) as name, amount as donate_amount, donated_at as updated_at")
                 ->orderByDesc('donate_amount')
-                ->limit(20) // Giới hạn kết quả để tối ưu performance
                 ->get();
         });
 

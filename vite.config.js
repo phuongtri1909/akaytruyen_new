@@ -10,7 +10,7 @@ export default defineConfig({
                 'resources/assets/frontend/css/stories_new_styles.css',
                 'resources/assets/frontend/css/styles.css',
                 'resources/assets/frontend/css/home.css',
-                'resources/assets/admin/styles_admin.css',
+                'resources/assets/admin/css/styles_admin.css',
                 'resources/assets/frontend/js/app.js',
                 'resources/assets/frontend/js/common.js',
                 'resources/assets/frontend/js/story.js',

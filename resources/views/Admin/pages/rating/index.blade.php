@@ -527,24 +527,19 @@
                 cursor: 'move',
                 opacity: 0.8,
                 update: function(event, ui) {
-                    // Optional: Add visual feedback when order changes
                     $(this).addClass('order-changed');
                     setTimeout(() => {
                         $(this).removeClass('order-changed');
                     }, 1000);
+                    
+                    autoSaveRatings();
                 }
             });
             
-            // Save ratings
-            $('#btn_save_ratings').on('click', function() {
-                const button = $(this);
-                const originalText = button.html();
-                
-                button.addClass('btn-loading').prop('disabled', true);
-                
+            // Auto-save function
+            function autoSaveRatings() {
                 const body = {};
                 
-                // Serialize day ratings
                 const dayItems = $('#rating-day-list .rating-item').map(function() {
                     return {
                         id: $(this).data('story-id'),
@@ -555,7 +550,6 @@
                     body.day = dayItems;
                 }
                 
-                // Serialize month ratings
                 const monthItems = $('#rating-month-list .rating-item').map(function() {
                     return {
                         id: $(this).data('story-id'),
@@ -566,7 +560,6 @@
                     body.month = monthItems;
                 }
                 
-                // Serialize all time ratings
                 const allTimeItems = $('#rating-alltime-list .rating-item').map(function() {
                     return {
                         id: $(this).data('story-id'),
@@ -586,19 +579,104 @@
                     },
                     body: JSON.stringify(body)
                 })
-                .then(response => {
-                    if (response.ok) {
-                        location.reload();
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Đã lưu!',
+                            text: 'Xếp hạng đã được cập nhật',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end'
+                        });
                     } else {
-                        throw new Error('Network response was not ok');
+                        throw new Error(data.message || 'Có lỗi xảy ra');
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     Swal.fire({
                         icon: 'error',
                         title: 'Lỗi!',
-                        text: 'Có lỗi xảy ra khi cập nhật xếp hạng.'
+                        text: error.message || 'Có lỗi xảy ra khi lưu xếp hạng',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                });
+            }
+            
+            // Save ratings (manual save button)
+            $('#btn_save_ratings').on('click', function() {
+                const button = $(this);
+                const originalText = button.html();
+                
+                button.addClass('btn-loading').prop('disabled', true);
+                
+                const body = {};
+                
+                const dayItems = $('#rating-day-list .rating-item').map(function() {
+                    return {
+                        id: $(this).data('story-id'),
+                        name: $(this).data('story-name')
+                    };
+                }).get();
+                if (dayItems.length > 0) {
+                    body.day = dayItems;
+                }
+                
+                const monthItems = $('#rating-month-list .rating-item').map(function() {
+                    return {
+                        id: $(this).data('story-id'),
+                        name: $(this).data('story-name')
+                    };
+                }).get();
+                if (monthItems.length > 0) {
+                    body.month = monthItems;
+                }
+                
+                const allTimeItems = $('#rating-alltime-list .rating-item').map(function() {
+                    return {
+                        id: $(this).data('story-id'),
+                        name: $(this).data('story-name')
+                    };
+                }).get();
+                if (allTimeItems.length > 0) {
+                    body.all_time = allTimeItems;
+                }
+                
+                fetch('{{ route("admin.ratings.update") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify(body)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Thành công!',
+                            text: data.message || 'Cập nhật xếp hạng thành công!',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        throw new Error(data.message || 'Có lỗi xảy ra');
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi!',
+                        text: error.message || 'Có lỗi xảy ra khi cập nhật xếp hạng.'
                     });
                 })
                 .finally(() => {

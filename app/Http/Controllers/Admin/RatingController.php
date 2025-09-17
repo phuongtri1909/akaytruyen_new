@@ -49,42 +49,48 @@ class RatingController extends Controller
         try {
             $dataReq = $request->input();
 
-            $dataType = [
-                1 => 'day',
-                2 => 'month', 
-                3 => 'all_time'
+            $typeMapping = [
+                'day' => Rating::TYPE_DAY,      // 1
+                'month' => Rating::TYPE_MONTH,  // 2
+                'all_time' => Rating::TYPE_ALL_TIME // 3
             ];
 
-            // Empty all ratings
-            Rating::truncate();
+            foreach ($dataReq as $typeKey => $value) {
+                if (!isset($typeMapping[$typeKey])) {
+                    continue; // Skip invalid types
+                }
 
-            foreach ($dataReq as $type => $value) {
-                $data = [
-                    'status' => Rating::STATUS_ACTIVE
-                ];
-                $intDataType = array_filter($dataType, function ($item) use ($type) {
-                    return $item == $type;
-                });
-                $data['type'] = array_key_first($intDataType);
-                $data['value'] = json_encode($value);
+                $typeId = $typeMapping[$typeKey];
                 
-                // Save rating
-                $rating = new Rating();
-                $rating->status = $data['status'];
-                $rating->type = $data['type'];
-                $rating->value = $data['value'];
+                // Find existing rating or create new one
+                $rating = Rating::where('type', $typeId)->first();
+                
+                if (!$rating) {
+                    $rating = new Rating();
+                    $rating->type = $typeId;
+                    $rating->status = Rating::STATUS_ACTIVE;
+                }
+                
+                $rating->value = json_encode($value);
                 $rating->save();
             }
 
-            return redirect()->route('admin.ratings.index')->with('success', 'Cập nhật xếp hạng thành công!');
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật xếp hạng thành công!'
+            ]);
 
         } catch (\Exception $e) {
             \Log::error('Error updating ratings', [
                 'error' => $e->getMessage(),
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
+                'request_data' => $request->all()
             ]);
 
-            return redirect()->route('admin.ratings.index')->with('error', 'Có lỗi xảy ra khi cập nhật xếp hạng.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi cập nhật xếp hạng.'
+            ], 500);
         }
     }
 

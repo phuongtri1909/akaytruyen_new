@@ -183,12 +183,7 @@ class AuthController extends Controller
             'password.required' => 'Hãy nhập mật khẩu của bạn vào đi',
         ]);
 
-        $credentials = $request->only('email', 'password');
-        $remember = $request->has('remember');
-
-        if (Auth::attempt($credentials, $remember)) {
-            return redirect()->route('home');
-        }
+       
 
         try {
 
@@ -211,13 +206,16 @@ class AuthController extends Controller
                 ]);
             }
 
-            Auth::login($user);
-
             $user->ip_address = $request->ip();
             $user->last_login_time = Carbon::now();
             $user->save();
-
-            return redirect()->route('home');
+            
+            $credentials = $request->only('email', 'password');
+            $remember = $request->has('remember');
+    
+            if (Auth::attempt($credentials, $remember)) {
+                return redirect()->route('home');
+            }
         } catch (Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Đã xảy ra lỗi trong quá trình đăng nhập. Vui lòng thử lại sau.');
         }

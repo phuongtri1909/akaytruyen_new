@@ -64,6 +64,43 @@
                         @method('PUT')
 
                         <div class="form-tabs">
+                            <!-- Avatar Section -->
+                            <div class="form-group">
+                                <label class="form-label-custom">Ảnh đại diện</label>
+                                <div class="avatar-section">
+                                    <div class="current-avatar">
+                                        @if ($user->avatar)
+                                            <img src="{{ $user->avatar_url }}" alt="Avatar hiện tại" class="avatar-preview">
+                                            <div class="avatar-actions">
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="removeAvatar()">
+                                                    <i class="fas fa-trash"></i> Xóa avatar
+                                                </button>
+                                            </div>
+                                        @else
+                                            <div class="no-avatar">
+                                                <i class="fas fa-user-circle"></i>
+                                                <span>Chưa có avatar</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="avatar-upload">
+                                        <input type="file" id="avatar" name="avatar" accept="image/*" class="avatar-input">
+                                        <label for="avatar" class="avatar-upload-btn">
+                                            <i class="fas fa-upload"></i> Chọn ảnh mới
+                                        </label>
+                                        <div class="form-hint">
+                                            <i class="fas fa-info-circle"></i>
+                                            <span>Chấp nhận: JPG, PNG, GIF. Kích thước tối đa: 2MB</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="error-message" id="error-avatar">
+                                    @error('avatar')
+                                        {{ $message }}
+                                    @enderror
+                                </div>
+                            </div>
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -295,6 +332,93 @@
             color: #007bff;
         }
 
+        /* Avatar Section */
+        .avatar-section {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .current-avatar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #e9ecef;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .no-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #f8f9fa;
+            border: 3px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            text-align: center;
+        }
+
+        .no-avatar i {
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+
+        .no-avatar span {
+            font-size: 12px;
+        }
+
+        .avatar-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .avatar-upload {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .avatar-input {
+            display: none;
+        }
+
+        .avatar-upload-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .avatar-upload-btn:hover {
+            background: #0056b3;
+            color: white;
+            text-decoration: none;
+        }
+
+        .avatar-upload-btn i {
+            font-size: 16px;
+        }
+
         @media (max-width: 768px) {
             .user-meta {
                 flex-direction: column;
@@ -302,6 +426,16 @@
             
             .roles-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .avatar-section {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .avatar-upload {
+                width: 100%;
+                text-align: center;
             }
         }
     </style>
@@ -316,6 +450,21 @@
                 placeholder: 'Chọn vai trò',
                 allowClear: true,
                 width: '100%'
+            });
+
+            // Avatar preview
+            $('#avatar').change(function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('.avatar-preview').attr('src', e.target.result);
+                        $('.no-avatar').hide();
+                        $('.avatar-preview').show();
+                        $('.avatar-actions').show();
+                    };
+                    reader.readAsDataURL(file);
+                }
             });
 
             // Form validation and submission
@@ -395,5 +544,40 @@
                 });
             });
         });
+
+        // Remove avatar function
+        function removeAvatar() {
+            Swal.fire({
+                title: 'Xác nhận xóa avatar',
+                text: 'Bạn có chắc chắn muốn xóa avatar hiện tại?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Add hidden input to indicate avatar removal
+                    if ($('#remove_avatar').length === 0) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            id: 'remove_avatar',
+                            name: 'remove_avatar',
+                            value: '1'
+                        }).appendTo('#user-form');
+                    }
+                    
+                    // Update UI
+                    $('.avatar-preview').hide();
+                    $('.avatar-actions').hide();
+                    $('.no-avatar').show();
+                    $('#avatar').val('');
+                    
+                    // Auto submit form to save changes
+                    $('#user-form').submit();
+                }
+            });
+        }
     </script>
 @endpush

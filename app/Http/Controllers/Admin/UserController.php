@@ -10,6 +10,7 @@ use App\Models\SMTPSetting;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -128,7 +129,8 @@ class UserController extends Controller
             }
         }
 
-        $users = $query->paginate(20)->withQueryString();
+        $users = $query->orderBy('last_login_time', 'desc')->paginate(20)->withQueryString();
+
         $roles = Role::all();
 
         return view('Admin.pages.users.index', compact('users', 'roles'));
@@ -238,6 +240,7 @@ class UserController extends Controller
             ],
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|string|exists:roles,name',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ], [
             'name.required' => 'Tên người dùng là bắt buộc',
             'name.max' => 'Tên người dùng không được vượt quá 255 ký tự',
@@ -248,6 +251,9 @@ class UserController extends Controller
             'password.confirmed' => 'Xác nhận mật khẩu không khớp',
             'role.required' => 'Vai trò là bắt buộc',
             'role.exists' => 'Vai trò không tồn tại',
+            'avatar.image' => 'Avatar phải là ảnh',
+            'avatar.mimes' => 'Chỉ chấp nhận ảnh định dạng jpeg, png, jpg, gif, webp',
+            'avatar.max' => 'Dung lượng avatar không được vượt quá 2MB',
         ]);
 
         $updateData = [
@@ -257,6 +263,28 @@ class UserController extends Controller
 
         if ($request->filled('password')) {
             $updateData['password'] = Hash::make($request->password);
+        }
+
+        if ($request->has('remove_avatar') && $request->remove_avatar == '1') {
+            if ($user->avatar && !str_starts_with($user->avatar, 'uploads/images/avatar/')) {
+                if (Storage::disk('public')->exists($user->avatar)) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+            }
+            $updateData['avatar'] = null;
+        } elseif ($request->hasFile('avatar')) {
+            $oldAvatar = $user->avatar;
+            
+            $imageName = $user->id . '_' . time() . '.' . $request->avatar->extension();
+            $imagePath = $request->avatar->storeAs('avatars', $imageName, 'public');
+            
+            $updateData['avatar'] = $imagePath;
+            
+            if ($oldAvatar && !str_starts_with($oldAvatar, 'uploads/images/avatar/')) {
+                if (Storage::disk('public')->exists($oldAvatar)) {
+                    Storage::disk('public')->delete($oldAvatar);
+                }
+            }
         }
 
         $user->update($updateData);

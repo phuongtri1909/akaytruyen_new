@@ -47,7 +47,7 @@
                                 <tr>
                                     <th class="column-small">STT</th>
                                     <th class="column-large">Tên người donate</th>
-                                    <th class="column-medium">Số tiền (VND)</th>
+                                    <th class="column-medium">Số tiền (Linh Thạch)</th>
                                     <th class="column-medium">Ngày donate</th>
                                     <th class="column-small text-center">Thao tác</th>
                                 </tr>
@@ -142,7 +142,7 @@
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
                         <div class="form-group mb-3">
-                            <label for="amount" class="form-label">Số tiền (VND) <span
+                            <label for="amount" class="form-label">Số tiền (Linh Thạch) <span
                                     class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="amount" name="amount" min="1000"
                                 required>
@@ -178,7 +178,7 @@
                             <input type="text" class="form-control" id="edit_name" name="name" required>
                         </div>
                         <div class="form-group mb-3">
-                            <label for="edit_amount" class="form-label">Số tiền (VND) <span
+                            <label for="edit_amount" class="form-label">Số tiền (Linh Thạch) <span
                                     class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="edit_amount" name="amount" min="1000"
                                 required>

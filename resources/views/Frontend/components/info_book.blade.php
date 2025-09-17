@@ -91,7 +91,7 @@
                                                 </td>
                                                 <td>{{ $donor->name }}</td>
                                                 <td class="text-success fw-bold">
-                                                    {{ number_format($donor->donate_amount, 0) }} VND</td>
+                                                    {{ number_format($donor->donate_amount, 0) }} Linh Thạch</td>
                                             </tr>
                                         @endforeach
                                     </tbody>

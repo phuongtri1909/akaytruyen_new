@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <tr>
                     <td>${rankIcon}</td>
                     <td>${donor.name}</td>
-                    <td class="text-success fw-bold">${new Intl.NumberFormat('vi-VN').format(donor.donate_amount)} VND</td>
+                    <td class="text-success fw-bold">${new Intl.NumberFormat('vi-VN').format(donor.donate_amount)} Linh Thạch</td>
                 </tr>
             `;
         });

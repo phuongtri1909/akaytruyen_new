@@ -129,7 +129,7 @@
                             <i class="fas fa-money-bill-wave"></i>
                         </div>
                         <div class="stat-content">
-                            <h3>{{ number_format($donationStats['total_amount']) }} VND</h3>
+                            <h3>{{ number_format($donationStats['total_amount']) }} Linh Thạch</h3>
                             <p>Tổng số tiền</p>
                         </div>
                     </div>
@@ -159,7 +159,7 @@
                                             </div>
                                             <div class="donor-info">
                                                 <h6 class="donor-name">{{ $donor['name'] }}</h6>
-                                                <p class="donor-amount">{{ number_format($donor['total_amount']) }} VND</p>
+                                                <p class="donor-amount">{{ number_format($donor['total_amount']) }} Linh Thạch</p>
                                                 <small class="donor-count">{{ $donor['donation_count'] }} lần</small>
                                             </div>
                                         </li>
@@ -185,7 +185,7 @@
                                         <li class="story-donation-item">
                                             <div class="story-info">
                                                 <h6 class="story-name">{{ $story['story_name'] }}</h6>
-                                                <p class="story-amount">{{ number_format($story['total_amount']) }} VND</p>
+                                                <p class="story-amount">{{ number_format($story['total_amount']) }} Linh Thạch</p>
                                                 <small class="story-count">{{ $story['donation_count'] }} donation</small>
                                             </div>
                                         </li>

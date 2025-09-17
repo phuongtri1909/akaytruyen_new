@@ -31,6 +31,7 @@ Route::middleware(['ban:login'])->group(function () {
 
         // User Management
         Route::resource('users', UserController::class);
+        Route::post('users/bulk-delete', [UserController::class, 'bulkDelete'])->name('users.bulk-delete');
 
         // Category Management
         Route::resource('categories', CategoryController::class);

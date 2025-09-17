@@ -18,11 +18,18 @@
                     <i class="fas fa-users icon-title"></i>
                     <h5>Danh sách người dùng</h5>
                 </div>
-                @can('them_nguoi_dung')
-                    <a href="{{ route('admin.users.create') }}" class="action-button">
-                        <i class="fas fa-plus"></i> Thêm người dùng
-                    </a>
-                @endcan
+                <div class="card-actions">
+                    @can('xoa_nguoi_dung')
+                        <button type="button" class="action-button danger-button" id="bulk-delete-btn" style="display: none;">
+                            <i class="fas fa-trash"></i> Xóa đã chọn
+                        </button>
+                    @endcan
+                    @can('them_nguoi_dung')
+                        <a href="{{ route('admin.users.create') }}" class="action-button">
+                            <i class="fas fa-plus"></i> Thêm người dùng
+                        </a>
+                    @endcan
+                </div>
             </div>
 
             <!-- Filter Section -->
@@ -166,6 +173,11 @@
                         <table class="data-table">
                             <thead>
                                 <tr>
+                                    @can('xoa_nguoi_dung')
+                                        <th class="column-small text-center">
+                                            <input type="checkbox" id="select-all" title="Chọn tất cả">
+                                        </th>
+                                    @endcan
                                     <th class="column-small">STT</th>
                                     <th class="column-small">ID</th>
                                     <th class="column-large">Tên</th>
@@ -180,6 +192,23 @@
                             <tbody>
                                 @foreach ($users as $index => $user)
                                     <tr>
+                                        @can('xoa_nguoi_dung')
+                                            <td class="text-center">
+                                                @php
+                                                    $smtpSetting = \App\Models\SMTPSetting::first();
+                                                    $isSuperAdmin = $smtpSetting && $smtpSetting->admin_email === auth()->user()->email;
+                                                    $isUserSuperAdmin = $smtpSetting && $smtpSetting->admin_email === $user->email;
+                                                    $canDelete = !$isUserSuperAdmin && !($user->hasRole('Admin') && !$isSuperAdmin);
+                                                @endphp
+                                                @if($canDelete)
+                                                    <input type="checkbox" class="user-checkbox" value="{{ $user->id }}" data-user-name="{{ $user->name }}">
+                                                @else
+                                                    <span class="text-muted" title="Không thể xóa">
+                                                        <i class="fas fa-lock"></i>
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        @endcan
                                         <td class="text-center">
                                             {{ ($users->currentPage() - 1) * $users->perPage() + $index + 1 }}</td>
                                         <td class="text-center">{{ $user->id }}</td>
@@ -473,6 +502,31 @@
             font-size: 12px;
             transition: all 0.2s ease;
         }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .danger-button {
+            background-color: #dc3545;
+            color: white;
+            border: 1px solid #dc3545;
+        }
+
+        .danger-button:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+        .user-checkbox {
+            transform: scale(1.2);
+        }
+
+        #select-all {
+            transform: scale(1.2);
+        }
     </style>
 @endpush
 
@@ -489,6 +543,116 @@
 
         document.getElementById('ban_filter').addEventListener('change', function() {
             document.querySelector('.filter-form').submit();
+        });
+
+        // Bulk delete functionality
+        $(document).ready(function() {
+            const selectAllCheckbox = $('#select-all');
+            const userCheckboxes = $('.user-checkbox');
+            const bulkDeleteBtn = $('#bulk-delete-btn');
+
+            // Select all functionality
+            selectAllCheckbox.on('change', function() {
+                const isChecked = $(this).is(':checked');
+                userCheckboxes.prop('checked', isChecked);
+                toggleBulkDeleteButton();
+            });
+
+            // Individual checkbox change
+            userCheckboxes.on('change', function() {
+                const totalCheckboxes = userCheckboxes.length;
+                const checkedCheckboxes = userCheckboxes.filter(':checked').length;
+                
+                selectAllCheckbox.prop('checked', totalCheckboxes === checkedCheckboxes);
+                selectAllCheckbox.prop('indeterminate', checkedCheckboxes > 0 && checkedCheckboxes < totalCheckboxes);
+                
+                toggleBulkDeleteButton();
+            });
+
+            // Toggle bulk delete button visibility
+            function toggleBulkDeleteButton() {
+                const checkedCount = userCheckboxes.filter(':checked').length;
+                if (checkedCount > 0) {
+                    bulkDeleteBtn.show();
+                    bulkDeleteBtn.html(`<i class="fas fa-trash"></i> Xóa đã chọn (${checkedCount})`);
+                } else {
+                    bulkDeleteBtn.hide();
+                }
+            }
+
+            // Bulk delete action
+            bulkDeleteBtn.on('click', function() {
+                const selectedUsers = userCheckboxes.filter(':checked');
+                const userIds = selectedUsers.map(function() {
+                    return $(this).val();
+                }).get();
+                const userNames = selectedUsers.map(function() {
+                    return $(this).data('user-name');
+                }).get();
+
+                if (userIds.length === 0) {
+                    Swal.fire('Cảnh báo', 'Vui lòng chọn ít nhất một người dùng để xóa!', 'warning');
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Xác nhận xóa hàng loạt',
+                    html: `
+                        <p>Bạn có chắc chắn muốn xóa <strong>${userIds.length}</strong> người dùng sau?</p>
+                        <div style="max-height: 200px; overflow-y: auto; text-align: left; margin: 10px 0;">
+                            ${userNames.map(name => `<div>• ${name}</div>`).join('')}
+                        </div>
+                        <p style="color: #dc3545; font-weight: bold;">Hành động này không thể hoàn tác!</p>
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Xóa ngay',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Đang xóa...',
+                            text: 'Vui lòng chờ trong giây lát',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Send bulk delete request
+                        $.ajax({
+                            url: '{{ route("admin.users.bulk-delete") }}',
+                            type: 'POST',
+                            data: {
+                                user_ids: userIds,
+                                _token: $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    title: 'Thành công!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            },
+                            error: function(xhr) {
+                                const message = xhr.responseJSON?.message || 'Có lỗi xảy ra khi xóa người dùng';
+                                Swal.fire({
+                                    title: 'Lỗi!',
+                                    text: message,
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
         });
 
         // Ban/Unban user function

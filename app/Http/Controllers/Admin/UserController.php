@@ -20,7 +20,7 @@ class UserController extends Controller
         $this->middleware('canAny:xem_danh_sach_nguoi_dung,them_nguoi_dung,sua_nguoi_dung,xoa_nguoi_dung')->only('index');
         $this->middleware('can:them_nguoi_dung')->only('create', 'store');
         $this->middleware('can:sua_nguoi_dung')->only('edit', 'update', 'ban', 'getBanInfo', 'banIp', 'unbanIp');
-        $this->middleware('can:xoa_nguoi_dung')->only('destroy');
+        $this->middleware('can:xoa_nguoi_dung')->only('destroy', 'bulkDelete');
     }
 
     /**
@@ -340,6 +340,65 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.users.index')->with('success', 'Người dùng đã được xóa thành công!');
+    }
+
+    /**
+     * Bulk delete users
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'user_ids' => 'required|array|min:1',
+            'user_ids.*' => 'integer|exists:users,id'
+        ], [
+            'user_ids.required' => 'Vui lòng chọn ít nhất một người dùng để xóa',
+            'user_ids.array' => 'Dữ liệu không hợp lệ',
+            'user_ids.min' => 'Vui lòng chọn ít nhất một người dùng để xóa',
+            'user_ids.*.integer' => 'ID người dùng không hợp lệ',
+            'user_ids.*.exists' => 'Một hoặc nhiều người dùng không tồn tại'
+        ]);
+
+        $userIds = $request->user_ids;
+        $deletedCount = 0;
+        $errors = [];
+
+        foreach ($userIds as $userId) {
+            try {
+                $user = User::findOrFail($userId);
+
+                // Kiểm tra quyền xóa
+                if ($this->isUserSuperAdmin($user)) {
+                    $errors[] = "Không thể xóa Super Admin: {$user->name}";
+                    continue;
+                }
+
+                // Admin thường không thể xóa admin khác
+                if ($user->hasRole('Admin') && !$this->isSuperAdmin()) {
+                    $errors[] = "Không có quyền xóa admin: {$user->name}";
+                    continue;
+                }
+
+                $user->delete();
+                $deletedCount++;
+            } catch (\Exception $e) {
+                $errors[] = "Lỗi khi xóa người dùng ID {$userId}: " . $e->getMessage();
+            }
+        }
+
+        $message = "Đã xóa thành công {$deletedCount} người dùng";
+        if (!empty($errors)) {
+            $message .= ". Một số lỗi: " . implode(', ', array_slice($errors, 0, 3));
+            if (count($errors) > 3) {
+                $message .= " và " . (count($errors) - 3) . " lỗi khác";
+            }
+        }
+
+        return response()->json([
+            'success' => $deletedCount > 0,
+            'message' => $message,
+            'deleted_count' => $deletedCount,
+            'errors' => $errors
+        ]);
     }
 
     /**

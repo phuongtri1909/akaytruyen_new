@@ -80,8 +80,8 @@ class User extends Authenticatable
 
     public function getUserBanAttribute()
     {
-        if (!isset($this->attributes['_user_ban_cache'])) {
-            $this->attributes['_user_ban_cache'] = $this->userBan()->first() ?? new UserBan([
+        if (!isset($this->relations['_user_ban_cache'])) {
+            $this->relations['_user_ban_cache'] = $this->userBan()->first() ?? new UserBan([
                 'user_id' => $this->id,
                 'login' => false,
                 'comment' => false,
@@ -89,7 +89,7 @@ class User extends Authenticatable
                 'read' => false,
             ]);
         }
-        return $this->attributes['_user_ban_cache'];
+        return $this->relations['_user_ban_cache'];
     }
 
     public function isBanned()

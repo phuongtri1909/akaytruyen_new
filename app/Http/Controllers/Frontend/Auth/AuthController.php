@@ -81,7 +81,7 @@ class AuthController extends Controller
                         $avatarPath = $request->avatar->storeAs($pathInfo['path'], $pathInfo['fileName'], 'public');
                         $user->avatar = $avatarPath;
                     } catch (\Exception $e) {
-                        \Log::error('Error processing avatar:', ['error' => $e->getMessage()]);
+                        Log::error('Error processing avatar:', ['error' => $e->getMessage()]);
                     }
                 }
 
@@ -385,11 +385,7 @@ class AuthController extends Controller
 
         $extension = strtolower($file->getClientOriginalExtension());
         if (in_array($extension, $dangerousExtensions)) {
-            return response()->json([
-                'success' => false,
-                'error' => 'File không được phép upload.',
-                'message' => "File extension '$extension' không được phép upload. Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP)."
-            ], 200);
+            throw new \Exception("File extension '$extension' không được phép upload. Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP).");
         }
 
         $allowedMimes = [
@@ -398,37 +394,50 @@ class AuthController extends Controller
 
         $mimeType = $file->getMimeType();
         if (!in_array($mimeType, $allowedMimes)) {
-            return response()->json([
-                'success' => false,
-                'error' => 'File không được phép upload.',
-                'message' => "File type '$mimeType' không được phép upload. Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP)."
-            ], 200);
+            throw new \Exception("File type '$mimeType' không được phép upload. Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP).");
         }
 
-        if ($extension === 'png' || $extension === 'jpg' || $extension === 'jpeg' || $extension === 'gif' || $extension === 'webp') {
-            return;
+        try {
+            $filePath = $file->getRealPath();
+            if ($filePath && file_exists($filePath)) {
+                $fileSignature = bin2hex(file_get_contents($filePath, false, null, 0, 4));
+                
+                $validSignatures = [
+                    'ffd8ffe0', 'ffd8ffe1', 'ffd8ffe2', 'ffd8ffe3', 'ffd8ffe8', 'ffd8ffdb', 'ffd8ffc0', 'ffd8ffc2',
+                    '89504e47', '47494638', '47494639', '52494646'
+                ];
+                
+                if (!in_array($fileSignature, $validSignatures)) {
+                    throw new \Exception('File không phải là ảnh hợp lệ. Vui lòng chọn file ảnh thực sự.');
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Cannot validate file signature: ' . $e->getMessage());
         }
 
-        $content = file_get_contents($file->getRealPath());
-        if ($this->containsPhpCode($content)) {
-            return response()->json([
-                'success' => false,
-                'error' => 'File không được phép upload.',
-                'message' => 'File chứa mã PHP không được phép upload. Chỉ chấp nhận file ảnh hợp lệ.'
-            ], 200);
+        if ($file->getSize() > 4 * 1024 * 1024) {
+            throw new \Exception('File quá lớn. Kích thước tối đa là 4MB.');
+        }
+
+        try {
+            $content = file_get_contents($file->getRealPath());
+            if (mb_check_encoding($content, 'UTF-8') && $this->containsPhpCode($content)) {
+                throw new \Exception('File chứa mã PHP không được phép upload. Chỉ chấp nhận file ảnh hợp lệ.');
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Cannot read file content for PHP validation: ' . $e->getMessage());
         }
     }
 
     private function containsPhpCode($content): bool
     {
         $phpPatterns = [
-            '/<\?php/i', '/<\?=/i', '/<\?/i',
-            '/phpinfo\s*\(/i', '/eval\s*\(/i', '/exec\s*\(/i',
-            '/system\s*\(/i', '/shell_exec\s*\(/i', '/passthru\s*\(/i',
+            '/<\?php\s+/i', '/<\?=\s*/i', '/phpinfo\s*\(/i', '/eval\s*\(/i',
+            '/exec\s*\(/i', '/system\s*\(/i', '/shell_exec\s*\(/i', '/passthru\s*\(/i',
             '/base64_decode\s*\(/i', '/gzinflate\s*\(/i', '/str_rot13\s*\(/i',
-            '/file_get_contents\s*\(/i', '/file_put_contents\s*\(/i',
-            '/fopen\s*\(/i', '/fwrite\s*\(/i', '/include\s*\(/i',
-            '/require\s*\(/i', '/include_once\s*\(/i', '/require_once\s*\(/i'
+            '/file_get_contents\s*\(/i', '/file_put_contents\s*\(/i', '/fopen\s*\(/i',
+            '/fwrite\s*\(/i', '/include\s*\(/i', '/require\s*\(/i',
+            '/include_once\s*\(/i', '/require_once\s*\(/i'
         ];
 
         foreach ($phpPatterns as $pattern) {

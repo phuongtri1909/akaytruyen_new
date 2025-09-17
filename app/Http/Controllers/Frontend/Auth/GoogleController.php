@@ -56,6 +56,13 @@ class GoogleController extends Controller
             $existingUser = User::where('email', $googleUser->getEmail())->first();
 
             if ($existingUser) {
+                if ($existingUser->roles()->count() === 0) {
+                    $roleUser = Role::where('name', 'User')->first();
+                    if ($roleUser) {
+                        $existingUser->assignRole($roleUser);
+                    }
+                }
+                
                 $existingUser->active = 'active';
                 $existingUser->ip_address = request()->ip();
                 $existingUser->last_login_time = Carbon::now();
@@ -85,7 +92,7 @@ class GoogleController extends Controller
                         $pathInfo = $this->generateAvatarPath($tempFile);
                         
                        
-                        $avatarPath = \Storage::disk('public')->putFileAs($pathInfo['path'], new \Illuminate\Http\File($tempFile), $pathInfo['fileName']);
+                        $avatarPath = Storage::disk('public')->putFileAs($pathInfo['path'], new \Illuminate\Http\File($tempFile), $pathInfo['fileName']);
                         $user->avatar = $avatarPath;
                         
                         unlink($tempFile);

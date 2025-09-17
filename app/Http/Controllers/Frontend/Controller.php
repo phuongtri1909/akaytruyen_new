@@ -16,7 +16,7 @@ class Controller extends BaseController
     {
         $otp = '';
         for ($i = 0; $i < $length; $i++) {
-            $otp .= rand(0, 9);
+            $otp .= random_int(0, 9);
         }
         return $otp;
     }

@@ -164,13 +164,13 @@
                                     @endif
                                 @endif
 
-                                @if ($comment->user && $comment->user->email === 'khaicybers@gmail.com')
+                                @if ($comment->user && $comment->user->email === 'tri2003bt@gmail.com')
                                     <span class="tooltip-icon">
                                         <img src="https://cdn3.emoji.gg/emojis/64012-management.png" width="30px"
                                             style="margin-left:5px; margin-top:-10px;" alt="Hỗ trợ">
                                         <span class="tooltip-text">Hỗ Trợ</span>
                                     </span>
-                                @elseif($comment->user && $comment->user->email === 'nguyenphuochau12t2@gmail.com')
+                                @elseif($comment->user && $comment->user->hasRole('Content'))
                                     <span class="tooltip-icon">
                                         <img src="https://cdn3.emoji.gg/emojis/65928-owner.png" width="30px"
                                             style="margin-left:5px;margin-top:-10px;" alt="tac gia">

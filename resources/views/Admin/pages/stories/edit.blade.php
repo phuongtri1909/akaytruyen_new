@@ -382,6 +382,21 @@
                 $('.input-error').removeClass('input-error');
 
                 const formData = new FormData($(this)[0]);
+                
+                // Remove all category checkboxes first
+                formData.delete('categories[]');
+                
+                // Only add selected categories
+                $('input[name="categories[]"]:checked').each(function() {
+                    formData.append('categories[]', $(this).val());
+                });
+                
+                // Ensure other checkboxes are included in FormData
+                $('input[type="checkbox"]:not([name="categories[]"])').each(function() {
+                    if (!$(this).is(':checked')) {
+                        formData.append($(this).attr('name'), '0');
+                    }
+                });
                 const submitBtn = $('.save-button');
                 const originalBtnText = submitBtn.html();
 

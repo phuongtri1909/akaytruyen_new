@@ -106,6 +106,10 @@
                                     @if ($story->is_hot)
                                         <span class="status-badge status-hot">Hot</span>
                                     @endif
+
+                                    @if ($story->is_vip)
+                                        <span class="status-badge status-vip">VIP</span>
+                                    @endif
                                 </div>
                             </div>
 
@@ -395,6 +399,13 @@
         .status-old {
             background: #f8d7da;
             color: #721c24;
+        }
+
+        .status-vip {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #8b4513;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         .story-description-section {

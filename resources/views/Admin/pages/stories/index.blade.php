@@ -146,6 +146,7 @@
                                     <th class="column-small text-center">Hoàn thành</th>
                                     <th class="column-small text-center">Mới</th>
                                     <th class="column-small text-center">Hot</th>
+                                    <th class="column-small text-center">VIP</th>
                                     <th class="column-small text-center">Số chương</th>
                                     <th class="column-small text-center">Thao tác</th>
                                 </tr>
@@ -213,6 +214,16 @@
                                                     <input type="checkbox" 
                                                            {{ $story->is_hot ? 'checked' : '' }}
                                                            onchange="toggleStatus({{ $story->id }}, 'is_hot', this.checked)">
+                                                    <span class="slider round"></span>
+                                                </label>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="switch-container">
+                                                <label class="switch">
+                                                    <input type="checkbox" 
+                                                           {{ $story->is_vip ? 'checked' : '' }}
+                                                           onchange="toggleStatus({{ $story->id }}, 'is_vip', this.checked)">
                                                     <span class="slider round"></span>
                                                 </label>
                                             </div>
@@ -449,7 +460,7 @@
                 type: 'POST',
                 data: {
                     field: field,
-                    value: value,
+                    value: value ? '1' : '0',
                     _token: $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(response) {

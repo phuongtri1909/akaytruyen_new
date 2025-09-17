@@ -146,6 +146,11 @@
                                     <span class="checkmark"></span>
                                     Truyện hot
                                 </label>
+                                <label class="status-checkbox">
+                                    <input type="checkbox" name="is_vip" value="1" {{ old('is_vip') ? 'checked' : '' }}>
+                                    <span class="checkmark"></span>
+                                    Truyện VIP
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -264,6 +269,21 @@
                 $('.input-error').removeClass('input-error');
 
                 const formData = new FormData($(this)[0]);
+                
+                // Remove all category checkboxes first
+                formData.delete('categories[]');
+                
+                // Only add selected categories
+                $('input[name="categories[]"]:checked').each(function() {
+                    formData.append('categories[]', $(this).val());
+                });
+                
+                // Ensure other checkboxes are included in FormData
+                $('input[type="checkbox"]:not([name="categories[]"])').each(function() {
+                    if (!$(this).is(':checked')) {
+                        formData.append($(this).attr('name'), '0');
+                    }
+                });
                 const submitBtn = $('.save-button');
                 const originalBtnText = submitBtn.html();
 

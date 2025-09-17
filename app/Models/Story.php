@@ -46,6 +46,11 @@ class Story extends Model
         return $this->desc;
     }
 
+    public function getActiveAttribute()
+    {
+        return $this->status ? 'active' : 'inactive';
+    }
+
     protected $table = 'stories';
 
     public function author()

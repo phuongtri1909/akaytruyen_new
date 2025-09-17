@@ -97,10 +97,11 @@ class StoryController extends Controller
             'slug' => Str::slug($request->name),
             'desc' => $cleanDesc,
             'author_id' => $request->author_id,
-            'status' => $request->has('status') ? 1 : 0,
-            'is_full' => $request->has('is_full') ? 1 : 0,
-            'is_new' => $request->has('is_new') ? 1 : 0,
-            'is_hot' => $request->has('is_hot') ? 1 : 0,
+            'status' => $request->input('status') == '1' ? 1 : 0,
+            'is_full' => $request->input('is_full') == '1' ? 1 : 0,
+            'is_new' => $request->input('is_new') == '1' ? 1 : 0,
+            'is_hot' => $request->input('is_hot') == '1' ? 1 : 0,
+            'is_vip' => $request->input('is_vip') == '1' ? 1 : 0,
         ];
 
         if ($request->hasFile('image')) {
@@ -214,10 +215,11 @@ class StoryController extends Controller
             'slug' => Str::slug($request->name),
             'desc' => $cleanDesc,
             'author_id' => $request->author_id,
-            'status' => $request->has('status') ? 1 : 0,
-            'is_full' => $request->has('is_full') ? 1 : 0,
-            'is_new' => $request->has('is_new') ? 1 : 0,
-            'is_hot' => $request->has('is_hot') ? 1 : 0,
+            'status' => $request->input('status') == '1' ? 1 : 0,
+            'is_full' => $request->input('is_full') == '1' ? 1 : 0,
+            'is_new' => $request->input('is_new') == '1' ? 1 : 0,
+            'is_hot' => $request->input('is_hot') == '1' ? 1 : 0,
+            'is_vip' => $request->input('is_vip') == '1' ? 1 : 0,
         ];
 
         if ($request->hasFile('image')) {
@@ -279,7 +281,7 @@ class StoryController extends Controller
     public function toggleStatus(Request $request, Story $story)
     {
         $request->validate([
-            'field' => 'required|in:status,is_full,is_new,is_hot',
+            'field' => 'required|in:status,is_full,is_new,is_hot,is_vip',
             'value' => 'required'
         ]);
 

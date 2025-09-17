@@ -119,16 +119,45 @@
                     @if ($chapter->content)
                         {!! \App\Helpers\Helper::sanitizeChapterContent($chapter->content) !!}
                     @else
-                        <div class="alert alert-custom text-center rounded-4" style="border: 2px dashed #14425d;">
-                            <div class="mb-3">
-                                <i class="fas fa-lock fa-3x text-primary-custom"></i>
-                            </div>
-                            <h5 class="text-warning mb-3">Bạn không có quyền xem nội dung chương này</h5>
-                            <p class="mb-3">Vui lòng liên hệ Quản trị viên để được hỗ trợ.</p>
-                            <a href="https://m.me/596014326928548" target="_blank" rel="noreferrer" class="btn btn-outline-primary btn-sm">
+                        <div class="access-denied-container">
+                            <div class="access-denied-card">
+                                <div class="lock-icon-container">
+                                    <div class="lock-icon-wrapper">
+                                        <i class="fas fa-lock lock-icon"></i>
+                                        <div class="lock-shine"></div>
+                                    </div>
+                                </div>
                                 
-                                <span class="ml-1">Liên Hệ QTV</span>
-                            </a>
+                                <div class="access-denied-content">
+                                    <h4 class="access-denied-title">
+                                        <span class="title-text">Truy cập bị hạn chế</span>
+                                        <div class="title-underline"></div>
+                                    </h4>
+                                    
+                                    <p class="access-denied-message">
+                                        Bạn không có quyền xem nội dung chương này. 
+                                        <br>Vui lòng liên hệ Quản trị viên để được hỗ trợ.
+                                    </p>
+                                    
+                                    <div class="contact-section">
+                                        <div class="contact-icon">
+                                            <i class="fab fa-facebook-messenger"></i>
+                                        </div>
+                                        <a href="https://m.me/596014326928548" target="_blank" rel="noreferrer" class="contact-btn">
+                                            <span class="btn-text">Liên Hệ QTV</span>
+                                            <span class="btn-arrow">→</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div class="floating-particles">
+                                    <div class="particle"></div>
+                                    <div class="particle"></div>
+                                    <div class="particle"></div>
+                                    <div class="particle"></div>
+                                    <div class="particle"></div>
+                                </div>
+                            </div>
                         </div>
                     @endif
             </div>
@@ -181,7 +210,19 @@
                 document.addEventListener("DOMContentLoaded", function() {
                     let chapterContent = document.getElementById("chapter-content");
                     if (chapterContent && chapterContent.innerHTML.trim() !== '') {
-                        chapterContent.innerHTML = chapterContent.innerHTML.replace(/([^\s])\./g, "$1. ");
+                        const walker = document.createTreeWalker(
+                            chapterContent,
+                            NodeFilter.SHOW_TEXT,
+                            null,
+                            false
+                        );
+                        
+                        let node;
+                        while (node = walker.nextNode()) {
+                            if (node.parentElement.tagName !== 'A') {
+                                node.textContent = node.textContent.replace(/([^\s])\./g, "$1. ");
+                            }
+                        }
                     }
                 });
             </script>
@@ -525,25 +566,14 @@
                 color: #7a5c2f;
             }
 
-            .wuxia-search__submit {
+            .search-wrapper .wuxia-search__submit {
                 position: absolute;
                 right: 0;
-                top: 50%;
-                transform: translateY(-50%);
-                border-radius: 8px;
-                border: none;
-                background: radial-gradient(circle at 30% 30%, #8fc4e3, #14425d 70%);
-                color: #4c380b;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: all 0.3s ease;
+                top: 0;
+               
             }
 
-            .wuxia-search__submit:hover {
-                background: radial-gradient(circle at 30% 30%, #a58a36, #6b5a22 70%);
-                transform: translateY(-50%) scale(1.05);
-            }
+         
 
             .dark-theme .wuxia-search__input {
                 background: linear-gradient(180deg, #2c2a26 0%, #24221f 100%);
@@ -558,6 +588,388 @@
 
             .dark-theme .wuxia-search__submit:hover {
                 background: radial-gradient(circle at 30% 30%, #c4a94a, #8b7a2e 70%);
+            }
+
+            /* Access Denied Styling */
+            .access-denied-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 400px;
+                padding: 2rem;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .access-denied-card {
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                border-radius: 20px;
+                padding: 3rem 2rem;
+                text-align: center;
+                position: relative;
+                box-shadow: 
+                    0 20px 40px rgba(0, 0, 0, 0.1),
+                    0 0 0 1px rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                max-width: 500px;
+                width: 100%;
+                animation: cardSlideIn 0.8s ease-out;
+            }
+
+            @keyframes cardSlideIn {
+                0% {
+                    opacity: 0;
+                    transform: translateY(30px) scale(0.95);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+
+            .lock-icon-container {
+                margin-bottom: 2rem;
+                position: relative;
+            }
+
+            .lock-icon-wrapper {
+                position: relative;
+                display: inline-block;
+                animation: lockBounce 2s ease-in-out infinite;
+            }
+
+            @keyframes lockBounce {
+                0%, 20%, 50%, 80%, 100% {
+                    transform: translateY(0);
+                }
+                40% {
+                    transform: translateY(-10px);
+                }
+                60% {
+                    transform: translateY(-5px);
+                }
+            }
+
+            .lock-icon {
+                font-size: 4rem;
+                color: #14425d;
+                position: relative;
+                z-index: 2;
+                filter: drop-shadow(0 4px 8px rgba(20, 66, 93, 0.3));
+            }
+
+            .lock-shine {
+                position: absolute;
+                top: -5px;
+                left: -5px;
+                right: -5px;
+                bottom: -5px;
+                background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+                border-radius: 50%;
+                animation: shine 3s ease-in-out infinite;
+                z-index: 1;
+            }
+
+            @keyframes shine {
+                0% {
+                    transform: rotate(0deg);
+                    opacity: 0;
+                }
+                50% {
+                    opacity: 1;
+                }
+                100% {
+                    transform: rotate(360deg);
+                    opacity: 0;
+                }
+            }
+
+            .access-denied-content {
+                position: relative;
+                z-index: 3;
+            }
+
+            .access-denied-title {
+                margin-bottom: 1.5rem;
+                position: relative;
+            }
+
+            .title-text {
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: #14425d;
+                display: inline-block;
+                animation: titleGlow 2s ease-in-out infinite alternate;
+            }
+
+            @keyframes titleGlow {
+                0% {
+                    text-shadow: 0 0 5px rgba(20, 66, 93, 0.3);
+                }
+                100% {
+                    text-shadow: 0 0 20px rgba(20, 66, 93, 0.6);
+                }
+            }
+
+            .title-underline {
+                width: 60px;
+                height: 3px;
+                background: linear-gradient(90deg, #14425d, #8fc4e3);
+                margin: 0.5rem auto 0;
+                border-radius: 2px;
+                animation: underlineExpand 1.5s ease-out;
+            }
+
+            @keyframes underlineExpand {
+                0% {
+                    width: 0;
+                }
+                100% {
+                    width: 60px;
+                }
+            }
+
+            .access-denied-message {
+                font-size: 1.1rem;
+                color: #6c757d;
+                line-height: 1.6;
+                margin-bottom: 2rem;
+                animation: messageFadeIn 1s ease-out 0.5s both;
+            }
+
+            @keyframes messageFadeIn {
+                0% {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .contact-section {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 1rem;
+                animation: contactSlideIn 1s ease-out 0.8s both;
+            }
+
+            @keyframes contactSlideIn {
+                0% {
+                    opacity: 0;
+                    transform: translateX(-20px);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            .contact-icon {
+                width: 50px;
+                height: 50px;
+                background: linear-gradient(135deg, #0084ff, #0066cc);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: iconPulse 2s ease-in-out infinite;
+            }
+
+            @keyframes iconPulse {
+                0%, 100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(0, 132, 255, 0.4);
+                }
+                50% {
+                    transform: scale(1.05);
+                    box-shadow: 0 0 0 10px rgba(0, 132, 255, 0);
+                }
+            }
+
+            .contact-icon i {
+                font-size: 1.5rem;
+                color: white;
+            }
+
+            .contact-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0rem 1.5rem;
+                background: linear-gradient(135deg, #14425d, #8fc4e3);
+                color: white;
+                text-decoration: none;
+                border-radius: 25px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .contact-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(20, 66, 93, 0.3);
+                color: #fff;
+            }
+
+            .contact-btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.5s ease;
+            }
+
+            .contact-btn:hover::before {
+                left: 100%;
+            }
+
+            .contact-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(20, 66, 93, 0.3);
+            }
+
+            .btn-text {
+                position: relative;
+                z-index: 2;
+            }
+
+            .btn-arrow {
+                position: relative;
+                z-index: 2;
+                transition: transform 0.3s ease;
+            }
+
+            .contact-btn:hover .btn-arrow {
+                transform: translateX(3px);
+            }
+
+            .floating-particles {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                pointer-events: none;
+                overflow: hidden;
+            }
+
+            .particle {
+                position: absolute;
+                width: 4px;
+                height: 4px;
+                background: rgba(20, 66, 93, 0.3);
+                border-radius: 50%;
+                animation: float 6s ease-in-out infinite;
+            }
+
+            .particle:nth-child(1) {
+                top: 20%;
+                left: 10%;
+                animation-delay: 0s;
+                animation-duration: 4s;
+            }
+
+            .particle:nth-child(2) {
+                top: 60%;
+                left: 80%;
+                animation-delay: 1s;
+                animation-duration: 5s;
+            }
+
+            .particle:nth-child(3) {
+                top: 80%;
+                left: 20%;
+                animation-delay: 2s;
+                animation-duration: 6s;
+            }
+
+            .particle:nth-child(4) {
+                top: 30%;
+                left: 70%;
+                animation-delay: 3s;
+                animation-duration: 4.5s;
+            }
+
+            .particle:nth-child(5) {
+                top: 70%;
+                left: 50%;
+                animation-delay: 4s;
+                animation-duration: 5.5s;
+            }
+
+            @keyframes float {
+                0%, 100% {
+                    transform: translateY(0px) rotate(0deg);
+                    opacity: 0.3;
+                }
+                50% {
+                    transform: translateY(-20px) rotate(180deg);
+                    opacity: 0.8;
+                }
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .access-denied-card {
+                    padding: 2rem 1.5rem;
+                    margin: 1rem;
+                }
+
+                .lock-icon {
+                    font-size: 3rem;
+                }
+
+                .title-text {
+                    font-size: 1.5rem;
+                }
+
+                .access-denied-message {
+                    font-size: 1rem;
+                }
+
+                .contact-section {
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+
+                .contact-icon {
+                    width: 45px;
+                    height: 45px;
+                }
+
+                .contact-icon i {
+                    font-size: 1.3rem;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .access-denied-container {
+                    padding: 1rem;
+                }
+
+                .access-denied-card {
+                    padding: 1.5rem 1rem;
+                }
+
+                .lock-icon {
+                    font-size: 2.5rem;
+                }
+
+                .title-text {
+                    font-size: 1.3rem;
+                }
+
+                .access-denied-message {
+                    font-size: 0.95rem;
+                }
             }
         </style>
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Serif&family=Charter&display=swap"
@@ -659,11 +1071,12 @@
             document.addEventListener("DOMContentLoaded", function() {
                         let chapterContent = document.getElementById("chapter-content");
                         if (chapterContent) {
-                            let content = chapterContent.innerHTML;
-                            content = content.replace(/\s*([.,!?])\s*(["'”’])/g, '$1$2');
-                            content = content.replace(/([.,!?])([^\s"”’])/g, '$1 $2');
-                            content = content.replace(/(["'”’])([^\s.,!?])/g, '$1 $2');
-                            chapterContent.innerHTML = content;
+                            // Tạm thời comment để test
+                            // let content = chapterContent.innerHTML;
+                            // content = content.replace(/\s*([.,!?])\s*(["'”’])/g, '$1$2');
+                            // content = content.replace(/([.,!?])([^\s"”’])/g, '$1 $2');
+                            // content = content.replace(/(["'”’])([^\s.,!?])/g, '$1 $2');
+                            // chapterContent.innerHTML = content;
                         }
                     });
         </script>

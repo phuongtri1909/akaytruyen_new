@@ -192,7 +192,7 @@
                                                 <input class="form-control wuxia-search__input" type="text"
                                                     id="search-chapter" data-story-slug="{{ $story->slug }}"
                                                     placeholder="Chương, Tên chương, Nội dung ...">
-                                                <button class="btn wuxia-search__submit" type="button" id="btn-search"
+                                                <button class="btn search-chapter-story wuxia-search__submit" type="button" id="btn-search"
                                                     aria-label="Tìm kiếm">
                                                     <svg xmlns="http://www.w3.org/2000/svg" height="1em"
                                                         viewBox="0 0 512 512">
@@ -440,24 +440,11 @@
             color: #7a5c2f;
         }
 
-        .wuxia-search__submit {
+        .search-chapter-story.wuxia-search__submit {
             position: absolute;
             right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            border-radius: 8px;
-            border: none;
-            background: radial-gradient(circle at 30% 30%, #8fc4e3, #14425d 70%);
-            color: #4c380b;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .wuxia-search__submit:hover {
-            background: radial-gradient(circle at 30% 30%, #a58a36, #6b5a22 70%);
-            transform: translateY(-50%) scale(1.05);
+            top: 0;
+            
         }
 
         .dark-theme .wuxia-search__input {

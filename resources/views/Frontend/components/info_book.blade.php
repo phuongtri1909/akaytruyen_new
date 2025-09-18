@@ -16,25 +16,27 @@
                             <span class="stat-number counter" data-target="{{ $totalStory }}">0</span>
                             <span class="stat-label">Truyện</span>
                         </div>
-                        <div class="stat-item">
-                            <i class="fas fa-list-ol"></i>
-                            <span class="stat-number counter" data-target="{{ $totalChapter }}">0</span>
-                            <span class="stat-label">Chương</span>
-                        </div>
-                    </div>
-                    <div class="stats-row">
-                        @if (auth()->check() && (auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Mod') || auth()->user()->hasRole('Content')))
-                            <div class="stat-item">
-                                <i class="fas fa-eye"></i>
-                                <span class="stat-number counter" data-target="{{ $totalViews }}">0</span>
-                                <span class="stat-label">Lượt Xem</span>
-                            </div>
-                        @endif
+
                         <div class="stat-item">
                             <i class="fas fa-star"></i>
                             <span class="stat-number counter" data-target="{{ $totalRating }}">0</span>
                             <span class="stat-label">Đánh Giá</span>
                         </div>
+                        {{-- <div class="stat-item">
+                            <i class="fas fa-list-ol"></i>
+                            <span class="stat-number counter" data-target="{{ $totalChapter }}">0</span>
+                            <span class="stat-label">Chương</span>
+                        </div> --}}
+                    </div>
+                    <div class="stats-row">
+                        {{-- @if (auth()->check() && (auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Mod') || auth()->user()->hasRole('Content')))
+                            <div class="stat-item">
+                                <i class="fas fa-eye"></i>
+                                <span class="stat-number counter" data-target="{{ $totalViews }}">0</span>
+                                <span class="stat-label">Lượt Xem</span>
+                            </div>
+                        @endif --}}
+                        
                     </div>
                 </div>
 

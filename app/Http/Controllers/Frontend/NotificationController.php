@@ -91,17 +91,43 @@ class NotificationController extends Controller
                 return response()->json(['error' => 'Người dùng chưa đăng nhập'], 401);
             }
 
-            // Cập nhật thông báo của người dùng hiện tại thành đã đọc
-            DB::table('notifications')
-                ->where('user_id', $user->id)
-                ->where('is_read', 0)
-                ->update(['is_read' => 1]);
+            $notificationId = $request->input('notification_id');
 
-            // Invalidate per-user notification cache
-            Cache::forget("notifications:unread:user:{$user->id}");
-            Cache::forget("notifications:tagged:user:{$user->id}");
+            if ($notificationId) {
+                $updated = DB::table('notifications')
+                    ->where('id', $notificationId)
+                    ->where('user_id', $user->id)
+                    ->where('is_read', 0)
+                    ->update(['is_read' => 1]);
 
-            return response()->json(['message' => 'Thông báo đã được đánh dấu là đã đọc']);
+                if ($updated) {
+                    Cache::forget("notifications:unread:user:{$user->id}");
+                    Cache::forget("notifications:tagged:user:{$user->id}");
+                    
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Thông báo đã được đánh dấu là đã đọc'
+                    ]);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Không tìm thấy thông báo hoặc đã được đánh dấu đọc'
+                    ]);
+                }
+            } else {
+                DB::table('notifications')
+                    ->where('user_id', $user->id)
+                    ->where('is_read', 0)
+                    ->update(['is_read' => 1]);
+
+                Cache::forget("notifications:unread:user:{$user->id}");
+                Cache::forget("notifications:tagged:user:{$user->id}");
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Tất cả thông báo đã được đánh dấu là đã đọc'
+                ]);
+            }
         } catch (\Exception $e) {
             Log::error('Lỗi khi đánh dấu thông báo là đã đọc: ' . $e->getMessage());
             return response()->json(['error' => 'Có lỗi xảy ra, vui lòng thử lại!'], 500);

@@ -11,7 +11,8 @@ class Notification extends Model
 
     protected $table = 'notifications';
 
-    protected $fillable = ['user_id', 'story_id', 'chapter_id', 'message', 'is_read','created_at','updated_at'];
+    protected $fillable = ['user_id', 'story_id', 'chapter_id', 'message', 'is_read','created_at'];
+    public $timestamps = false;
 
     protected $casts = [
         'is_read' => 'boolean',

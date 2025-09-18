@@ -400,13 +400,26 @@ class Helper
     {
         if (empty($text)) return '';
         
-        $text = nl2br($text);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         
-        $text = strip_tags($text, '<br>');
+        $text = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $text);
+        $text = preg_replace('/<iframe[^>]*>.*?<\/iframe>/is', '', $text);
+        $text = preg_replace('/<object[^>]*>.*?<\/object>/is', '', $text);
+        $text = preg_replace('/<embed[^>]*>.*?<\/embed>/is', '', $text);
+        $text = preg_replace('/<form[^>]*>.*?<\/form>/is', '', $text);
+        $text = preg_replace('/<input[^>]*\/?>/is', '', $text);
+        $text = preg_replace('/<textarea[^>]*>.*?<\/textarea>/is', '', $text);
+        $text = preg_replace('/<select[^>]*>.*?<\/select>/is', '', $text);
+        $text = preg_replace('/<button[^>]*>.*?<\/button>/is', '', $text);
         
-        $text = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+        $text = preg_replace('/javascript\s*:/i', '', $text);
+        $text = preg_replace('/vbscript\s*:/i', '', $text);
+        $text = preg_replace('/data\s*:/i', '', $text);
+        $text = preg_replace('/mocha\s*:/i', '', $text);
+        $text = preg_replace('/livescript\s*:/i', '', $text);
         
-        $text = str_replace('&lt;br&gt;', '<br>', $text);
+        $text = preg_replace('/on\w+\s*=\s*["\'][^"\']*["\']/i', '', $text);
+        $text = preg_replace('/on\w+\s*=\s*[^\s>]+/i', '', $text);
         
         return trim($text);
     }

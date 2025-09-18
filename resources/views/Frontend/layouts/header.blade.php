@@ -2,8 +2,8 @@
     <nav class="navbar navbar-expand-lg header__navbar p-1 header-custom">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
-                <img src="{{ asset('images/logo/Logoakay.png') }}" alt="Logo akaytruyen" srcset=""
-                    class="img-fluid" style="width: 200px;">
+                <img src="{{ asset('images/logo/Logoakay.png') }}" alt="Logo akaytruyen" srcset="" class="img-fluid"
+                    style="width: 200px;">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
@@ -71,8 +71,8 @@
                     </ul>
                 </div>
 
-                <form class="d-flex align-items-center header__form-search wuxia-search" action="{{ route('main.search.story') }}"
-                    method="GET">
+                <form class="d-flex align-items-center header__form-search wuxia-search"
+                    action="{{ route('main.search.story') }}" method="GET">
                     @php
                         $valueDefault = '';
                         if (request()->input('key_word')) {
@@ -166,8 +166,8 @@
             <div class="offcanvas offcanvas-end header-custom w-75" tabindex="-1" id="offcanvasDarkNavbar"
                 aria-labelledby="offcanvasDarkNavbarLabel">
                 <div class="offcanvas-header">
-                    <img src="{{ asset('images/logo/Logoakay.png') }}" alt="akaytruyen"
-                        srcset="" class="img-fluid" style="width: 200px;">
+                    <img src="{{ asset('images/logo/Logoakay.png') }}" alt="akaytruyen" srcset=""
+                        class="img-fluid" style="width: 200px;">
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
                         aria-label="Close"></button>
                 </div>
@@ -189,8 +189,8 @@
 
                     </ul>
 
-                    <form class="d-flex align-items-center header__form-search wuxia-search" action="{{ route('main.search.story') }}"
-                        method="GET">
+                    <form class="d-flex align-items-center header__form-search wuxia-search"
+                        action="{{ route('main.search.story') }}" method="GET">
                         @php
                             $valueDefault = '';
                             if (request()->input('key_word')) {
@@ -303,7 +303,8 @@
                     li.innerHTML = `
                 <a href="${chapterUrl}"
                    class="text-decoration-none text-dark notification-item"
-                   data-id="${notification.id}">
+                   data-id="${notification.id}"
+                   onclick="markSingleNotificationAsRead(${notification.id})">
                     📢 <strong>${notification.story_title}</strong> ${chapterInfo}
                     <br><small class="text-muted">${new Date(notification.created_at).toLocaleString()}</small>
                 </a>
@@ -312,17 +313,14 @@
                     notificationList.insertBefore(li, notificationList.firstChild);
                 });
 
-                // Thêm thông báo bị tag
                 taggedNotifications.forEach(tag => {
                     let li = document.createElement('li');
                     li.className = "p-2 border-bottom";
 
-                    // Dùng đường dẫn chỉ tới coment chapter
                     let chapterUrl = `/${tag.story_slug}/${tag.chapter_slug}`;
                     if (tag.comment_id) {
                         chapterUrl += `#comment-${tag.comment_id}`;
                     }
-                    // Create the delete button HTML
                     let deleteButton =
                         `<button class="btn btn-sm btn-danger delete-notification" data-id="${tag.id}">Xóa</button>`;
 
@@ -333,7 +331,8 @@
                     li.innerHTML = `
     <a href="${chapterUrl}"
        class="text-decoration-none text-dark notification-item"
-       data-id="${tag.id}">
+       data-id="${tag.id}"
+       onclick="handleTaggedNotificationClick(${tag.id})">
         🏷️ <strong>${tag.tagger_name || 'Một người nào đó'}</strong> đã nhắc đến bạn trong
         <strong>chương ${tag.chapter_number}: ${tag.chapter_title}</strong> của <strong>${tag.story_title}</strong>.
         <div class="border rounded px-2 py-1 mt-1 bg-light text-dark">
@@ -344,16 +343,13 @@
     ${deleteButton}
 `;
 
-                    // Insert the notification into the list
                     notificationList.insertBefore(li, notificationList.firstChild);
 
-                    // Add event listener for the delete button
                     li.querySelector('.delete-notification').addEventListener('click', function(e) {
                         e.preventDefault();
 
                         let notificationId = this.getAttribute('data-id');
 
-                        // Perform the delete action via AJAX
                         fetch(`/delete-tagged-notification/${notificationId}`, {
                                 method: 'DELETE',
                                 headers: {
@@ -368,7 +364,6 @@
                             .then(response => response.json())
                             .then(data => {
                                 if (data.status === 'success') {
-                                    // If the deletion is successful, remove the notification from the list
                                     li.remove();
                                     alert('Thông báo đã được xóa!');
                                 } else {
@@ -381,31 +376,50 @@
                             });
                     });
                 });
-
-
-
-                document.querySelector(`#notificationDropdown${device}`).addEventListener("click", markNotificationsAsRead);
-                document.querySelector(`#notificationDropdown${device}`).addEventListener("touchstart",
-                    markNotificationsAsRead);
             }
         }
 
-        function markNotificationsAsRead() {
+        function markSingleNotificationAsRead(notificationId) {
             fetch('/notifications/read', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
+                    },
+                    body: JSON.stringify({
+                        notification_id: notificationId
+                    })
                 })
                 .then(response => response.json())
-                .then(() => {
-                    document.querySelector('#notification-count-PC').style.display = "none";
-                    document.querySelector('#notification-count-Mobile').style.display = "none";
+                .then(data => {
+                    if (data.success) {
+                        loadNotifications();
+                    }
                 })
                 .catch(error => console.error('Lỗi khi đánh dấu thông báo đã đọc:', error));
         }
 
+        function handleTaggedNotificationClick(taggedNotificationId) {
+            fetch(`/delete-tagged-notification/${taggedNotificationId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        notification_id: taggedNotificationId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        loadNotifications();
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi xóa thông báo tagged:', error);
+                });
+        }
         @if (Auth::check())
             document.addEventListener("DOMContentLoaded", loadNotifications);
         @endif

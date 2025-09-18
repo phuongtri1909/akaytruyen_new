@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Chapter;
+use Purifier;
+use App\Models\User;
 use App\Models\Story;
 use App\Helpers\Helper;
+use App\Models\Chapter;
+use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Purifier;
 
 class ChapterController extends Controller
 {
@@ -24,11 +27,11 @@ class ChapterController extends Controller
         if (!$storyId) {
             return redirect()->route('admin.stories.index')->with('error', 'Vui lòng chọn truyện để thêm chương.');
         }
-        
+
         $story = Story::findOrFail($storyId);
-        
+
         $nextChapterNumber = $story->chapters()->max('chapter') + 1;
-        
+
         return view('Admin.pages.chapters.create', compact('story', 'nextChapterNumber'));
     }
 
@@ -52,13 +55,12 @@ class ChapterController extends Controller
             'content.required' => 'Nội dung là bắt buộc',
         ]);
 
-
         $story = Story::findOrFail($request->story_id);
 
         $sanitizedContent = Helper::processTextareaContent($request->content);
 
         $chapter = Chapter::create([
-            'story_id' => $request->story_id,
+            'story_id' => $story->id,
             'name' => $request->name,
             'chapter' => $request->chapter,
             'content' => $sanitizedContent,
@@ -66,6 +68,25 @@ class ChapterController extends Controller
             'is_new' => 1,
             'views' => 0
         ]);
+
+        $users = User::pluck('id');
+        $now   = now();
+
+        $data = $users->map(function ($userId) use ($chapter, $now) {
+            return [
+                'user_id'    => $userId,
+                'story_id'   => $chapter->story_id,
+                'chapter_id' => $chapter->id,
+                'message'    => 'Một chapter mới đã được thêm vào truyện: '
+                    . $chapter->story->name . ' - Chương '
+                    . $chapter->chapter,
+                'created_at' => $now,
+            ];
+        })->toArray();
+
+        Notification::insert($data);
+
+
 
         return redirect()->route('admin.stories.show', $request->story_id)->with('success', 'Chương đã được tạo thành công!');
     }

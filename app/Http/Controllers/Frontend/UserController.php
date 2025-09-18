@@ -19,6 +19,18 @@ use App\Mail\OTPUpdateUserMail;
 
 class UserController extends Controller
 {
+
+    public function searchUser(Request $request)
+    {
+        $query = $request->input('query');
+        
+        $users = User::where('name', 'LIKE', "%{$query}%")
+            ->limit(5)
+            ->get(['id', 'name']);
+
+        return response()->json(['users' => $users]);
+    }
+
     public function userProfile()
     {
         $user = Auth::user();

@@ -204,8 +204,8 @@
                                                 <br>
 
                                                 @if ($comment->chapter->story)
-                                                <a href="{{ route('chapter', ['slugStory' => $comment->chapter->story->slug, 'slugChapter' => $comment->chapter->slug]) }}"
-                                                    class="chapter-name text-decoration-none">
+                                                    <a href="{{ route('chapter', ['slugStory' => $comment->chapter->story->slug, 'slugChapter' => $comment->chapter->slug]) }}#comment-{{ $comment->id }}"
+                                                        class="chapter-name text-decoration-none">
                                                         Chương {{ $comment->chapter->chapter }}: {{ $comment->chapter->name }}
                                                     </a>
                                                 @else

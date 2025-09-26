@@ -72,7 +72,7 @@
             class="wuxia-social wuxia-social--fb text-white" aria-label="Facebook">
             <i class="fa-brands fa-facebook-f"></i>
         </a>
-        <a href="https://discord.gg/yourInviteCode" target="_blank" rel="noreferrer"
+        <a href="https://discord.gg/Gnjvk8xvex" target="_blank" rel="noreferrer"
             class="wuxia-social wuxia-social--dc text-white" aria-label="Discord">
             <i class="fa-brands fa-discord"></i>
         </a>

@@ -30,7 +30,7 @@
                         </div>
 
                         <div class="social-link-item col-12 col-md-4">
-                            <a target="_blank" href="https://discord.gg/your-discord-invite"
+                            <a target="_blank" href="https://discord.gg/Gnjvk8xvex"
                                class="social-link discord-link">
                                 <div class="social-icon">
                                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none">

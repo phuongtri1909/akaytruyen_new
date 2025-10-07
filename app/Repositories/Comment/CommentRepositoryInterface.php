@@ -8,5 +8,5 @@ interface CommentRepositoryInterface extends BaseRepositoryInterface
 {
     public function getChapterComments($chapterId, $isPinned = false, $limit = 50);
     public function getCachedChapterComments($chapterId, $isPinned = false, $limit = 50);
-    public function getChapterCommentsPaginated($chapterId, $isPinned = false, $perPage = 10);
+    public function getAllChapterComments($chapterId, $isPinned = false);
 }

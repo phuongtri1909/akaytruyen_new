@@ -90,7 +90,6 @@ Route::middleware(['ban:login'])->group(function () {
     Route::post('/get-list-story-hot', [HomeController::class, 'getListStoryHot'])->name('get.list.story.hot');
 
     Route::post('/ajax/search-story', [HomeController::class, 'searchStory'])->name('search.story');
-    Route::post('/ajax/load-more-comments', [CommentController::class, 'loadMoreComments'])->name('comments.load.more.ajax');
 
 
     Livewire::component('live-chat-section', LiveChatSection::class);
@@ -101,6 +100,7 @@ Route::middleware(['ban:login'])->group(function () {
 
         Route::get('/notifications', [NotificationController::class, 'getNotifications']);
         Route::post('/notifications/read', [NotificationController::class, 'markAsRead']);
+        Route::post('/notifications/read-all', [NotificationController::class, 'markAsRead']);
 
         Route::delete('/delete-tagged-notification/{notificationId}', [NotificationController::class, 'deleteTaggedNotification']);
 
@@ -123,8 +123,9 @@ Route::middleware(['ban:login'])->group(function () {
             // Route ghim comment (pin/unpin)
             Route::post('/comments/{comment}/pin', [CommentController::class, 'togglePin'])->name('comments.pin');
 
-            // admin delete comment
-            Route::delete('/delete-comments/{comment}', [CommentController::class, 'deleteComment'])->name('delete.comments');
+            
+            // frontend delete comment
+            Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
             Route::post('comment/store', [CommentController::class, 'storeClient'])->name('comment.store.client');
         });

@@ -201,93 +201,7 @@ class CommentController extends Controller
         return view('Admin.pages.comments.index', compact('comments', 'users', 'totalComments'));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        $authUser = auth()->user();
-        $comment = Comment::find($id);
 
-        if (!$comment) {
-            return response()->json(['status' => 'error', 'message' => 'Không tìm thấy bình luận này'], 404);
-        }
-
-        if (
-            $authUser->hasRole('Admin') || $authUser->hasRole('Content') ||
-            ($authUser->hasRole('Mod') && (!$comment->user || !$comment->user->hasRole('Admin')))
-        ) {
-            $comment->delete();
-            return response()->json(['status' => 'success', 'message' => 'Xóa bình luận thành công']);
-        }
-
-        return response()->json(['status' => 'error', 'message' => 'Không thể xóa bình luận của Admin'], 403);
-    }
-
-    /**
-     * Load more comments for pagination
-     */
-    public function loadMoreComments(Request $request)
-    {
-        $request->validate([
-            'chapter_id' => 'required|string|exists:chapters,id',
-            'page' => 'required|integer|min:1',
-            'is_pinned' => 'boolean'
-        ]);
-
-        $chapterId = $request->chapter_id;
-        $page = $request->page;
-        $isPinned = $request->boolean('is_pinned', false);
-        $perPage = 10;
-
-        $query = Comment::with([
-            'user:id,name,email,avatar',
-            'user.roles:id,name,guard_name',
-            'editor:id,name,email,avatar',
-            'editHistories.editor:id,name,email,avatar',
-            'replies' => function ($query) {
-                $query->with([
-                    'user:id,name,email,avatar',
-                    'user.roles:id,name,guard_name',
-                    'editor:id,name,email,avatar',
-                    'editHistories.editor:id,name,email,avatar',
-                    'reactions:id,comment_id,type,user_id',
-                    'replies' => function ($subQuery) {
-                        $subQuery->with([
-                            'user:id,name,email,avatar',
-                            'user.roles:id,name,guard_name',
-                            'editor:id,name,email,avatar',
-                            'editHistories.editor:id,name,email,avatar',
-                            'reactions:id,comment_id,type,user_id'
-                        ])->oldest();
-                    }
-                ])->oldest();
-            },
-            'reactions:id,comment_id,type,user_id'
-        ])
-            ->where('chapter_id', $chapterId)
-            ->whereNull('reply_id')
-            ->where('is_pinned', $isPinned);
-
-        $comments = $query->latest()->paginate($perPage, ['*'], 'page', $page);
-
-
-        $html = '';
-        if ($comments->count() > 0) {
-            foreach ($comments as $comment) {
-                $html .= view('Frontend.components.comments-item', compact('comment'))->render();
-            }
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'html' => $html,
-            'hasMore' => $comments->hasMorePages(),
-            'currentPage' => $comments->currentPage(),
-            'lastPage' => $comments->lastPage(),
-            'count' => $comments->count()
-        ]);
-    }
 
 
     public function xoa($id)
@@ -325,5 +239,23 @@ class CommentController extends Controller
             'slugStory' => $comment->chapter->story->slug ?? '',
             'slugChapter' => $comment->chapter->slug ?? ''
         ])->with('success', 'Xóa bình luận thành công');
+    }
+
+    public function destroy($id)
+    {
+        $authUser = auth()->user();
+        $comment = Comment::find($id);
+
+        if (!$comment) {
+            return response()->json(['status' => 'error', 'message' => 'Không tìm thấy bình luận này'], 404);
+        }
+
+        if ($authUser->hasRole('Admin') || $authUser->hasRole('Content') ||
+        ($authUser->hasRole('Mod') && (!$comment->user || !$comment->user->hasRole('Admin')))) {
+        $comment->delete();
+        return response()->json(['status' => 'success', 'message' => 'Xóa bình luận thành công']);
+    }
+
+        return response()->json(['status' => 'error', 'message' => 'Không thể xóa bình luận của Admin'], 403);
     }
 }

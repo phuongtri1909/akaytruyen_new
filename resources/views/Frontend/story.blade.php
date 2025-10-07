@@ -94,7 +94,7 @@
                                     <span class="text-info">{{ $story->is_full ? 'Full' : 'Đang ra' }}</span>
                                 </p>
                                 
-                                @if(auth()->check() && (auth()->user()->id == $story->author_id || auth()->user()->can('sua_truyen')))
+                                {{-- @if(auth()->check() && (auth()->user()->id == $story->author_id || auth()->user()->can('sua_truyen')))
                                     <div class="vip-toggle-container mb-2">
                                         <div class="d-flex align-items-center">
                                             <strong class="me-2">Truyện VIP:</strong>
@@ -113,7 +113,7 @@
                                         <strong>Truyện VIP:</strong>
                                         <span class="text-warning">Có</span>
                                     </p>
-                                @endif
+                                @endif --}}
                             </div>
 
 

@@ -250,7 +250,7 @@
 
                 <div class="comment-content mb-3" id="comment-{{ $comment->id }}">
                     @if ($comment->user && $comment->user->hasRole('VIP SIÊU VIỆT'))
-                        <div class="vip-super-role" data-text="{{ strip_tags($comment->comment) }}">
+                        <div class="vip-super-role">
                             {!! \App\Helpers\Helper::parseLinks($comment->comment) !!}
                         </div>
                     @else

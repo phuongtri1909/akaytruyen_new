@@ -32,16 +32,6 @@
         </div>
     @endif
 
-    {{-- Load More Button --}}
-    @if (method_exists($regularComments, 'hasMorePages') &&
-            $regularComments->hasMorePages() &&
-            $regularComments->count() > 0)
-        <div class="load-more-container">
-            <button class="btn btn-link" id="load-more-comments">
-                📄 Xem thêm bình luận...
-            </button>
-        </div>
-    @endif
 
     {{-- Empty state --}}
     @if ($pinnedComments->count() == 0 && $regularComments->count() == 0)
@@ -224,31 +214,21 @@
                 position: relative;
             }
 
-            .vip-super-role::before {
-                content: attr(data-text);
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
+            .vip-super-role {
                 background: linear-gradient(135deg, #005f99, #87cefa, #00cc66);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
                 background-clip: text;
-                pointer-events: none;
-                z-index: 1;
             }
 
-            .vip-super-role img,
-            .vip-super-role .emoji,
-            .vip-super-role a {
-                position: relative;
-                z-index: 2;
+            .vip-super-role span {
                 background: none !important;
-                -webkit-text-fill-color: unset !important;
-                filter: none !important;
-                display: inline-block;
+                -webkit-background-clip: unset !important;
+                -webkit-text-fill-color: #000 !important;
+                background-clip: unset !important;
+                color: #000 !important;
             }
+
 
             /* Actions */
             .comment-actions {
@@ -1265,30 +1245,6 @@
                 animation: fadeInUp 0.4s ease-out;
             }
 
-            .load-more-container {
-                text-align: center;
-                margin-top: 1.5rem;
-                padding: 1rem 0;
-            }
-
-            .load-more-container .btn-link {
-                color: #007bff;
-                text-decoration: none;
-                font-weight: 600;
-                font-size: 0.9rem;
-                padding: 0.5rem 1rem;
-                border-radius: 10px;
-                border: 1px solid #007bff;
-                background: transparent;
-                transition: all 0.3s ease;
-                display: inline-block;
-            }
-
-            .load-more-container .btn-link:hover {
-                background: #e9ecef;
-                color: #0056b3;
-                border-color: #0056b3;
-            }
 
             .empty-comments {
                 text-align: center;
@@ -1322,10 +1278,6 @@
                     font-size: 0.75rem;
                 }
 
-                .load-more-container .btn-link {
-                    padding: 0.4rem 0.8rem;
-                    font-size: 0.8rem;
-                }
 
                 .empty-comments {
                     padding: 1.5rem 1rem;

@@ -32,7 +32,6 @@
         .form-floating.submit-comment .form-control {
             border: 1px solid #e9ecef;
             border-radius: 12px;
-            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
             font-size: 0.9rem;
             transition: all 0.3s ease;
             resize: none;
@@ -606,74 +605,4 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tributejs/5.1.3/tribute.min.js"></script>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let loadMoreBtn = document.getElementById("load-more-comments");
-            let currentPage = 1;
-            let isLoading = false;
-
-            if (loadMoreBtn) {
-                loadMoreBtn.addEventListener("click", function() {
-                    if (isLoading) return;
-
-                    isLoading = true;
-                    const btn = this;
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...';
-                    btn.disabled = true;
-
-                    currentPage++;
-
-                    fetch('{{ route('comments.load.more.ajax') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                    .getAttribute('content')
-                            },
-                            body: JSON.stringify({
-                                chapter_id: '{{ $chapter->id ?? '' }}',
-                                page: currentPage,
-                                is_pinned: false
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-
-                            if (data.status === 'success') {
-                                const emptyComments = document.querySelector('.empty-comments');
-                                if (emptyComments) {
-                                    emptyComments.style.opacity = '0';
-                                    emptyComments.style.transition = 'opacity 0.3s ease';
-                                    setTimeout(() => emptyComments.remove(), 300);
-                                }
-
-                                if (data.html && data.html.trim() !== '') {
-                                    const regularComments = document.querySelector('.regular-comments');
-                                    if (regularComments) {
-                                        regularComments.insertAdjacentHTML('beforeend', data.html);
-                                    }
-                                }
-
-                                if (!data.hasMore) {
-                                    btn.remove();
-                                }
-
-                                showToast(`Đã tải ${data.count} bình luận`, 'success');
-                            } else {
-                                showToast(data.message || 'Có lỗi xảy ra', 'error');
-                            }
-                        })
-                        .catch(error => {
-                            showToast('Có lỗi xảy ra khi tải bình luận', 'error');
-                        })
-                        .finally(() => {
-                            isLoading = false;
-                            btn.innerHTML = originalText;
-                            btn.disabled = false;
-                        });
-                });
-            }
-        });
-    </script>
 @endpush

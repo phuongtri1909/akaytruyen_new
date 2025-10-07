@@ -103,9 +103,14 @@
 
             $chapter->content = preg_replace('/\r\n|\r|\n/', '</p><p>', $chapter->content);
 
-            $chapter->content = preg_replace('/\s*([.,!?]?\s*[."\'”’])\s*/u', '$1', $chapter->content);
+            $chapter->content = preg_replace('/([^\s])"([^\s])/u', '$1" $2', $chapter->content);
+            $chapter->content = preg_replace('/([^\s])"([^\s])/u', '$1" $2', $chapter->content);
+            $chapter->content = preg_replace('/([^\s])"([^\s])/u', '$1" $2', $chapter->content);
+            $chapter->content = preg_replace('/([^\s])"([^\s])/u', '$1" $2', $chapter->content);
+            
+            $chapter->content = preg_replace('/\s*([.,!?]?\s*[."\'""])\s*/u', '$1', $chapter->content);
 
-            $chapter->content = preg_replace('/([.,!?])([^\s”’])/u', '$1 $2', $chapter->content);
+            $chapter->content = preg_replace('/([.,!?])([^\s""])/u', '$1 $2', $chapter->content);
 
             $chapter->content = '<p>' . $chapter->content . '</p>';
 
@@ -220,6 +225,11 @@
                         let node;
                         while (node = walker.nextNode()) {
                             if (node.parentElement.tagName !== 'A') {
+                                node.textContent = node.textContent.replace(/([^\s])"([^\s])/g, '$1" $2');
+                                node.textContent = node.textContent.replace(/([^\s])"([^\s])/g, '$1" $2');
+                                node.textContent = node.textContent.replace(/([^\s])"([^\s])/g, '$1" $2');
+                                node.textContent = node.textContent.replace(/([^\s])"([^\s])/g, '$1" $2');
+                                
                                 node.textContent = node.textContent.replace(/([^\s])\./g, "$1. ");
                             }
                         }

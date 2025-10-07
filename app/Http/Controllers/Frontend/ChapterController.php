@@ -83,17 +83,15 @@ class ChapterController extends Controller
         $breadcrumbEndpoint = 'Chương ' . $chapter->chapter;
 
         $pinnedComments = $this->commentRepository->getCachedChapterComments($chapter->id, true, 10);
-        $regularComments = $this->commentRepository->getChapterCommentsPaginated($chapter->id, false, 10);
+        $regularComments = $this->commentRepository->getAllChapterComments($chapter->id, false);
 
         if ($request->ajax()) {
             if ($request->type === 'comments') {
-                $showPinned = $request->page == 1;
                 return response()->json([
                     'html' => view('components.comments-list', [
-                        'pinnedComments' => $showPinned ? $pinnedComments : collect([]),
+                        'pinnedComments' => $pinnedComments,
                         'regularComments' => $regularComments
-                    ])->render(),
-                    'hasMore' => false
+                    ])->render()
                 ]);
             }
 

@@ -112,7 +112,36 @@ class Helper
         $emojiPattern = '/[\x{1F000}-\x{1FFFF}|\x{2600}-\x{27BF}|\x{1F900}-\x{1F9FF}|\x{2B50}|\x{2705}]/u';
         $text = preg_replace_callback($emojiPattern, fn($m) => '<span class="emoji">'.$m[0].'</span>', $text);
 
+        // Sửa lỗi lặp lại nội dung - loại bỏ các đoạn text trùng lặp
+        $text = self::removeDuplicateContent($text);
+
         return nl2br($text);
+    }
+    
+    /**
+     * Remove duplicate content from text
+     */
+    public static function removeDuplicateContent($text)
+    {
+        if (empty($text)) return '';
+        
+        $sentences = preg_split('/(?<=[.!?])\s+/', $text);
+        $uniqueSentences = [];
+        $seen = [];
+        
+        foreach ($sentences as $sentence) {
+            $sentence = trim($sentence);
+            if (empty($sentence)) continue;
+            
+            $key = preg_replace('/\s+/', ' ', strtolower($sentence));
+            
+            if (!in_array($key, $seen)) {
+                $uniqueSentences[] = $sentence;
+                $seen[] = $key;
+            }
+        }
+        
+        return implode(' ', $uniqueSentences);
     }
     
     /**
@@ -426,7 +455,7 @@ class Helper
 
     public static function generateChapterSlug($chapterNumber, $chapterName, $storyId, $excludeId = null)
     {
-        $baseSlug = $chapterNumber . '-' . \Str::slug($chapterName);
+        $baseSlug = $chapterNumber . '-' . Str::slug($chapterName);
         $slug = $baseSlug;
         $counter = 1;
 

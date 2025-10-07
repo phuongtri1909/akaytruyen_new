@@ -65,6 +65,12 @@
                     <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="notificationDropdownPC"
                         style="width: 300px; max-height: 300px; overflow-y: auto;">
                         <li><strong class="dropdown-header">🔔 Thông báo mới</strong></li>
+                        <li class="dropdown-item-text">
+                            <button class="btn btn-sm btn-outline-primary w-100" id="mark-all-read-PC" onclick="markAllNotificationsAsRead('PC')" style="display: none;">
+                                ✓ Đánh dấu tất cả đã đọc
+                            </button>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
                         <div id="notification-list-PC">
                             <li class="text-center p-2 text-muted">Không có thông báo</li>
                         </div>
@@ -154,6 +160,12 @@
                 <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="notificationDropdownMobile"
                     style="width: 300px; max-height: 300px; overflow-y: auto;">
                     <li><strong class="dropdown-header">🔔 Thông báo mới</strong></li>
+                    <li class="dropdown-item-text">
+                        <button class="btn btn-sm btn-outline-primary w-100" id="mark-all-read-Mobile" onclick="markAllNotificationsAsRead('Mobile')" style="display: none;">
+                            ✓ Đánh dấu tất cả đã đọc
+                        </button>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
                     <div id="notification-list-Mobile">
                         <li class="text-center p-2 text-muted">Không có thông báo</li>
                     </div>
@@ -273,6 +285,7 @@
         function updateNotificationUI(notifications, taggedNotifications, device) {
             let notificationList = document.querySelector(`#notification-list-${device}`);
             let notificationCount = document.querySelector(`#notification-count-${device}`);
+            let markAllReadBtn = document.querySelector(`#mark-all-read-${device}`);
 
             if (!notificationList || !notificationCount) return;
 
@@ -283,9 +296,17 @@
             if (total === 0) {
                 notificationList.innerHTML = '<li class="text-center p-2 text-muted">Không có thông báo</li>';
                 notificationCount.style.display = "none";
+                if (markAllReadBtn) markAllReadBtn.style.display = "none";
             } else {
                 notificationCount.innerText = total;
                 notificationCount.style.display = "inline";
+                
+                // Hiển thị nút "Đánh dấu tất cả đã đọc" nếu có thông báo chương mới
+                if (markAllReadBtn && notifications.length > 0) {
+                    markAllReadBtn.style.display = "block";
+                } else if (markAllReadBtn) {
+                    markAllReadBtn.style.display = "none";
+                }
 
                 // Thêm thông báo chương mới
                 notifications.forEach(notification => {
@@ -418,6 +439,45 @@
                 })
                 .catch(error => {
                     console.error('Lỗi khi xóa thông báo tagged:', error);
+                });
+        }
+
+        function markAllNotificationsAsRead(device) {
+            fetch('/notifications/read-all', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Hiển thị thông báo thành công
+                        const markAllBtn = document.querySelector(`#mark-all-read-${device}`);
+                        if (markAllBtn) {
+                            const originalText = markAllBtn.innerHTML;
+                            markAllBtn.innerHTML = '✓ Đã đánh dấu tất cả';
+                            markAllBtn.classList.remove('btn-outline-primary');
+                            markAllBtn.classList.add('btn-success');
+                            
+                            // Reset về trạng thái ban đầu sau 2 giây
+                            setTimeout(() => {
+                                markAllBtn.innerHTML = originalText;
+                                markAllBtn.classList.remove('btn-success');
+                                markAllBtn.classList.add('btn-outline-primary');
+                            }, 2000);
+                        }
+                        
+                        // Reload notifications để cập nhật UI
+                        loadNotifications();
+                    } else {
+                        alert('Không thể đánh dấu tất cả thông báo đã đọc. Vui lòng thử lại.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi đánh dấu tất cả thông báo đã đọc:', error);
+                    alert('Có lỗi xảy ra khi đánh dấu tất cả thông báo đã đọc.');
                 });
         }
         @if (Auth::check())

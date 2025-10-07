@@ -65,7 +65,7 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
         });
     }
 
-    public function getChapterCommentsPaginated($chapterId, $isPinned = false, $perPage = 10)
+    public function getAllChapterComments($chapterId, $isPinned = false)
     {
         return $this->getModel()
             ->query()
@@ -101,6 +101,6 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
                 'reactions:id,comment_id,type,user_id'
             ])
             ->latest()
-            ->paginate($perPage);
+            ->get();
     }
 }

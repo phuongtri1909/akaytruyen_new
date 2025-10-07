@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Helpers\Helper;
 use App\Models\Chapter;
 use App\Models\Comment;
+use App\Models\SavedChapter;
 use App\Repositories\Chapter\ChapterRepositoryInterface;
 use App\Repositories\Story\StoryRepositoryInterface;
 use App\Repositories\Comment\CommentRepositoryInterface;
@@ -85,6 +86,20 @@ class ChapterController extends Controller
         $pinnedComments = $this->commentRepository->getCachedChapterComments($chapter->id, true, 10);
         $regularComments = $this->commentRepository->getAllChapterComments($chapter->id, false);
 
+        // Lấy thông tin vị trí cuộn đã lưu
+        $savedChapter = null;
+        $scrollPosition = 0;
+        if (auth()->check()) {
+            $savedChapter = SavedChapter::where('user_id', auth()->id())
+                ->where('story_id', $story->id)
+                ->where('chapter_id', $chapter->id)
+                ->first();
+            
+            if ($savedChapter) {
+                $scrollPosition = $savedChapter->scroll_position;
+            }
+        }
+
         if ($request->ajax()) {
             if ($request->type === 'comments') {
                 return response()->json([
@@ -110,7 +125,8 @@ class ChapterController extends Controller
             'chapterAfter',
             'pinnedComments',
             'regularComments',
-            'slugStory'
+            'slugStory',
+            'scrollPosition'
         ));
     }
 
@@ -173,5 +189,55 @@ class ChapterController extends Controller
         $user->savedChapters()->detach($chapterId);
 
         return response()->json(['success' => true]);
+    }
+
+    public function saveReadingProgress(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json(['success' => false, 'message' => 'Bạn cần đăng nhập để lưu tiến độ đọc.']);
+        }
+
+        $request->validate([
+            'story_id' => 'required|integer|exists:stories,id',
+            'chapter_id' => 'required|integer|exists:chapters,id',
+            'scroll_position' => 'required|integer|min:0',
+            'read_progress' => 'required|numeric|min:0|max:100'
+        ]);
+
+        $userId = auth()->id();
+        $storyId = $request->story_id;
+        $chapterId = $request->chapter_id;
+        $scrollPosition = $request->scroll_position;
+        $readProgress = $request->read_progress;
+
+        // Lưu hoặc cập nhật tiến độ đọc
+        SavedChapter::updateOrCreate(
+            [
+                'user_id' => $userId,
+                'story_id' => $storyId
+            ],
+            [
+                'chapter_id' => $chapterId,
+                'scroll_position' => $scrollPosition,
+                'read_progress' => $readProgress,
+                'last_read_at' => now()
+            ]
+        );
+
+        return response()->json(['success' => true, 'message' => 'Đã lưu tiến độ đọc.']);
+    }
+
+    public function getSavedChapters()
+    {
+        if (!auth()->check()) {
+            return response()->json(['success' => false, 'message' => 'Bạn cần đăng nhập.']);
+        }
+
+        $savedChapters = SavedChapter::with(['story', 'chapter'])
+            ->where('user_id', auth()->id())
+            ->orderBy('last_read_at', 'desc')
+            ->get();
+
+        return response()->json(['success' => true, 'data' => $savedChapters]);
     }
 }

@@ -137,6 +137,19 @@
                     </div>
                 </div>
 
+                <!-- Saved Chapters Section -->
+                <div class="saved-chapters-section">
+                    <h4 class="section-title">📚 Chương đã lưu</h4>
+                    <div id="savedChaptersList" class="saved-chapters-list">
+                        <div class="loading-container">
+                            <div class="loading-spinner-icon">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                            <div class="loading-text">Đang tải danh sách chương đã lưu...</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Action Buttons -->
                 <div class="action-buttons">
                     <a href="{{ route('logout') }}" class="logout-btn">
@@ -547,6 +560,138 @@
 
         .info-item.clickable:hover .info-value i {
             color: #667eea;
+        }
+
+        /* Saved Chapters Section */
+        .saved-chapters-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .saved-chapters-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .saved-chapter-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .saved-chapter-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .chapter-info {
+            flex: 1;
+        }
+
+        .chapter-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .chapter-meta {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .chapter-actions {
+            margin-left: 16px;
+        }
+
+        .continue-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .continue-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            color: white;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .loading-spinner-icon {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 16px;
+        }
+
+        .loading-spinner-icon i {
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            color: #718096;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #718096;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
         }
 
         /* Action Buttons */
@@ -1047,7 +1192,66 @@
                     'animation-duration': (6 + index) + 's'
                 });
             });
+
+            // Load saved chapters
+            loadSavedChapters();
         });
+
+        function loadSavedChapters() {
+            fetch('{{ route('get.saved.chapters') }}')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('savedChaptersList');
+                    
+                    if (data.success && data.data.length > 0) {
+                        let html = '';
+                        data.data.forEach(item => {
+                            const lastReadDate = new Date(item.last_read_at).toLocaleDateString('vi-VN');
+                            html += `
+                                <div class="saved-chapter-item" onclick="continueReading('${item.story.slug}', '${item.chapter.slug}')">
+                                    <div class="chapter-info">
+                                        <div class="chapter-title">${item.story.name}</div>
+                                        <div class="chapter-meta">
+                                            Chương ${item.chapter.chapter}: ${item.chapter.name}
+                                        </div>
+                                        <div class="chapter-meta">
+                                            Đọc lần cuối: ${lastReadDate} • Tiến độ: ${item.read_progress}%
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: ${item.read_progress}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="chapter-actions">
+                                        <span class="continue-btn">Tiếp tục đọc</span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        container.innerHTML = html;
+                    } else {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fas fa-book-open"></i>
+                                <p>Chưa có chương nào được lưu</p>
+                                <p class="text-muted">Bắt đầu đọc truyện để lưu tiến độ!</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi tải danh sách chương đã lưu:', error);
+                    document.getElementById('savedChaptersList').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Có lỗi xảy ra khi tải danh sách</p>
+                        </div>
+                    `;
+                });
+        }
+
+        function continueReading(storySlug, chapterSlug) {
+            window.location.href = `/${storySlug}/${chapterSlug}`;
+        }
 
         // OTP input handling
         function handleInput(element) {

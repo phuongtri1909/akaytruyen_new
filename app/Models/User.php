@@ -157,4 +157,9 @@ class User extends Authenticatable
         // Nếu là đường dẫn storage mới
         return asset('storage/' . $this->avatar);
     }
+
+    public function savedChapters()
+    {
+        return $this->hasMany(SavedChapter::class);
+    }
 }

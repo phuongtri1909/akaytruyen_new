@@ -104,6 +104,10 @@ Route::middleware(['ban:login'])->group(function () {
 
         Route::delete('/delete-tagged-notification/{notificationId}', [NotificationController::class, 'deleteTaggedNotification']);
 
+        // Saved chapters routes
+        Route::post('/save-reading-progress', [ChapterController::class, 'saveReadingProgress'])->name('save.reading.progress');
+        Route::get('/saved-chapters', [ChapterController::class, 'getSavedChapters'])->name('get.saved.chapters');
+
         // User profile
         Route::get('profile', [UserController::class, 'userProfile'])->name('profile');
         Route::post('update-profile/update-name-or-phone', [UserController::class, 'updateNameOrPhone'])->name('update.name.or.phone');

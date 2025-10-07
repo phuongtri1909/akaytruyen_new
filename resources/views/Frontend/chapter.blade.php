@@ -1095,6 +1095,70 @@
         @vite(['resources/assets/frontend/js/chapter.js'])
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
 
+        <!-- Reading Progress Tracking -->
+        <script>
+            let scrollTimeout;
+            let isSaving = false;
+
+            // Khôi phục vị trí cuộn khi load trang
+            document.addEventListener('DOMContentLoaded', function() {
+                const scrollPosition = {{ $scrollPosition ?? 0 }};
+                if (scrollPosition > 0) {
+                    setTimeout(() => {
+                        window.scrollTo(0, scrollPosition);
+                    }, 500);
+                }
+            });
+
+            // Lưu vị trí cuộn khi user cuộn
+            window.addEventListener('scroll', function() {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    saveReadingProgress();
+                }, 1000); // Lưu sau 1 giây không cuộn
+            });
+
+            // Lưu khi user rời khỏi trang
+            window.addEventListener('beforeunload', function() {
+                saveReadingProgress();
+            });
+
+            function saveReadingProgress() {
+                if (isSaving || !{{ auth()->check() ? 'true' : 'false' }}) return;
+                
+                isSaving = true;
+                const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+                const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const readProgress = documentHeight > 0 ? Math.round((scrollPosition / documentHeight) * 100) : 0;
+
+                fetch('{{ route('save.reading.progress') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        story_id: {{ $story->id }},
+                        chapter_id: {{ $chapter->id }},
+                        scroll_position: scrollPosition,
+                        read_progress: readProgress
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Đã lưu tiến độ đọc:', readProgress + '%');
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lưu tiến độ đọc:', error);
+                })
+                .finally(() => {
+                    isSaving = false;
+                });
+            }
+        </script>
+
                 <!-- Fix floating tools settings persistence -->
         <script>
             document.addEventListener('DOMContentLoaded', function() {

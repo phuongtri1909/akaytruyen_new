@@ -36,6 +36,10 @@ Route::get('akay/clear-cache', function () {
     return "Cache is cleared";
 })->name('clear.cache');
 
+Route::get('/ads.txt', function () {
+    return redirect('https://srv.adstxtmanager.com/19390/akaytruyen.com', 301);
+});
+
 // Sitemap Routes
 Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
 Route::get('sitemap-categories.xml', [SitemapController::class, 'categories'])->name('sitemap.categories.alt');

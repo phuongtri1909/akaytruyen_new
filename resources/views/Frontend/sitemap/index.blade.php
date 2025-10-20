@@ -1,4 +1,6 @@
-{!! '<?xml version="1.0" encoding="UTF-8"?>' !!}
+@php
+echo '<?xml version="1.0" encoding="UTF-8"?>';
+@endphp
 <!-- Sitemap Index for akaytruyen.com - Các URL đã được kiểm tra hoạt động tốt -->
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <sitemap>

@@ -7,13 +7,13 @@
 
 
 @section('content')
-    <div class="mb-3 container py-2 d-flex flex-column justify-content-center text-start wuxia-banner"
+    {{-- <div class="mb-3 container py-2 d-flex flex-column justify-content-center text-start wuxia-banner"
         style="min-height: 50px;">
         <p class="mb-0 text-start text-md-center" style="font-size: 14px;">
             Akaytruyen.com là web đọc truyện chính chủ duy nhất của tác giả AkayHau. <br>
             Tham gia kênh Youtube và Facebook Page chính của truyện để ủng hộ tác giả.
         </p>
-    </div>
+    </div> --}}
     @include('Frontend.sections.main.stories_hot', ['categoryIdSelected' => 0])
     <hr>
     <div>

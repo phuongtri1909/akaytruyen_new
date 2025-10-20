@@ -1,8 +1,13 @@
 <footer id="donate">
     <div class="footer-custom bg-gradient">
         <div class="container ">
+
+           
+
             <div class="py-3 text-white g-3">
                     <h5 class="mb-4">AKAY TRUYỆN</h5>
+
+                    
                     <div class="social-links-container row g-3">
                          <div class="social-link-item col-12 col-md-4">
                             <a target="_blank" href="https://youtube.com/@AkayTruyen?sub_confirmation=1"
@@ -92,7 +97,7 @@
         </div>
     </div>
     <div class="bg-dark">
-        <div class="container py-3">
+        <div class="container py-3 d-lg-flex justify-content-between align-items-center">
             <span class="copyright text-white">
                 Copyright © {{ date('Y') }} {{ request()->getHost() }} Version 3.5.2
                 <a href="//www.dmca.com/Protection/Status.aspx?ID=3da5a11e-fc82-4343-b6a0-8515713d3c33"
@@ -101,6 +106,15 @@
                         alt="DMCA.com Protection Status" /></a>
                 <script src="https://images.dmca.com/Badges/DMCABadgeHelper.min.js"></script>
             </span>
+
+            <div class="text-white mt-3 mt-lg-0 d-flex flex-wrap" style="gap: 10px;">
+                <a href="{{ route('contact') }}" class="text-white">Liên hệ</a>
+                <a href="{{ route('privacy-policy') }}" class="text-white">Quyền riêng tư</a>
+                <a href="{{ route('terms') }}" class="text-white">Điều khoản sử dụng</a>
+                <a href="{{ route('content-rules') }}" class="text-white">Quy tắc nội dung</a>
+                <a href="{{ route('confidental') }}" class="text-white">Bảo mật thông tin</a>
+            </div>
+
         </div>
 
     </div>

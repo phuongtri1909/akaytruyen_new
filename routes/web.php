@@ -18,7 +18,8 @@ use App\Http\Controllers\Frontend\{
     LiveChatController,
     NotificationController,
     SitemapController,
-    DonationController
+    DonationController,
+    PageController
 };
 use App\Http\Controllers\Frontend\Auth\GoogleController;
 use App\Http\Controllers\Frontend\ChatController;
@@ -39,6 +40,12 @@ Route::get('akay/clear-cache', function () {
 Route::get('/ads.txt', function () {
     return redirect('https://srv.adstxtmanager.com/19390/akaytruyen.com', 301);
 });
+
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/terms', [PageController::class, 'terms'])->name('terms');
+Route::get('/content-rules', [PageController::class, 'contentRules'])->name('content-rules');
+Route::get('/confidental', [PageController::class, 'confidental'])->name('confidental');
 
 // Sitemap Routes
 Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');

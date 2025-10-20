@@ -39,4 +39,44 @@
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
+
+    <!-- Trang liên hệ -->
+    <url>
+        <loc>{{ route('contact') }}</loc>
+        <lastmod>{{ now()->toAtomString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Trang quyền riêng tư -->
+    <url>
+        <loc>{{ route('privacy-policy') }}</loc>
+        <lastmod>{{ now()->toAtomString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Trang điều khoản sử dụng -->
+    <url>
+        <loc>{{ route('terms') }}</loc>
+        <lastmod>{{ now()->toAtomString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Trang quy tắc nội dung -->
+    <url>
+        <loc>{{ route('content-rules') }}</loc>
+        <lastmod>{{ now()->toAtomString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Trang bảo mật thông tin -->
+    <url>
+        <loc>{{ route('confidental') }}</loc>
+        <lastmod>{{ now()->toAtomString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
 </urlset> 

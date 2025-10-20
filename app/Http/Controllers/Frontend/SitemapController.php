@@ -80,6 +80,7 @@ class SitemapController extends Controller
             $perPage = 5000; // Mỗi sitemap nên chứa tối đa khoảng 50.000 URL, chọn số phù hợp
             
             $chapters = Chapter::with('story')
+                ->whereHas('story')
                 ->orderBy('id', 'desc')
                 ->skip(($page - 1) * $perPage)
                 ->take($perPage)

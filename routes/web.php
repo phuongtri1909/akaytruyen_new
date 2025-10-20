@@ -37,9 +37,9 @@ Route::get('akay/clear-cache', function () {
     return "Cache is cleared";
 })->name('clear.cache');
 
-Route::get('/ads.txt', function () {
-    return redirect('https://srv.adstxtmanager.com/19390/akaytruyen.com', 301);
-});
+// Route::get('/ads.txt', function () {
+//     return redirect('https://srv.adstxtmanager.com/19390/akaytruyen.com', 301);
+// });
 
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');

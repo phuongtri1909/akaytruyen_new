@@ -45,6 +45,8 @@
     @stack('custom_schema')
 
     @routes
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4405345005005059"
+     crossorigin="anonymous"></script>
 </head>
 
 <body @if ($bgColorCookie == 'dark') class="dark-theme" @endif>

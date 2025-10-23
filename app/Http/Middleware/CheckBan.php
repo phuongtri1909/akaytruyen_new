@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckBan
@@ -42,8 +44,16 @@ class CheckBan
             }
         }
 
-        $ip = $request->ip();
-        if (\App\Models\BanIp::where('ip_address', $ip)->exists()) {
+        $ip = \App\Helpers\Helper::getRealUserIp($request);
+
+        if ($this->isIpBanned($ip)) {
+            Log::warning('IP banned access attempt', [
+                'ip' => $ip,
+                'user_agent' => $request->userAgent(),
+                'url' => $request->fullUrl(),
+                'user_id' => $user ? $user->id : null
+            ]);
+            
             sleep(10);
             if($request->ajax()){
                 return response()->json(['message' => 'IP của bạn đã bị cấm.'], 403);
@@ -52,5 +62,14 @@ class CheckBan
         }
 
         return $next($request);
+    }
+
+    private function isIpBanned(string $ip): bool
+    {
+        $cacheKey = "banned_ip:{$ip}";
+        
+        return Cache::remember($cacheKey, 300, function () use ($ip) {
+            return \App\Models\BanIp::where('ip_address', $ip)->exists();
+        });
     }
 }

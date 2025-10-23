@@ -103,14 +103,11 @@
 
             $chapter->content = preg_replace('/\r\n|\r|\n/', '</p><p>', $chapter->content);
 
-            $chapter->content = preg_replace('/([^\s])"([^\s])/u', '$1" $2', $chapter->content);
-            $chapter->content = preg_replace('/([^\s])"([^\s])/u', '$1" $2', $chapter->content);
-            $chapter->content = preg_replace('/([^\s])"([^\s])/u', '$1" $2', $chapter->content);
-            $chapter->content = preg_replace('/([^\s])"([^\s])/u', '$1" $2', $chapter->content);
+            // Removed regex patterns that were adding unwanted spaces before quotes
             
-            $chapter->content = preg_replace('/\s*([.,!?]?\s*[."\'""])\s*/u', '$1', $chapter->content);
+            // Removed all regex processing to preserve original content formatting
 
-            $chapter->content = preg_replace('/([.,!?])([^\s""])/u', '$1 $2', $chapter->content);
+            // Removed regex that was adding spaces after punctuation
 
             $chapter->content = '<p>' . $chapter->content . '</p>';
 
@@ -225,12 +222,9 @@
                         let node;
                         while (node = walker.nextNode()) {
                             if (node.parentElement.tagName !== 'A') {
-                                node.textContent = node.textContent.replace(/([^\s])"([^\s])/g, '$1" $2');
-                                node.textContent = node.textContent.replace(/([^\s])"([^\s])/g, '$1" $2');
-                                node.textContent = node.textContent.replace(/([^\s])"([^\s])/g, '$1" $2');
-                                node.textContent = node.textContent.replace(/([^\s])"([^\s])/g, '$1" $2');
+                                // Removed JavaScript regex patterns that were adding unwanted spaces before quotes
                                 
-                                node.textContent = node.textContent.replace(/([^\s])\./g, "$1. ");
+                                // Removed JavaScript regex that was adding spaces after periods
                             }
                         }
                     }

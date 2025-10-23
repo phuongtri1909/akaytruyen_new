@@ -85,7 +85,7 @@ class AuthController extends Controller
                     }
                 }
 
-                $user->ip_address = $request->ip();
+                $user->ip_address = \App\Helpers\Helper::getRealUserIp($request);
                 $user->last_login_time = Carbon::now();
 
                 $roleUser = Role::where('name', 'User')->first();
@@ -206,7 +206,7 @@ class AuthController extends Controller
                 ]);
             }
 
-            $user->ip_address = $request->ip();
+            $user->ip_address = \App\Helpers\Helper::getRealUserIp($request);
             $user->last_login_time = Carbon::now();
             $user->save();
             
@@ -300,7 +300,7 @@ class AuthController extends Controller
 
                             $user->key_reset_password = null;
                             $user->password = bcrypt($request->password);
-                            $user->ip_address = $request->ip();
+                            $user->ip_address = \App\Helpers\Helper::getRealUserIp($request);
                             $user->last_login_time = Carbon::now();
                             $user->save();
 
@@ -412,7 +412,7 @@ class AuthController extends Controller
                 }
             }
         } catch (\Exception $e) {
-            \Log::warning('Cannot validate file signature: ' . $e->getMessage());
+            Log::warning('Cannot validate file signature: ' . $e->getMessage());
         }
 
         if ($file->getSize() > 4 * 1024 * 1024) {
@@ -425,7 +425,7 @@ class AuthController extends Controller
                 throw new \Exception('File chứa mã PHP không được phép upload. Chỉ chấp nhận file ảnh hợp lệ.');
             }
         } catch (\Exception $e) {
-            \Log::warning('Cannot read file content for PHP validation: ' . $e->getMessage());
+            Log::warning('Cannot read file content for PHP validation: ' . $e->getMessage());
         }
     }
 

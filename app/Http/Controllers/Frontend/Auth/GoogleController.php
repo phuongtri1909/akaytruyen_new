@@ -64,7 +64,7 @@ class GoogleController extends Controller
                 }
                 
                 $existingUser->active = 'active';
-                $existingUser->ip_address = request()->ip();
+                $existingUser->ip_address = \App\Helpers\Helper::getRealUserIp(request());
                 $existingUser->last_login_time = Carbon::now();
                 $existingUser->save();
                 Auth::login($existingUser);
@@ -76,7 +76,7 @@ class GoogleController extends Controller
                 $user->email = $googleUser->getEmail();
                 $user->password = bcrypt(Str::random(16)); 
                 $user->active = 'active';
-                $user->ip_address = request()->ip();
+                $user->ip_address = \App\Helpers\Helper::getRealUserIp(request());
                 $user->last_login_time = Carbon::now();
 
                 $roleUser = Role::where('name', 'User')->first();

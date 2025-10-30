@@ -14,17 +14,6 @@
             Tham gia kênh Youtube và Facebook Page chính của truyện để ủng hộ tác giả.
         </p>
     </div> --}}
-    <script type="text/javascript">
-        atOptions = {
-            'key' : '7410406f6875af40a55a73adf4be0f4a',
-            'format' : 'iframe',
-            'height' : 90,
-            'width' : 728,
-            'params' : {}
-        };
-    </script>
-    <script type="text/javascript" src="//acceptableremotehumorous.com/7410406f6875af40a55a73adf4be0f4a/invoke.js"></script>
-    <div id="container-76289abe542de83208f592130273b5ee"></div>
     @include('Frontend.sections.main.stories_hot', ['categoryIdSelected' => 0])
     <hr>
     <div>

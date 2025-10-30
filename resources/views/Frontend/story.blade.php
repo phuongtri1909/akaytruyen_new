@@ -18,6 +18,7 @@
     <div class="container">
         <div class="row align-items-start">
             <div class="col-12 col-md-7 col-lg-8">
+                <div id="container-76289abe542de83208f592130273b5ee"></div>
                 @include('Frontend.snippets.title_component', [
                     'title' => 'Thông tin truyện',
                 ])

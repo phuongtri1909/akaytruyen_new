@@ -7,6 +7,8 @@
 @section('content')
     <div class="chapter-wrapper container my-5">
         <div class="chapter-nav text-center main">
+
+            <div id="container-76289abe542de83208f592130273b5ee"></div>
             <div class="chapter-nav d-flex justify-content-between align-items-center mb-4 top-0">
 
                 @if ($chapterBefore)

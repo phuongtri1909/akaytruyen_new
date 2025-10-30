@@ -7,6 +7,15 @@
 @section('content')
     <div class="chapter-wrapper container my-5">
         <div class="chapter-nav text-center main">
+
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4405345005005059"
+                crossorigin="anonymous"></script>
+            <!-- Top Header -->
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059" data-ad-slot="4536454491"
+                data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
             <div class="chapter-nav d-flex justify-content-between align-items-center mb-4 top-0">
 
                 @if ($chapterBefore)
@@ -62,10 +71,13 @@
                     <div class="search-wrapper">
                         <div class="wuxia-search">
                             <div class="wuxia-search__container">
-                                <input class="form-control wuxia-search__input" type="text" id="search" placeholder="Tìm Nội dung ...">
-                                <button class="btn wuxia-search__submit" type="button" id="btn-search" aria-label="Tìm kiếm">
+                                <input class="form-control wuxia-search__input" type="text" id="search"
+                                    placeholder="Tìm Nội dung ...">
+                                <button class="btn wuxia-search__submit" type="button" id="btn-search"
+                                    aria-label="Tìm kiếm">
                                     <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512">
-                                        <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
+                                        <path
+                                            d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
                                     </svg>
                                 </button>
                             </div>
@@ -82,86 +94,87 @@
             <?php
             if ($chapter->content) {
                 $chapter->content = html_entity_decode(htmlspecialchars_decode($chapter->content), ENT_QUOTES, 'UTF-8');
-
-            $word_special_chars = [
-                '&ldquo;' => '“',
-                '&rdquo;' => '”',
-                '&lsquo;' => '‘',
-                '&rsquo;' => '’',
-                '&nbsp;' => ' ',
-                '&hellip;' => '...',
-                '&ndash;' => '-',
-                '&mdash;' => '—',
-                '‐' => '-',
-                '‑' => '-',
-                '‒' => '-',
-                '–' => '-',
-                '—' => '-',
-            ];
-            $chapter->content = str_replace(array_keys($word_special_chars), array_values($word_special_chars), $chapter->content);
-            $chapter->content = str_replace(['&nbsp;', "\xc2\xa0"], ' ', $chapter->content);
-
-            $chapter->content = preg_replace('/\r\n|\r|\n/', '</p><p>', $chapter->content);
-
-            // Removed regex patterns that were adding unwanted spaces before quotes
             
-            // Removed all regex processing to preserve original content formatting
-
-            // Removed regex that was adding spaces after punctuation
-
-            $chapter->content = '<p>' . $chapter->content . '</p>';
-
-            $chapter->content = preg_replace('/<p>\s*<\/p>/', '', $chapter->content);
+                $word_special_chars = [
+                    '&ldquo;' => '“',
+                    '&rdquo;' => '”',
+                    '&lsquo;' => '‘',
+                    '&rsquo;' => '’',
+                    '&nbsp;' => ' ',
+                    '&hellip;' => '...',
+                    '&ndash;' => '-',
+                    '&mdash;' => '—',
+                    '‐' => '-',
+                    '‑' => '-',
+                    '‒' => '-',
+                    '–' => '-',
+                    '—' => '-',
+                ];
+                $chapter->content = str_replace(array_keys($word_special_chars), array_values($word_special_chars), $chapter->content);
+                $chapter->content = str_replace(['&nbsp;', "\xc2\xa0"], ' ', $chapter->content);
+            
+                $chapter->content = preg_replace('/\r\n|\r|\n/', '</p><p>', $chapter->content);
+            
+                // Removed regex patterns that were adding unwanted spaces before quotes
+            
+                // Removed all regex processing to preserve original content formatting
+            
+                // Removed regex that was adding spaces after punctuation
+            
+                $chapter->content = '<p>' . $chapter->content . '</p>';
+            
+                $chapter->content = preg_replace('/<p>\s*<\/p>/', '', $chapter->content);
             }
             ?>
 
             <div id="chapter-content" class="chapter-content mb-4 p-3 border-0 rounded"
                 style="font-size: 1.5rem; min-height: 500px; line-height: 2; position: relative; top: -54px;">
-                
-                    @if ($chapter->content)
-                        {!! \App\Helpers\Helper::sanitizeChapterContent($chapter->content) !!}
-                    @else
-                        <div class="access-denied-container">
-                            <div class="access-denied-card">
-                                <div class="lock-icon-container">
-                                    <div class="lock-icon-wrapper">
-                                        <i class="fas fa-lock lock-icon"></i>
-                                        <div class="lock-shine"></div>
-                                    </div>
-                                </div>
-                                
-                                <div class="access-denied-content">
-                                    <h4 class="access-denied-title">
-                                        <span class="title-text">Truy cập bị hạn chế</span>
-                                        <div class="title-underline"></div>
-                                    </h4>
-                                    
-                                    <p class="access-denied-message">
-                                        Bạn không có quyền xem nội dung chương này. 
-                                        <br>Vui lòng liên hệ Quản trị viên để được hỗ trợ.
-                                    </p>
-                                    
-                                    <div class="contact-section">
-                                        <div class="contact-icon">
-                                            <i class="fab fa-facebook-messenger"></i>
-                                        </div>
-                                        <a href="https://m.me/596014326928548" target="_blank" rel="noreferrer" class="contact-btn">
-                                            <span class="btn-text">Liên Hệ QTV</span>
-                                            <span class="btn-arrow">→</span>
-                                        </a>
-                                    </div>
-                                </div>
-                                
-                                <div class="floating-particles">
-                                    <div class="particle"></div>
-                                    <div class="particle"></div>
-                                    <div class="particle"></div>
-                                    <div class="particle"></div>
-                                    <div class="particle"></div>
+
+                @if ($chapter->content)
+                    {!! \App\Helpers\Helper::sanitizeChapterContent($chapter->content) !!}
+                @else
+                    <div class="access-denied-container">
+                        <div class="access-denied-card">
+                            <div class="lock-icon-container">
+                                <div class="lock-icon-wrapper">
+                                    <i class="fas fa-lock lock-icon"></i>
+                                    <div class="lock-shine"></div>
                                 </div>
                             </div>
+
+                            <div class="access-denied-content">
+                                <h4 class="access-denied-title">
+                                    <span class="title-text">Truy cập bị hạn chế</span>
+                                    <div class="title-underline"></div>
+                                </h4>
+
+                                <p class="access-denied-message">
+                                    Bạn không có quyền xem nội dung chương này.
+                                    <br>Vui lòng liên hệ Quản trị viên để được hỗ trợ.
+                                </p>
+
+                                <div class="contact-section">
+                                    <div class="contact-icon">
+                                        <i class="fab fa-facebook-messenger"></i>
+                                    </div>
+                                    <a href="https://m.me/596014326928548" target="_blank" rel="noreferrer"
+                                        class="contact-btn">
+                                        <span class="btn-text">Liên Hệ QTV</span>
+                                        <span class="btn-arrow">→</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="floating-particles">
+                                <div class="particle"></div>
+                                <div class="particle"></div>
+                                <div class="particle"></div>
+                                <div class="particle"></div>
+                                <div class="particle"></div>
+                            </div>
                         </div>
-                    @endif
+                    </div>
+                @endif
             </div>
 
 
@@ -218,12 +231,12 @@
                             null,
                             false
                         );
-                        
+
                         let node;
                         while (node = walker.nextNode()) {
                             if (node.parentElement.tagName !== 'A') {
                                 // Removed JavaScript regex patterns that were adding unwanted spaces before quotes
-                                
+
                                 // Removed JavaScript regex that was adding spaces after periods
                             }
                         }
@@ -314,7 +327,7 @@
             }
 
             .chapter-content {
-                @if($chapterFont)
+                @if ($chapterFont)
                     font-family: {!! config('fonts.' . $chapterFont) !!};
                 @endif
                 @if ($chapterFontSize)
@@ -574,10 +587,10 @@
                 position: absolute;
                 right: 0;
                 top: 0;
-               
+
             }
 
-         
+
 
             .dark-theme .wuxia-search__input {
                 background: linear-gradient(180deg, #2c2a26 0%, #24221f 100%);
@@ -611,7 +624,7 @@
                 padding: 3rem 2rem;
                 text-align: center;
                 position: relative;
-                box-shadow: 
+                box-shadow:
                     0 20px 40px rgba(0, 0, 0, 0.1),
                     0 0 0 1px rgba(255, 255, 255, 0.8);
                 backdrop-filter: blur(10px);
@@ -626,6 +639,7 @@
                     opacity: 0;
                     transform: translateY(30px) scale(0.95);
                 }
+
                 100% {
                     opacity: 1;
                     transform: translateY(0) scale(1);
@@ -644,12 +658,19 @@
             }
 
             @keyframes lockBounce {
-                0%, 20%, 50%, 80%, 100% {
+
+                0%,
+                20%,
+                50%,
+                80%,
+                100% {
                     transform: translateY(0);
                 }
+
                 40% {
                     transform: translateY(-10px);
                 }
+
                 60% {
                     transform: translateY(-5px);
                 }
@@ -680,9 +701,11 @@
                     transform: rotate(0deg);
                     opacity: 0;
                 }
+
                 50% {
                     opacity: 1;
                 }
+
                 100% {
                     transform: rotate(360deg);
                     opacity: 0;
@@ -711,6 +734,7 @@
                 0% {
                     text-shadow: 0 0 5px rgba(20, 66, 93, 0.3);
                 }
+
                 100% {
                     text-shadow: 0 0 20px rgba(20, 66, 93, 0.6);
                 }
@@ -729,6 +753,7 @@
                 0% {
                     width: 0;
                 }
+
                 100% {
                     width: 60px;
                 }
@@ -747,6 +772,7 @@
                     opacity: 0;
                     transform: translateY(10px);
                 }
+
                 100% {
                     opacity: 1;
                     transform: translateY(0);
@@ -766,6 +792,7 @@
                     opacity: 0;
                     transform: translateX(-20px);
                 }
+
                 100% {
                     opacity: 1;
                     transform: translateX(0);
@@ -784,10 +811,13 @@
             }
 
             @keyframes iconPulse {
-                0%, 100% {
+
+                0%,
+                100% {
                     transform: scale(1);
                     box-shadow: 0 0 0 0 rgba(0, 132, 255, 0.4);
                 }
+
                 50% {
                     transform: scale(1.05);
                     box-shadow: 0 0 0 10px rgba(0, 132, 255, 0);
@@ -910,10 +940,13 @@
             }
 
             @keyframes float {
-                0%, 100% {
+
+                0%,
+                100% {
                     transform: translateY(0px) rotate(0deg);
                     opacity: 0.3;
                 }
+
                 50% {
                     transform: translateY(-20px) rotate(180deg);
                     opacity: 0.8;
@@ -1019,7 +1052,7 @@
                 $('.chapter-content').each(function() {
                     const $this = $(this);
                     const html = $this.html();
-                    
+
                     if (html && !html.includes('Bạn không có quyền xem nội dung chương này')) {
                         const newHtml = html.replace(regex, function(matched) {
                             matches.push(matched);
@@ -1073,19 +1106,19 @@
 
         <script>
             document.addEventListener("DOMContentLoaded", function() {
-                        let chapterContent = document.getElementById("chapter-content");
-                        if (chapterContent) {
-                            // Tạm thời comment để test
-                            // let content = chapterContent.innerHTML;
-                            // content = content.replace(/\s*([.,!?])\s*(["'”’])/g, '$1$2');
-                            // content = content.replace(/([.,!?])([^\s"”’])/g, '$1 $2');
-                            // content = content.replace(/(["'”’])([^\s.,!?])/g, '$1 $2');
-                            // chapterContent.innerHTML = content;
-                        }
-                    });
+                let chapterContent = document.getElementById("chapter-content");
+                if (chapterContent) {
+                    // Tạm thời comment để test
+                    // let content = chapterContent.innerHTML;
+                    // content = content.replace(/\s*([.,!?])\s*(["'”’])/g, '$1$2');
+                    // content = content.replace(/([.,!?])([^\s"”’])/g, '$1 $2');
+                    // content = content.replace(/(["'”’])([^\s.,!?])/g, '$1 $2');
+                    // chapterContent.innerHTML = content;
+                }
+            });
         </script>
 
-       
+
         @vite(['resources/assets/frontend/js/chapter.js'])
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
 
@@ -1119,41 +1152,41 @@
 
             function saveReadingProgress() {
                 if (isSaving || !{{ auth()->check() ? 'true' : 'false' }}) return;
-                
+
                 isSaving = true;
                 const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
                 const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
                 const readProgress = documentHeight > 0 ? Math.round((scrollPosition / documentHeight) * 100) : 0;
 
                 fetch('{{ route('save.reading.progress') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        story_id: {{ $story->id }},
-                        chapter_id: {{ $chapter->id }},
-                        scroll_position: scrollPosition,
-                        read_progress: readProgress
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            story_id: {{ $story->id }},
+                            chapter_id: {{ $chapter->id }},
+                            scroll_position: scrollPosition,
+                            read_progress: readProgress
+                        })
                     })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log('Đã lưu tiến độ đọc:', readProgress + '%');
-                    }
-                })
-                .catch(error => {
-                    console.error('Lỗi khi lưu tiến độ đọc:', error);
-                })
-                .finally(() => {
-                    isSaving = false;
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Đã lưu tiến độ đọc:', readProgress + '%');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Lỗi khi lưu tiến độ đọc:', error);
+                    })
+                    .finally(() => {
+                        isSaving = false;
+                    });
             }
         </script>
 
-                <!-- Fix floating tools settings persistence -->
+        <!-- Fix floating tools settings persistence -->
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Re-initialize floating tools if needed
@@ -1221,7 +1254,8 @@
                     }
 
                     // Apply saved line height
-                    let savedLineHeight = localStorage.getItem('chapter_line_height') || getCookieValue('line_height_chapter');
+                    let savedLineHeight = localStorage.getItem('chapter_line_height') || getCookieValue(
+                        'line_height_chapter');
                     if (savedLineHeight) {
                         chapterContent.style.lineHeight = savedLineHeight + '%';
                         const lineHeightSelect = document.querySelector('.setting-line-height');
@@ -1242,7 +1276,8 @@
                     fontInc.addEventListener('click', function() {
                         const chapterContent = document.querySelector('.chapter-content');
                         if (chapterContent) {
-                            const currentSize = parseInt(window.getComputedStyle(chapterContent).fontSize) || 18;
+                            const currentSize = parseInt(window.getComputedStyle(chapterContent).fontSize) ||
+                            18;
                             const newSize = Math.min(currentSize + 2, 48);
                             chapterContent.style.fontSize = newSize + 'px';
                             localStorage.setItem('chapter_fs_px', newSize);
@@ -1262,7 +1297,8 @@
                     fontDec.addEventListener('click', function() {
                         const chapterContent = document.querySelector('.chapter-content');
                         if (chapterContent) {
-                            const currentSize = parseInt(window.getComputedStyle(chapterContent).fontSize) || 18;
+                            const currentSize = parseInt(window.getComputedStyle(chapterContent).fontSize) ||
+                            18;
                             const newSize = Math.max(currentSize - 2, 12);
                             chapterContent.style.fontSize = newSize + 'px';
                             localStorage.setItem('chapter_fs_px', newSize);

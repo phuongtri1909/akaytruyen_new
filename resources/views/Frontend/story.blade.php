@@ -18,6 +18,14 @@
     <div class="container">
         <div class="row align-items-start">
             <div class="col-12 col-md-7 col-lg-8">
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4405345005005059"
+                    crossorigin="anonymous"></script>
+                <!-- Top Header -->
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059"
+                    data-ad-slot="4536454491" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
                 @include('Frontend.snippets.title_component', [
                     'title' => 'Thông tin truyện',
                 ])
@@ -93,8 +101,8 @@
                                     <strong>Trạng thái:</strong>
                                     <span class="text-info">{{ $story->is_full ? 'Full' : 'Đang ra' }}</span>
                                 </p>
-                                
-                                {{-- @if(auth()->check() && (auth()->user()->id == $story->author_id || auth()->user()->can('sua_truyen')))
+
+                                {{-- @if (auth()->check() && (auth()->user()->id == $story->author_id || auth()->user()->can('sua_truyen')))
                                     <div class="vip-toggle-container mb-2">
                                         <div class="d-flex align-items-center">
                                             <strong class="me-2">Truyện VIP:</strong>
@@ -192,8 +200,8 @@
                                                 <input class="form-control wuxia-search__input" type="text"
                                                     id="search-chapter" data-story-slug="{{ $story->slug }}"
                                                     placeholder="Chương, Tên chương, Nội dung ...">
-                                                <button class="btn search-chapter-story wuxia-search__submit" type="button" id="btn-search"
-                                                    aria-label="Tìm kiếm">
+                                                <button class="btn search-chapter-story wuxia-search__submit" type="button"
+                                                    id="btn-search" aria-label="Tìm kiếm">
                                                     <svg xmlns="http://www.w3.org/2000/svg" height="1em"
                                                         viewBox="0 0 512 512">
                                                         <path
@@ -444,7 +452,7 @@
             position: absolute;
             right: 0;
             top: 0;
-            
+
         }
 
         .dark-theme .wuxia-search__input {
@@ -676,7 +684,7 @@
             const isVip = $(this).is(':checked');
             const storyId = $(this).data('story-id');
             const label = $(this).siblings('label');
-            
+
             $.ajax({
                 url: `/truyen/${storyId}/toggle-vip`,
                 type: 'POST',
@@ -692,7 +700,7 @@
                     // Revert toggle state
                     $('#vipToggle').prop('checked', !isVip);
                     label.text(!isVip ? 'Có' : 'Không');
-                    
+
                     const response = xhr.responseJSON;
                     showToast(response?.message || 'Có lỗi xảy ra', 'error');
                 }

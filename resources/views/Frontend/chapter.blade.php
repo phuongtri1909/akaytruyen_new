@@ -8,14 +8,16 @@
     <div class="chapter-wrapper container my-5">
         <div class="chapter-nav text-center main">
 
+
             <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4405345005005059"
                 crossorigin="anonymous"></script>
-            <!-- Top Header -->
-            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059" data-ad-slot="4536454491"
-                data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <!-- Square Ads -->
+            <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px"
+                data-ad-client="ca-pub-4405345005005059" data-ad-slot="7544464049"></ins>
             <script>
                 (adsbygoogle = window.adsbygoogle || []).push({});
             </script>
+
             <div class="chapter-nav d-flex justify-content-between align-items-center mb-4 top-0">
 
                 @if ($chapterBefore)
@@ -94,7 +96,7 @@
             <?php
             if ($chapter->content) {
                 $chapter->content = html_entity_decode(htmlspecialchars_decode($chapter->content), ENT_QUOTES, 'UTF-8');
-            
+
                 $word_special_chars = [
                     '&ldquo;' => '“',
                     '&rdquo;' => '”',
@@ -112,17 +114,17 @@
                 ];
                 $chapter->content = str_replace(array_keys($word_special_chars), array_values($word_special_chars), $chapter->content);
                 $chapter->content = str_replace(['&nbsp;', "\xc2\xa0"], ' ', $chapter->content);
-            
+
                 $chapter->content = preg_replace('/\r\n|\r|\n/', '</p><p>', $chapter->content);
-            
+
                 // Removed regex patterns that were adding unwanted spaces before quotes
-            
+
                 // Removed all regex processing to preserve original content formatting
-            
+
                 // Removed regex that was adding spaces after punctuation
-            
+
                 $chapter->content = '<p>' . $chapter->content . '</p>';
-            
+
                 $chapter->content = preg_replace('/<p>\s*<\/p>/', '', $chapter->content);
             }
             ?>
@@ -245,6 +247,15 @@
             </script>
 
         </div>
+
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4405345005005059"
+            crossorigin="anonymous"></script>
+        <!-- Top Header -->
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059" data-ad-slot="4536454491"
+            data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
 
         <div class="section-list-category w-100">
             @if (!Auth()->check() || (Auth()->check() && Auth()->user()->userBan->comment == false))
@@ -1277,7 +1288,7 @@
                         const chapterContent = document.querySelector('.chapter-content');
                         if (chapterContent) {
                             const currentSize = parseInt(window.getComputedStyle(chapterContent).fontSize) ||
-                            18;
+                                18;
                             const newSize = Math.min(currentSize + 2, 48);
                             chapterContent.style.fontSize = newSize + 'px';
                             localStorage.setItem('chapter_fs_px', newSize);
@@ -1298,7 +1309,7 @@
                         const chapterContent = document.querySelector('.chapter-content');
                         if (chapterContent) {
                             const currentSize = parseInt(window.getComputedStyle(chapterContent).fontSize) ||
-                            18;
+                                18;
                             const newSize = Math.max(currentSize - 2, 12);
                             chapterContent.style.fontSize = newSize + 'px';
                             localStorage.setItem('chapter_fs_px', newSize);

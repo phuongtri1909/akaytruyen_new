@@ -244,6 +244,13 @@
 
         </div>
 
+        <!-- Square Ads -->
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059" data-ad-slot="7544464049"
+            data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+
         <div class="section-list-category w-100">
             @if (!Auth()->check() || (Auth()->check() && Auth()->user()->userBan->comment == false))
                 @include('Frontend.components.comment', [

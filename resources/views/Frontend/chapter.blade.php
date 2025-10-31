@@ -10,19 +10,20 @@
 
 
             <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4405345005005059"
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4405345005005059"
                 crossorigin="anonymous"></script>
             <!-- Square Ads -->
-            <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px"
-                data-ad-client="ca-pub-4405345005005059" data-ad-slot="7544464049"></ins>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059" data-ad-slot="7544464049"
+                data-ad-format="auto" data-full-width-responsive="true"></ins>
             <script>
                 (adsbygoogle = window.adsbygoogle || []).push({});
             </script>
 
-             <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4405345005005059"
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4405345005005059"
                 crossorigin="anonymous"></script>
             <!-- Square Ads -->
-            <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px"
-                data-ad-client="ca-pub-4405345005005059" data-ad-slot="7544464049"></ins>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059" data-ad-slot="7544464049"
+                data-ad-format="auto" data-full-width-responsive="true"></ins>
             <script>
                 (adsbygoogle = window.adsbygoogle || []).push({});
             </script>

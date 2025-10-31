@@ -18,6 +18,15 @@
                 (adsbygoogle = window.adsbygoogle || []).push({});
             </script>
 
+             <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4405345005005059"
+                crossorigin="anonymous"></script>
+            <!-- Square Ads -->
+            <ins class="adsbygoogle" style="display:inline-block;width:250px;height:250px"
+                data-ad-client="ca-pub-4405345005005059" data-ad-slot="7544464049"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+
             <div class="chapter-nav d-flex justify-content-between align-items-center mb-4 top-0">
 
                 @if ($chapterBefore)

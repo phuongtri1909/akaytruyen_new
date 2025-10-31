@@ -15,8 +15,6 @@
         </p>
     </div> --}}
     <div class="container">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4405345005005059"
-            crossorigin="anonymous"></script>
         <!-- Top Header -->
         <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059" data-ad-slot="4536454491"
             data-ad-format="auto" data-full-width-responsive="true"></ins>

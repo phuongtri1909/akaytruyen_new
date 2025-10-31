@@ -18,8 +18,6 @@
     <div class="container">
         <div class="row align-items-start">
             <div class="col-12 col-md-7 col-lg-8">
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4405345005005059"
-                    crossorigin="anonymous"></script>
                 <!-- Top Header -->
                 <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059"
                     data-ad-slot="4536454491" data-ad-format="auto" data-full-width-responsive="true"></ins>
@@ -107,8 +105,8 @@
                                         <div class="d-flex align-items-center">
                                             <strong class="me-2">Truyện VIP:</strong>
                                             <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="vipToggle" 
-                                                       {{ $story->is_vip ? 'checked' : '' }} 
+                                                <input class="form-check-input" type="checkbox" id="vipToggle"
+                                                       {{ $story->is_vip ? 'checked' : '' }}
                                                        data-story-id="{{ $story->id }}">
                                                 <label class="form-check-label" for="vipToggle">
                                                     {{ $story->is_vip ? 'Có' : 'Không' }}

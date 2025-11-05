@@ -18,18 +18,12 @@
     <div class="container">
         <div class="row align-items-start">
             <div class="col-12 col-md-7 col-lg-8">
-                <div class="ad-banner-responsive">
-                    <script type="text/javascript">
-                        atOptions = {
-                            'key' : '7410406f6875af40a55a73adf4be0f4a',
-                            'format' : 'iframe',
-                            'height' : 90,
-                            'width' : 728,
-                            'params' : {}
-                        };
-                    </script>
-                    <script type="text/javascript" src="//acceptableremotehumorous.com/7410406f6875af40a55a73adf4be0f4a/invoke.js"></script>
-                </div>
+                <!-- Top Header -->
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059"
+                    data-ad-slot="4536454491" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
                 @include('Frontend.snippets.title_component', [
                     'title' => 'Thông tin truyện',
                 ])
@@ -312,45 +306,6 @@
 
 @push('styles')
     <style>
-        /* Responsive Ad Banner - Scale theo màn hình */
-        .ad-banner-responsive {
-            width: 100%;
-            max-width: 728px;
-            margin: 0 auto 1rem;
-            display: flex;
-            justify-content: center;
-        }
-
-        .ad-banner-responsive > div {
-            width: 100%;
-            max-width: 728px;
-        }
-
-        .ad-banner-responsive iframe {
-            width: 100% !important;
-            height: auto !important;
-            max-width: 728px;
-            aspect-ratio: 728 / 90;
-        }
-
-        /* Mobile - Scale xuống */
-        @media (max-width: 767px) {
-            .ad-banner-responsive {
-                transform-origin: center;
-            }
-            
-            .ad-banner-responsive iframe {
-                min-height: 60px;
-            }
-        }
-
-        /* Tablet */
-        @media (min-width: 768px) and (max-width: 991px) {
-            .ad-banner-responsive iframe {
-                min-height: 80px;
-            }
-        }
-
         .chapter-card {
             padding: 15px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);

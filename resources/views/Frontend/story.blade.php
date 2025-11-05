@@ -18,7 +18,7 @@
     <div class="container">
         <div class="row align-items-start">
             <div class="col-12 col-md-7 col-lg-8">
-                <div class="ad-banner-responsive d-none d-md-flex justify-content-center mb-3">
+                <div class="ad-banner-responsive">
                     <script type="text/javascript">
                         atOptions = {
                             'key' : '7410406f6875af40a55a73adf4be0f4a',
@@ -312,27 +312,42 @@
 
 @push('styles')
     <style>
-        /* Responsive Ad Banner */
+        /* Responsive Ad Banner - Scale theo màn hình */
         .ad-banner-responsive {
-            overflow: hidden;
-            max-width: 100%;
+            width: 100%;
+            max-width: 728px;
+            margin: 0 auto 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .ad-banner-responsive > div {
+            width: 100%;
+            max-width: 728px;
         }
 
         .ad-banner-responsive iframe {
-            max-width: 100%;
-            height: auto;
+            width: 100% !important;
+            height: auto !important;
+            max-width: 728px;
+            aspect-ratio: 728 / 90;
         }
 
+        /* Mobile - Scale xuống */
         @media (max-width: 767px) {
             .ad-banner-responsive {
-                display: none !important;
+                transform-origin: center;
+            }
+            
+            .ad-banner-responsive iframe {
+                min-height: 60px;
             }
         }
 
+        /* Tablet */
         @media (min-width: 768px) and (max-width: 991px) {
-            .ad-banner-responsive {
-                overflow-x: auto;
-                justify-content: flex-start !important;
+            .ad-banner-responsive iframe {
+                min-height: 80px;
             }
         }
 

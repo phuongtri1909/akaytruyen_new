@@ -7,12 +7,16 @@
 @section('content')
     <div class="chapter-wrapper container my-5">
         <div class="chapter-nav text-center main">
-            <!-- Top Header -->
-            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059" data-ad-slot="4536454491"
-                data-ad-format="auto" data-full-width-responsive="true"></ins>
-            <script>
-                (adsbygoogle = window.adsbygoogle || []).push({});
+            <script type="text/javascript">
+                atOptions = {
+                    'key' : '7410406f6875af40a55a73adf4be0f4a',
+                    'format' : 'iframe',
+                    'height' : 90,
+                    'width' : 728,
+                    'params' : {}
+                };
             </script>
+            <script type="text/javascript" src="//acceptableremotehumorous.com/7410406f6875af40a55a73adf4be0f4a/invoke.js"></script>
 
             <div class="chapter-nav d-flex justify-content-between align-items-center mb-4 top-0">
 
@@ -244,12 +248,16 @@
 
         </div>
 
-        <!-- Square Ads -->
-        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059" data-ad-slot="7544464049"
-            data-ad-format="auto" data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
+        <script type="text/javascript">
+            atOptions = {
+                'key' : '7410406f6875af40a55a73adf4be0f4a',
+                'format' : 'iframe',
+                'height' : 90,
+                'width' : 728,
+                'params' : {}
+            };
         </script>
+        <script type="text/javascript" src="//acceptableremotehumorous.com/7410406f6875af40a55a73adf4be0f4a/invoke.js"></script>
 
         <div class="section-list-category w-100">
             @if (!Auth()->check() || (Auth()->check() && Auth()->user()->userBan->comment == false))

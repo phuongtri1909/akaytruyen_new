@@ -7,16 +7,18 @@
 @section('content')
     <div class="chapter-wrapper container my-5">
         <div class="chapter-nav text-center main">
-            <script type="text/javascript">
-                atOptions = {
-                    'key' : '7410406f6875af40a55a73adf4be0f4a',
-                    'format' : 'iframe',
-                    'height' : 90,
-                    'width' : 728,
-                    'params' : {}
-                };
-            </script>
-            <script type="text/javascript" src="//acceptableremotehumorous.com/7410406f6875af40a55a73adf4be0f4a/invoke.js"></script>
+            <div class="ad-banner-responsive d-none d-md-flex justify-content-center mb-3">
+                <script type="text/javascript">
+                    atOptions = {
+                        'key' : '7410406f6875af40a55a73adf4be0f4a',
+                        'format' : 'iframe',
+                        'height' : 90,
+                        'width' : 728,
+                        'params' : {}
+                    };
+                </script>
+                <script type="text/javascript" src="//acceptableremotehumorous.com/7410406f6875af40a55a73adf4be0f4a/invoke.js"></script>
+            </div>
 
             <div class="chapter-nav d-flex justify-content-between align-items-center mb-4 top-0">
 
@@ -248,16 +250,18 @@
 
         </div>
 
-        <script type="text/javascript">
-            atOptions = {
-                'key' : '7410406f6875af40a55a73adf4be0f4a',
-                'format' : 'iframe',
-                'height' : 90,
-                'width' : 728,
-                'params' : {}
-            };
-        </script>
-        <script type="text/javascript" src="//acceptableremotehumorous.com/7410406f6875af40a55a73adf4be0f4a/invoke.js"></script>
+        <div class="ad-banner-responsive d-none d-md-flex justify-content-center mb-3">
+            <script type="text/javascript">
+                atOptions = {
+                    'key' : '7410406f6875af40a55a73adf4be0f4a',
+                    'format' : 'iframe',
+                    'height' : 90,
+                    'width' : 728,
+                    'params' : {}
+                };
+            </script>
+            <script type="text/javascript" src="//acceptableremotehumorous.com/7410406f6875af40a55a73adf4be0f4a/invoke.js"></script>
+        </div>
 
         <div class="section-list-category w-100">
             @if (!Auth()->check() || (Auth()->check() && Auth()->user()->userBan->comment == false))
@@ -278,6 +282,30 @@
 @once
     @push('styles')
         <style>
+            /* Responsive Ad Banner */
+            .ad-banner-responsive {
+                overflow: hidden;
+                max-width: 100%;
+            }
+
+            .ad-banner-responsive iframe {
+                max-width: 100%;
+                height: auto;
+            }
+
+            @media (max-width: 767px) {
+                .ad-banner-responsive {
+                    display: none !important;
+                }
+            }
+
+            @media (min-width: 768px) and (max-width: 991px) {
+                .ad-banner-responsive {
+                    overflow-x: auto;
+                    justify-content: flex-start !important;
+                }
+            }
+
             .alert-custom {
                 background-color: #eef9ff;
             }

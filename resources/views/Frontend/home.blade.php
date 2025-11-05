@@ -15,16 +15,18 @@
         </p>
     </div> --}}
     <div class="container">
-        <script type="text/javascript">
-            atOptions = {
-                'key' : '7410406f6875af40a55a73adf4be0f4a',
-                'format' : 'iframe',
-                'height' : 90,
-                'width' : 728,
-                'params' : {}
-            };
-        </script>
-        <script type="text/javascript" src="//acceptableremotehumorous.com/7410406f6875af40a55a73adf4be0f4a/invoke.js"></script>
+        <div class="ad-banner-responsive d-none d-md-flex justify-content-center mb-3">
+            <script type="text/javascript">
+                atOptions = {
+                    'key' : '7410406f6875af40a55a73adf4be0f4a',
+                    'format' : 'iframe',
+                    'height' : 90,
+                    'width' : 728,
+                    'params' : {}
+                };
+            </script>
+            <script type="text/javascript" src="//acceptableremotehumorous.com/7410406f6875af40a55a73adf4be0f4a/invoke.js"></script>
+        </div>
     </div>
     @include('Frontend.sections.main.stories_hot', ['categoryIdSelected' => 0])
     <hr>
@@ -80,4 +82,29 @@
 
 @push('styles')
     @vite(['resources/assets/frontend/css/home.css'])
+    <style>
+        /* Responsive Ad Banner */
+        .ad-banner-responsive {
+            overflow: hidden;
+            max-width: 100%;
+        }
+
+        .ad-banner-responsive iframe {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 767px) {
+            .ad-banner-responsive {
+                display: none !important;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 991px) {
+            .ad-banner-responsive {
+                overflow-x: auto;
+                justify-content: flex-start !important;
+            }
+        }
+    </style>
 @endpush

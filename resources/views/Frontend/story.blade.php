@@ -18,16 +18,18 @@
     <div class="container">
         <div class="row align-items-start">
             <div class="col-12 col-md-7 col-lg-8">
-                <script type="text/javascript">
-                    atOptions = {
-                        'key' : '7410406f6875af40a55a73adf4be0f4a',
-                        'format' : 'iframe',
-                        'height' : 90,
-                        'width' : 728,
-                        'params' : {}
-                    };
-                </script>
-                <script type="text/javascript" src="//acceptableremotehumorous.com/7410406f6875af40a55a73adf4be0f4a/invoke.js"></script>
+                <div class="ad-banner-responsive d-none d-md-flex justify-content-center mb-3">
+                    <script type="text/javascript">
+                        atOptions = {
+                            'key' : '7410406f6875af40a55a73adf4be0f4a',
+                            'format' : 'iframe',
+                            'height' : 90,
+                            'width' : 728,
+                            'params' : {}
+                        };
+                    </script>
+                    <script type="text/javascript" src="//acceptableremotehumorous.com/7410406f6875af40a55a73adf4be0f4a/invoke.js"></script>
+                </div>
                 @include('Frontend.snippets.title_component', [
                     'title' => 'Thông tin truyện',
                 ])
@@ -310,6 +312,30 @@
 
 @push('styles')
     <style>
+        /* Responsive Ad Banner */
+        .ad-banner-responsive {
+            overflow: hidden;
+            max-width: 100%;
+        }
+
+        .ad-banner-responsive iframe {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 767px) {
+            .ad-banner-responsive {
+                display: none !important;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 991px) {
+            .ad-banner-responsive {
+                overflow-x: auto;
+                justify-content: flex-start !important;
+            }
+        }
+
         .chapter-card {
             padding: 15px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);

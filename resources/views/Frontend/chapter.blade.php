@@ -18,11 +18,11 @@
 
                 @if ($chapterBefore)
                     <a href="{{ route('chapter', ['slugStory' => $story->slug, 'slugChapter' => $chapterBefore->slug]) }}"
-                        class="btn bg-primary-custom rounded-circle text-white px-3">
+                        class="btn bg-primary-custom rounded-circle text-white px-3 btn-back-next">
                         <i class="fas fa-chevron-left"></i>
                     </a>
                 @else
-                    <button disabled class="btn btn-outline-secondary rounded-circle px-3">
+                    <button disabled class="btn btn-outline-secondary rounded-circle px-3 btn-back-next">
                         <i class="fas fa-chevron-left"></i>
                     </button>
                 @endif
@@ -38,11 +38,11 @@
 
                 @if ($chapterAfter)
                     <a href="{{ route('chapter', ['slugStory' => $story->slug, 'slugChapter' => $chapterAfter->slug]) }}"
-                        class="btn bg-primary-custom rounded-circle text-white px-3">
+                        class="btn bg-primary-custom rounded-circle text-white px-3 btn-back-next">
                         <i class="fas fa-chevron-right"></i>
                     </a>
                 @else
-                    <button disabled class="btn btn-outline-secondary rounded-circle px-3">
+                    <button disabled class="btn btn-outline-secondary rounded-circle px-3 btn-back-next">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 @endif
@@ -126,7 +126,7 @@
             ?>
 
             <div id="chapter-content" class="chapter-content mb-4 p-3 border-0 rounded"
-                style="font-size: 1.5rem; min-height: 500px; line-height: 2; position: relative; top: -54px;">
+                style="font-size: 1.5rem; min-height: 500px; line-height: 2; position: relative; top: -54px;word-break: break-word;">
 
                 @if ($chapter->content)
                     {!! \App\Helpers\Helper::sanitizeChapterContent($chapter->content) !!}
@@ -180,11 +180,11 @@
 
                 @if ($chapterBefore)
                     <a href="{{ route('chapter', ['slugStory' => $story->slug, 'slugChapter' => $chapterBefore->slug]) }}"
-                        class="btn bg-primary-custom rounded-circle text-white px-3">
+                        class="btn bg-primary-custom rounded-circle text-white px-3 btn-back-next">
                         <i class="fas fa-chevron-left"></i>
                     </a>
                 @else
-                    <button disabled class="btn btn-outline-secondary rounded-circle px-3">
+                    <button disabled class="btn btn-outline-secondary rounded-circle px-3 btn-back-next">
                         <i class="fas fa-chevron-left"></i>
                     </button>
                 @endif
@@ -209,11 +209,11 @@
 
                 @if ($chapterAfter)
                     <a href="{{ route('chapter', ['slugStory' => $story->slug, 'slugChapter' => $chapterAfter->slug]) }}"
-                        class="btn bg-primary-custom rounded-circle text-white px-3">
+                        class="btn bg-primary-custom rounded-circle text-white px-3 btn-back-next">
                         <i class="fas fa-chevron-right"></i>
                     </a>
                 @else
-                    <button disabled class="btn btn-outline-secondary rounded-circle px-3">
+                    <button disabled class="btn btn-outline-secondary rounded-circle px-3 btn-back-next">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 @endif
@@ -1012,6 +1012,12 @@
                 .access-denied-message {
                     font-size: 0.95rem;
                 }
+            }
+
+            .btn-back-next{
+                aspect-ratio: 1/1;
+                display: flex;
+                align-items: center;
             }
         </style>
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Serif&family=Charter&display=swap"

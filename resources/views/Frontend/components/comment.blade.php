@@ -109,18 +109,30 @@
             border-radius: 8px;
             border-left: 3px solid #007bff;
             animation: slideInDown 0.3s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        .reply-form.focused {
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+            background: #fff;
         }
 
         .reply-form .form-control {
             border-radius: 8px;
             border: 1px solid #dee2e6;
             font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .reply-form .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
         }
 
         .submit-reply {
             background: #007bff;
             border: none;
-            border-radius: 15px;
+            border-radius: 20px;
             padding: 0.4rem 1rem;
             color: white;
             font-weight: 500;
@@ -130,7 +142,20 @@
 
         .submit-reply:hover {
             background: #0056b3;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        .cancel-reply {
+            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .cancel-reply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
         }
 
         /* Mention System */
@@ -265,6 +290,16 @@
 
             .reply-form {
                 padding: 0.5rem;
+            }
+
+            .reply-form .form-control {
+                font-size: 0.8rem;
+            }
+
+            .submit-reply,
+            .cancel-reply {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.75rem;
             }
 
             .blog-comment ul.comments ul:before {
@@ -443,21 +478,58 @@
                 e.preventDefault();
                 const commentId = $(this).data('id');
                 const userName = $(this).closest('.post-comments').find('.meta b').text().trim();
+                const postComments = $(this).closest('.post-comments');
 
-                if ($(this).closest('.post-comments').find('.reply-form').length === 0) {
+                if (postComments.find('.reply-form').length === 0) {
                     const replyForm = `
                         <div class="reply-form mt-2">
                             <div class="form-floating">
-                                <textarea class="form-control reply-text" placeholder="Nhập trả lời..." maxlength="700"></textarea>
-                                <label>Trả lời</label>
+                                <textarea class="form-control reply-text" placeholder="Nhập trả lời..." maxlength="700" rows="3"></textarea>
+                                <label>Trả lời <strong>${userName}</strong></label>
                                 <ul class="mention-list"></ul>
                             </div>
-                            <button class="btn btn-sm btn-info mt-2 submit-reply" data-id="${commentId}">Gửi</button>
+                            <div class="d-flex gap-2 align-items-center mt-2">
+                                <button class="btn btn-sm btn-primary submit-reply" data-id="${commentId}">
+                                    <i class="fa-solid fa-paper-plane me-1"></i>Gửi
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary cancel-reply">
+                                    <i class="fa-solid fa-times me-1"></i>Hủy
+                                </button>
+                            </div>
                         </div>
                     `;
-                    $(this).closest('.post-comments').append(replyForm);
+                    postComments.append(replyForm);
                     $(this).hide();
+
+                    setTimeout(() => {
+                        const replyFormElement = postComments.find('.reply-form');
+                        const textarea = postComments.find('.reply-text');
+                        
+                        replyFormElement.addClass('focused');
+                        
+                        textarea.focus();
+                        
+                        textarea[0].scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+
+                        setTimeout(() => {
+                            replyFormElement.removeClass('focused');
+                        }, 2000);
+                    }, 100);
                 }
+            });
+
+            $(document).on('click', '.cancel-reply', function(e) {
+                e.preventDefault();
+                const replyForm = $(this).closest('.reply-form');
+                const replyBtn = $(this).closest('.post-comments').find('.reply-btn');
+                
+                replyForm.fadeOut(300, function() {
+                    $(this).remove();
+                    replyBtn.show(); 
+                });
             });
 
             $(document).on('input', '.reply-text', function() {
@@ -558,11 +630,12 @@
                             }
 
                             replyContainer.append(res.html);
-                            btn.closest('.reply-form').remove();
-
-                            setTimeout(() => {
+                            
+                            const replyForm = btn.closest('.reply-form');
+                            replyForm.fadeOut(300, function() {
+                                $(this).remove();
                                 replyBtn.css('display', 'inline-block');
-                            }, 100);
+                            });
 
                             removeEmptyCommentsState();
 

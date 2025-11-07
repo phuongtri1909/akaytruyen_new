@@ -37,6 +37,13 @@
             resize: none;
         }
 
+        @media (max-width: 768px) {
+            .form-floating.submit-comment .form-control,
+            .form-floating.submit-comment .form-control:focus {
+                font-size: 16px !important;
+            }
+        }
+
         .form-floating.submit-comment .form-control:focus {
             border-color: #007bff;
             box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.1);
@@ -127,6 +134,13 @@
         .reply-form .form-control:focus {
             border-color: #007bff;
             box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+        }
+
+        @media (max-width: 768px) {
+            .reply-form .form-control,
+            .reply-form .form-control:focus {
+                font-size: 16px !important;
+            }
         }
 
         .submit-reply {
@@ -290,10 +304,6 @@
 
             .reply-form {
                 padding: 0.5rem;
-            }
-
-            .reply-form .form-control {
-                font-size: 0.8rem;
             }
 
             .submit-reply,

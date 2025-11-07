@@ -135,6 +135,13 @@
         padding: 0.75rem;
     }
 
+    .edit-comment-textarea,
+    .edit-comment-textarea:focus,
+    .comment-edit-form .form-control,
+    .comment-edit-form .form-control:focus {
+        font-size: 16px !important;
+    }
+
     .edit-form-actions {
         flex-direction: column;
     }

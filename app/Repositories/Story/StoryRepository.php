@@ -39,7 +39,6 @@ class StoryRepository extends BaseRepository implements StoryRepositoryInterface
             ->where('status', '=', Story::STATUS_ACTIVE)
             ->where('is_hot', '=', Story::IS_HOT)
             ->orderByDesc('updated_at')
-            ->limit($limit)
             ->get();
     }
 

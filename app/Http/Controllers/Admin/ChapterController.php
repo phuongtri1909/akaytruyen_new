@@ -64,7 +64,7 @@ class ChapterController extends Controller
             'name' => $request->name,
             'chapter' => $request->chapter,
             'content' => $sanitizedContent,
-            'slug' => Helper::generateChapterSlug($request->chapter, $request->name, $request->story_id),
+            'slug' => Helper::generateChapterSlug($request->chapter, $request->name, $request->story_id, null, null, null),
             'is_new' => 1,
             'views' => 0
         ]);
@@ -121,12 +121,16 @@ class ChapterController extends Controller
 
         $sanitizedContent = Helper::processTextareaContent($request->content);
 
+        // Lưu slug và name cũ để so sánh
+        $oldSlug = $chapter->slug;
+        $oldName = $chapter->name;
+
         $chapter->update([
             'story_id' => $request->story_id,
             'name' => $request->name,
             'chapter' => $request->chapter,
             'content' => $sanitizedContent,
-            'slug' => Helper::generateChapterSlug($request->chapter, $request->name, $request->story_id, $chapter->id),
+            'slug' => Helper::generateChapterSlug($request->chapter, $request->name, $request->story_id, $chapter->id, $oldSlug, $oldName),
         ]);
 
         return redirect()->route('admin.stories.show', $chapter->story_id)->with('success', 'Chương đã được cập nhật thành công!');

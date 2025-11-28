@@ -453,9 +453,33 @@ class Helper
         return trim($text);
     }
 
-    public static function generateChapterSlug($chapterNumber, $chapterName, $storyId, $excludeId = null)
+    public static function generateChapterSlug($chapterNumber, $chapterName, $storyId, $excludeId = null, $oldSlug = null, $oldName = null)
     {
         $baseSlug = $chapterNumber . '-' . Str::slug($chapterName);
+        $prefix = 'chuong-';
+        $shouldAddPrefix = false;
+        
+        if ($oldSlug === null) {
+            $shouldAddPrefix = true;
+        } else {
+            $hasPrefix = str_starts_with($oldSlug, $prefix);
+            
+            if ($hasPrefix) {
+                $shouldAddPrefix = true;
+            } else {
+                if ($oldName !== null && $oldName !== $chapterName) {
+                    $shouldAddPrefix = true;
+                }
+                if ($oldName !== null && $oldName === $chapterName) {
+                    return $oldSlug;
+                }
+            }
+        }
+        
+        if ($shouldAddPrefix) {
+            $baseSlug = $prefix . $baseSlug;
+        }
+        
         $slug = $baseSlug;
         $counter = 1;
 

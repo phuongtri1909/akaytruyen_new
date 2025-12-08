@@ -181,6 +181,13 @@
                         </div>
                     </div>
 
+                    <!-- Top Header -->
+                    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059"
+                        data-ad-slot="4536454491" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    <script>
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+
                     <div class="story-detail__list-chapter">
                         <div class="row">
                             <div class="col-12 col-sm-7 col-md-12 col-lg-7">
@@ -198,8 +205,8 @@
                                                 <input class="form-control wuxia-search__input" type="text"
                                                     id="search-chapter" data-story-slug="{{ $story->slug }}"
                                                     placeholder="Chương, Tên chương, Nội dung ...">
-                                                <button class="btn search-chapter-story wuxia-search__submit" type="button"
-                                                    id="btn-search" aria-label="Tìm kiếm">
+                                                <button class="btn search-chapter-story wuxia-search__submit"
+                                                    type="button" id="btn-search" aria-label="Tìm kiếm">
                                                     <svg xmlns="http://www.w3.org/2000/svg" height="1em"
                                                         viewBox="0 0 512 512">
                                                         <path

@@ -1,4 +1,10 @@
 <div class="section-stories-new mb-3 mt-5">
+    <!-- Top Header -->
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4405345005005059" data-ad-slot="4536454491"
+        data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
     <div class="row">
         @include('Frontend.snippets.head_title_global', [
             'title' => 'Truyện Mới',

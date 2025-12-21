@@ -62,12 +62,14 @@
 @endif
 
 <div class="floating-wuxia-social m-3 mb-5">
-    <!-- Social Buttons Container -->
+    <!-- YouTube Button - Always visible -->
+    <a href="https://youtube.com/@AkayTruyen?sub_confirmation=1" target="_blank" rel="noreferrer"
+        class="wuxia-social wuxia-social--yt text-white wuxia-social--always-visible" aria-label="Youtube">
+        <i class="fa-brands fa-youtube"></i>
+    </a>
+
+    <!-- Social Buttons Container - Facebook and Discord only -->
     <div class="social-buttons-container" id="socialContainer">
-        <a href="https://youtube.com/@AkayTruyen?sub_confirmation=1" target="_blank" rel="noreferrer"
-            class="wuxia-social wuxia-social--yt text-white" aria-label="Youtube">
-            <i class="fa-brands fa-youtube"></i>
-        </a>
         <a href="https://www.facebook.com/groups/1134210028188278/" target="_blank" rel="noreferrer"
             class="wuxia-social wuxia-social--fb text-white" aria-label="Facebook">
             <i class="fa-brands fa-facebook-f"></i>
@@ -322,13 +324,15 @@
         gap: 10px;
         transform: translateX(100%);
         opacity: 0;
-        transition: transform 0.3s ease, opacity 0.3s ease;
+        max-height: 0;
+        transition: transform 0.3s ease, opacity 0.3s ease, max-height 0.3s ease;
         pointer-events: none;
     }
 
     .social-buttons-container.active {
         transform: translateX(0);
         opacity: 1;
+        max-height: 200px; /* Đủ chỗ cho 2 buttons */
         pointer-events: auto;
     }
 
@@ -341,7 +345,7 @@
         color: #fff;
         font-size: 18px;
         text-decoration: none;
-        box-shadow: 0 8px 18px rgba(0, 0, 0, .25);
+        box-shadow: 0 0px 18px rgba(0, 0, 0, .25);
         transition: transform .2s ease, box-shadow .2s ease;
         animation: slideInRight 0.3s ease forwards;
     }
@@ -350,6 +354,13 @@
     .wuxia-social:nth-child(2) { animation-delay: 0.2s; }
     .wuxia-social:nth-child(3) { animation-delay: 0.3s; }
 
+    /* YouTube button always visible - ban đầu nằm sát toggle button (gap 10px từ parent) */
+    .wuxia-social--always-visible {
+        opacity: 1 !important;
+        transform: translateX(0) !important;
+        animation: none !important;
+        transition: transform 0.3s ease;
+    }
     @keyframes slideInRight {
         from {
             transform: translateX(50px);
@@ -363,7 +374,7 @@
 
     .wuxia-social:hover {
         transform: translateY(-2px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, .3);
+        box-shadow: 0 0px 24px rgba(0, 0, 0, .3);
     }
 
     .wuxia-social--yt {
@@ -413,8 +424,8 @@
         }
     }
 
-    /* Hiệu ứng loading cho social buttons */
-    .wuxia-social {
+    /* Hiệu ứng loading cho social buttons (chỉ áp dụng cho buttons trong container) */
+    .social-buttons-container .wuxia-social {
         opacity: 0;
         transform: translateX(50px);
     }
@@ -633,15 +644,26 @@
         // Social Toggle Functionality
         var socialToggle = document.getElementById('socialToggle');
         var socialContainer = document.getElementById('socialContainer');
+        var floatingSocial = document.querySelector('.floating-wuxia-social');
 
-        if (socialToggle && socialContainer) {
+        if (socialToggle && socialContainer && floatingSocial) {
             // Lấy trạng thái từ localStorage
             var isSocialOpen = localStorage.getItem('socialOpen') === 'true';
+
+            // Hàm để cập nhật class container-active
+            function updateContainerActive(isActive) {
+                if (isActive) {
+                    floatingSocial.classList.add('container-active');
+                } else {
+                    floatingSocial.classList.remove('container-active');
+                }
+            }
 
             // Áp dụng trạng thái ban đầu
             if (isSocialOpen) {
                 socialContainer.classList.add('active');
                 socialToggle.classList.add('active');
+                updateContainerActive(true);
             }
 
             socialToggle.addEventListener('click', function() {
@@ -651,6 +673,7 @@
                 // Lưu trạng thái vào localStorage
                 var isOpen = socialContainer.classList.contains('active');
                 localStorage.setItem('socialOpen', isOpen);
+                updateContainerActive(isOpen);
 
                 // Thêm hiệu ứng click
                 this.style.transform = 'scale(0.95)';
@@ -670,6 +693,7 @@
                     hideTimeout = setTimeout(function() {
                         socialContainer.classList.remove('active');
                         socialToggle.classList.remove('active');
+                        updateContainerActive(false);
                         localStorage.setItem('socialOpen', 'false');
                     }, 5000);
                 }

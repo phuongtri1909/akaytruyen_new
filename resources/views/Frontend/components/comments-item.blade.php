@@ -22,6 +22,7 @@
                 'Mod' => 'vien_mod.png',
                 'Content' => 'avt_content.png',
                 'vip' => 'avt_admin.png',
+                'VIP' => 'avt_admin.png',
                 'VIP PRO' => 'ma-van-dang-tptk.gif',
                 'VIP PRO MAX' => 'avt_vip_pro_max.gif',
                 'VIP SIÊU VIỆT' => 'khung-sieu-viet.png',
@@ -98,7 +99,7 @@
                                             🛡️ [MOD] <b>{{ $comment->user->name }}</b>
                                         @endif
                                     </span>
-                                @elseif ($userRole === 'vip')
+                                @elseif (in_array(strtolower($userRole ?? ''), ['vip']))
                                     <span class="role-badge vip-badge">
                                         @if (auth()->check() && (auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Mod')))
                                             <a href="{{ route('admin.users.edit', $comment->user->id) }}"
@@ -190,7 +191,7 @@
                                             style="margin-left:5px;margin-top:-10px;" alt="Mod">
                                         <span class="tooltip-text">Mod kiểm duyệt</span>
                                     </span>
-                                @elseif($comment->user && $comment->user->hasRole('vip'))
+                                @elseif($comment->user && ($comment->user->hasRole('vip') || $comment->user->hasRole('VIP')))
                                     <span class="tooltip-icon">
                                         <img src="https://cdn3.emoji.gg/emojis/45918-msp-super-vip.png" width="30px"
                                             style="margin-left:5px;margin-top:-10px;" alt="vip1">

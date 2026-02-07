@@ -309,6 +309,7 @@
         {{-- <div class="fb-comments" data-href="https://developers.facebook.com/docs/plugins/comments#configurator"
             data-width="" data-numposts="5"></div> --}}
     </div>
+    @include('Frontend.components.tet_effects')
 @endsection
 
 @push('styles')

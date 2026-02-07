@@ -72,6 +72,7 @@
         </div>
     </div>
     <hr>
+    @include('Frontend.components.tet_effects')
 @endsection
 
 @push('styles')

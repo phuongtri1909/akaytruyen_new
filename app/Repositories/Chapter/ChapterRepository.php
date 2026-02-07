@@ -35,6 +35,7 @@ class ChapterRepository extends BaseRepository implements ChapterRepositoryInter
         return $this->getModel()
             ->query()
             ->where('story_id', $storyId)
+            ->published()
             ->orderBy('chapter', $isOldFirst ? 'ASC' : 'DESC')
             ->paginate(50);
     }
@@ -46,6 +47,7 @@ class ChapterRepository extends BaseRepository implements ChapterRepositoryInter
         return $this->getModel()
             ->query()
             ->where('story_id', '=', $storyId)
+            ->published()
             ->select(['id', 'name', 'slug', 'chapter'])
             ->get();
     }
@@ -64,11 +66,12 @@ class ChapterRepository extends BaseRepository implements ChapterRepositoryInter
             $chapters = $this->getModel()
                 ->query()
                 ->where('story_id', '=', $storyId)
+                ->published()
                 ->where('is_new', '=', Chapter::IS_NEW)
                 ->orderBy('chapter', 'desc')
                 ->select('id', 'name', 'slug')
                 ->get();
-            
+
             return $chapters;
         });
     }
@@ -79,6 +82,7 @@ class ChapterRepository extends BaseRepository implements ChapterRepositoryInter
             ->query()
             ->where('story_id', '=', $storyId)
             ->where('slug', '=', $slug)
+            ->published()
             ->first();
     }
 
@@ -116,6 +120,7 @@ class ChapterRepository extends BaseRepository implements ChapterRepositoryInter
             $navigationChapters = $this->getModel()
                 ->query()
                 ->where('story_id', $storyId)
+                ->published()
                 ->whereIn('chapter', [$chapterInt - 1, $chapterInt + 1])
                 ->select('id', 'slug', 'chapter', 'name')
                 ->get()
@@ -154,6 +159,7 @@ class ChapterRepository extends BaseRepository implements ChapterRepositoryInter
                 ->query()
                 ->where('story_id', '=', $storyId)
                 ->where('slug', '=', $slugChapter)
+                ->published()
                 ->with(['story:id,name,slug,is_vip'])
                 ->first();
 
@@ -178,6 +184,7 @@ class ChapterRepository extends BaseRepository implements ChapterRepositoryInter
             $allChapters = $this->getModel()
                 ->query()
                 ->where('story_id', $storyId)
+                ->published()
                 ->where(function($query) use ($chapterInt, $storyId) {
                     $query->whereIn('chapter', [$chapterInt - 1, $chapterInt + 1])
                           ->orWhere('id', function($subQuery) use ($storyId) {

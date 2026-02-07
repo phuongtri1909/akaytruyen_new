@@ -180,12 +180,11 @@ class StoryRepository extends BaseRepository implements StoryRepositoryInterface
         $cacheKey = "story:chapters:{$storyId}:page:{$page}:order:" . ($isOldFirst ? 'asc' : 'desc') . $banSuffix . $vipSuffix . $guestSuffix;
 
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($storyId, $isOldFirst) {
-            $chapters = $this->getModel()
-                ->find($storyId)
-                ->chapters()
+            $chapters = \App\Models\Chapter::where('story_id', $storyId)
+                ->published()
                 ->orderBy('chapter', $isOldFirst ? 'asc' : 'desc')
                 ->paginate(50);
-            
+
             return $chapters;
         });
     }
@@ -193,8 +192,8 @@ class StoryRepository extends BaseRepository implements StoryRepositoryInterface
     public function getCachedStoryStats($storyId)
     {
         return Cache::remember("story:stats:{$storyId}", now()->addMinutes(30), function () use ($storyId) {
-            $totalChapters = \App\Models\Chapter::where('story_id', $storyId)->count();
-            $totalViews = \App\Models\Chapter::where('story_id', $storyId)->sum('views');
+            $totalChapters = \App\Models\Chapter::where('story_id', $storyId)->published()->count();
+            $totalViews = \App\Models\Chapter::where('story_id', $storyId)->published()->sum('views');
 
             return [
                 'total_chapters' => $totalChapters,
@@ -208,6 +207,7 @@ class StoryRepository extends BaseRepository implements StoryRepositoryInterface
         return Cache::remember("story:chapter_ranges:{$storyId}", now()->addMinutes(60), function () use ($storyId) {
             // Single query to get both min and max
             $result = \App\Models\Chapter::where('story_id', $storyId)
+                ->published()
                 ->selectRaw('MIN(chapter) as min_chapter, MAX(chapter) as max_chapter')
                 ->first();
 

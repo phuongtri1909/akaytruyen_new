@@ -89,9 +89,14 @@
 
         <div class="">
 
-            <?php
-            if ($chapter->content) {
-                $chapter->content = html_entity_decode(htmlspecialchars_decode($chapter->content), ENT_QUOTES, 'UTF-8');
+            @php
+                $contentType = $chapter->content_type ?? 'plain';
+                $displayContent = '';
+                if ($chapter->content) {
+                if ($contentType === 'rich') {
+                    $displayContent = \App\Helpers\Helper::sanitizeChapterContent($chapter->content);
+                } else {
+                    $displayContent = html_entity_decode(htmlspecialchars_decode($chapter->content), ENT_QUOTES, 'UTF-8');
 
                 $word_special_chars = [
                     '&ldquo;' => '“',
@@ -108,28 +113,24 @@
                     '–' => '-',
                     '—' => '-',
                 ];
-                $chapter->content = str_replace(array_keys($word_special_chars), array_values($word_special_chars), $chapter->content);
-                $chapter->content = str_replace(['&nbsp;', "\xc2\xa0"], ' ', $chapter->content);
+                $displayContent = str_replace(array_keys($word_special_chars), array_values($word_special_chars), $displayContent);
+                $displayContent = str_replace(['&nbsp;', "\xc2\xa0"], ' ', $displayContent);
 
-                $chapter->content = preg_replace('/\r\n|\r|\n/', '</p><p>', $chapter->content);
+                $displayContent = preg_replace('/\r\n|\r|\n/', '</p><p>', $displayContent);
 
-                // Removed regex patterns that were adding unwanted spaces before quotes
+                $displayContent = '<p>' . $displayContent . '</p>';
 
-                // Removed all regex processing to preserve original content formatting
-
-                // Removed regex that was adding spaces after punctuation
-
-                $chapter->content = '<p>' . $chapter->content . '</p>';
-
-                $chapter->content = preg_replace('/<p>\s*<\/p>/', '', $chapter->content);
+                $displayContent = preg_replace('/<p>\s*<\/p>/', '', $displayContent);
+                $displayContent = \App\Helpers\Helper::sanitizeChapterContent($displayContent);
+                }
             }
-            ?>
+            @endphp
 
             <div id="chapter-content" class="chapter-content mb-4 p-3 border-0 rounded"
                 style="font-size: 1.5rem; min-height: 500px; line-height: 2; position: relative; top: -54px;word-break: break-word;">
 
-                @if ($chapter->content)
-                    {!! \App\Helpers\Helper::sanitizeChapterContent($chapter->content) !!}
+                @if ($displayContent)
+                    {!! $displayContent !!}
                 @else
                     <div class="access-denied-container">
                         <div class="access-denied-card">

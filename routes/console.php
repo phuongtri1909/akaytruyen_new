@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 Schedule::command('activity-logs:clear')->daily();
 Schedule::command('vip:revert')->daily();
 Schedule::command('notifications:clear')->daily();
+Schedule::command('chapters:publish-scheduled')->everyMinute();

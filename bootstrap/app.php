@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(fn() => route('login'));
 
+        $middleware->validateCsrfTokens(except: [
+            'admin/img-upload',
+        ]);
+
         $middleware->alias([
             'secure.file.upload' => \App\Http\Middleware\SecureFileUpload::class,
             'ban' => \App\Http\Middleware\CheckBan::class,

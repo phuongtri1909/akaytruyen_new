@@ -87,6 +87,12 @@
                                     </span>
                                 </div>
                                 <div class="info-item">
+                                    <span class="info-label">Xuất bản:</span>
+                                    <span class="status-badge {{ ($chapter->status ?? 'published') === 'published' ? 'status-new' : 'status-old' }}">
+                                        {{ ($chapter->status ?? 'published') === 'published' ? 'Đã xuất bản' : 'Nháp' }}
+                                    </span>
+                                </div>
+                                <div class="info-item">
                                     <span class="info-label">Ngày tạo:</span>
                                     <span class="info-value">{{ $chapter->created_at->format('d/m/Y H:i') }}</span>
                                 </div>
@@ -94,6 +100,51 @@
                                     <span class="info-label">Cập nhật:</span>
                                     <span class="info-value">{{ $chapter->updated_at->format('d/m/Y H:i') }}</span>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label-custom">Kiểu nội dung <span class="required-mark">*</span></label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="content_type" value="plain" {{ old('content_type', $chapter->content_type ?? 'plain') === 'plain' ? 'checked' : '' }}>
+                                            <span>Text thông thường</span>
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="content_type" value="rich" {{ old('content_type', $chapter->content_type ?? 'plain') === 'rich' ? 'checked' : '' }}>
+                                            <span>Rich content (CKEditor)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label-custom">Trạng thái <span class="required-mark">*</span></label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="status" value="published" {{ old('status', $chapter->status ?? 'published') === 'published' ? 'checked' : '' }}>
+                                            <span>Xuất bản</span>
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="status" value="draft" {{ old('status', $chapter->status ?? 'published') === 'draft' ? 'checked' : '' }}>
+                                            <span>Nháp</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="scheduled-publish-group" style="display: {{ ($chapter->status ?? 'published') === 'draft' ? 'block' : 'none' }};">
+                            <label for="scheduled_publish_at" class="form-label-custom">Hẹn giờ đăng</label>
+                            <input type="datetime-local" id="scheduled_publish_at" name="scheduled_publish_at" 
+                                   class="custom-input" value="{{ old('scheduled_publish_at', $chapter->scheduled_publish_at?->format('Y-m-d\TH:i')) }}">
+                            <small class="text-muted">Chỉ áp dụng khi trạng thái là Nháp.</small>
+                            <div class="error-message" id="error-scheduled_publish_at">
+                                @error('scheduled_publish_at')
+                                    {{ $message }}
+                                @enderror
                             </div>
                         </div>
 
@@ -187,6 +238,10 @@
     }
 
 
+    .radio-group { display: flex; flex-direction: column; gap: 8px; }
+    .radio-label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .radio-label input { margin: 0; }
+
     @media (max-width: 768px) {
         .info-grid {
             grid-template-columns: 1fr;
@@ -196,10 +251,85 @@
 @endpush
 
 @push('scripts')
+<script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
 <script>
     $(document).ready(function() {
+        var ckEditor = null;
+
+        function initCKEditor() {
+            if (ckEditor) return;
+            var uploadUrl = "{{ url(route('admin.chapters.upload-image')) }}";
+            var csrfToken = "{{ csrf_token() }}";
+            CKEDITOR.replace('content', {
+                height: 400,
+                imageUploadUrl: uploadUrl,
+                filebrowserImageUploadUrl: uploadUrl,
+                filebrowserUploadMethod: 'form',
+                extraPlugins: 'uploadimage,image',
+                removePlugins: 'elementspath',
+                toolbar: [
+                    { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', '-', 'Undo', 'Redo'] },
+                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat'] },
+                    { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Blockquote'] },
+                    { name: 'links', items: ['Link', 'Unlink'] },
+                    { name: 'insert', items: ['Image', 'UploadImage'] }
+                ]
+            });
+            ckEditor = CKEDITOR.instances.content;
+            ckEditor.on('fileUploadRequest', function(evt) {
+                evt.data.fileLoader.xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+                evt.data.requestData._token = csrfToken;
+            });
+        }
+
+        function destroyCKEditor() {
+            if (ckEditor) {
+                ckEditor.destroy();
+                ckEditor = null;
+            }
+        }
+
+        function toggleContentType() {
+            var contentType = $('input[name="content_type"]:checked').val();
+            if (contentType === 'rich') {
+                var content = $('#content').val();
+                destroyCKEditor();
+                setTimeout(function() {
+                    $('#content').val(content);
+                    initCKEditor();
+                }, 100);
+            } else {
+                if (ckEditor) {
+                    var data = ckEditor.getData();
+                    destroyCKEditor();
+                    $('#content').val(data).show();
+                }
+            }
+        }
+
+        function toggleScheduledPublish() {
+            var status = $('input[name="status"]:checked').val();
+            if (status === 'draft') {
+                $('#scheduled-publish-group').show();
+            } else {
+                $('#scheduled-publish-group').hide();
+            }
+        }
+
+        $('input[name="content_type"]').on('change', toggleContentType);
+        $('input[name="status"]').on('change', toggleScheduledPublish);
+
+        if ($('input[name="content_type"]:checked').val() === 'rich') {
+            initCKEditor();
+        }
+        toggleScheduledPublish();
+
         $('#chapter-form').submit(function(e) {
             e.preventDefault();
+
+            if (ckEditor) {
+                ckEditor.updateElement();
+            }
 
             $('.error-message').empty();
             $('.input-error').removeClass('input-error');

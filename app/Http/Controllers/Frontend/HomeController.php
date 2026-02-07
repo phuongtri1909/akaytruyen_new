@@ -120,8 +120,10 @@ class HomeController extends Controller
         $totalViews = Cache::remember('stats:total_views', $cacheTtl, fn () => Chapter::query()->sum('views'));
         $totalRating = Cache::remember('stats:total_rating', $cacheTtl, fn () => User::query()->sum('rating'));
 
-        $selectedMonth = $request->query('month', Carbon::now()->month);
-        $selectedYear = $request->query('year', Carbon::now()->year);
+        $selectedMonth = (int) $request->query('month', Carbon::now()->month);
+        $selectedYear = (int) $request->query('year', Carbon::now()->year);
+        $selectedMonth = $selectedMonth ?: (int) Carbon::now()->month;
+        $selectedYear = $selectedYear ?: (int) Carbon::now()->year;
 
         // Lấy danh sách các tháng có donate (tối ưu query)
         $months = Cache::remember('donors:months', $cacheTtl, function () {
@@ -132,20 +134,12 @@ class HomeController extends Controller
                 ->get();
         });
 
-        // Lấy danh sách donate theo tháng được chọn (tổng hợp từ tất cả truyện)
-        $usersDonate = User::where('donate_amount', '>', 0)
-            ->whereMonth('updated_at', $selectedMonth)
-            ->whereYear('updated_at', $selectedYear)
-            ->selectRaw("CAST(name AS CHAR CHARACTER SET utf8mb4) as name, donate_amount, updated_at")
-            ->orderBy('donate_amount', 'desc');
-
-        $guestDonate = Donation::whereMonth('donated_at', $selectedMonth)
-            ->whereYear('donated_at', $selectedYear)
-            ->selectRaw("CAST(name AS CHAR CHARACTER SET utf8mb4) as name, amount as donate_amount, donated_at as updated_at");
-
-        // Gộp hai danh sách lại và lấy toàn bộ dữ liệu (tối ưu query)
-        $topDonors = Cache::remember("donors:top:{$selectedYear}-{$selectedMonth}", $cacheTtl, function () use ($usersDonate, $guestDonate) {
-            return $usersDonate->union($guestDonate)
+        $topDonors = Cache::remember("donors:top:{$selectedYear}-{$selectedMonth}", $cacheTtl, function () use ($selectedMonth, $selectedYear) {
+            return Donation::query()
+                ->whereMonth('donated_at', $selectedMonth)
+                ->whereYear('donated_at', $selectedYear)
+                ->selectRaw('name, SUM(amount) as donate_amount')
+                ->groupBy('name')
                 ->orderByDesc('donate_amount')
                 ->get();
         });
@@ -280,7 +274,8 @@ class HomeController extends Controller
             $normalizedSearchTerm = strtolower(trim($cleanedSearchTerm));
 
             $query = Chapter::select('id', 'story_id', 'slug', 'chapter', 'name', 'content', 'created_at')
-                ->where('story_id', $story->id);
+                ->where('story_id', $story->id)
+                ->published();
 
             if (!empty($normalizedSearchTerm)) {
                 $searchNumber = preg_replace('/[^0-9]/', '', $normalizedSearchTerm);

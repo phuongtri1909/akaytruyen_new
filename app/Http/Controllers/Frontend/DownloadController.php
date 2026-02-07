@@ -43,7 +43,7 @@ class DownloadController extends Controller
     
         // Lấy dữ liệu truyện và chương
         $story = Story::where('slug', $storySlug)->firstOrFail();
-        $chapter = Chapter::where('slug', $chapterSlug)->where('story_id', $story->id)->firstOrFail();
+        $chapter = Chapter::where('slug', $chapterSlug)->where('story_id', $story->id)->published()->firstOrFail();
     
         // Làm sạch nội dung chương
         $chapter->content = html_entity_decode(htmlspecialchars_decode($chapter->content), ENT_QUOTES, 'UTF-8');

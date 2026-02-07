@@ -150,6 +150,10 @@
                                         class="action-button">
                                         <i class="fas fa-plus"></i> Thêm chương
                                     </a>
+                                    <a href="{{ route('admin.chapters.bulk-create', $story) }}"
+                                        class="action-button">
+                                        <i class="fas fa-copy"></i> Tạo nhiều chương
+                                    </a>
                                 @endcan
                             </div>
                         </div>
@@ -184,6 +188,8 @@
                                             <th class="column-medium">Tên chương</th>
                                             <th class="column-small text-center">Lượt xem</th>
                                             <th class="column-small text-center">Trạng thái</th>
+                                            <th class="column-small text-center">Trạng thái chương</th>
+                                            <th class="column-medium text-center">Đếm ngược</th>
                                             <th class="column-small text-center">Ngày tạo</th>
                                             <th class="column-small text-center">Thao tác</th>
                                         </tr>
@@ -205,6 +211,26 @@
                                                         class="status-badge {{ $chapter->is_new ? 'status-new' : 'status-old' }}">
                                                         {{ $chapter->is_new ? 'Mới' : 'Cũ' }}
                                                     </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    @if(($chapter->status ?? '') === \App\Models\Chapter::STATUS_DRAFT)
+                                                        <span class="badge bg-secondary">Nháp</span>
+                                                    @else
+                                                        <span class="badge bg-success">Đã xuất bản</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    @if(($chapter->status ?? '') === \App\Models\Chapter::STATUS_DRAFT && $chapter->scheduled_publish_at)
+                                                        @if($chapter->scheduled_publish_at->isFuture())
+                                                            <span class="countdown-text" data-scheduled-at="{{ $chapter->scheduled_publish_at->toIso8601String() }}" title="Đăng lúc {{ $chapter->scheduled_publish_at->format('d/m/Y H:i') }}">
+                                                                <i class="fas fa-clock"></i> <span class="countdown-value">--</span>
+                                                            </span>
+                                                        @else
+                                                            <span class="badge bg-warning text-dark"><i class="fas fa-exclamation-circle"></i> Đã tới giờ đăng</span>
+                                                        @endif
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
                                                 </td>
                                                 <td class="text-center">{{ $chapter->created_at->format('d/m/Y') }}</td>
                                                 <td class="text-center">
@@ -693,6 +719,32 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
+            // Cập nhật đếm ngược cho các chương hẹn giờ đăng
+            function updateCountdowns() {
+                $('.countdown-text').each(function() {
+                    var $el = $(this);
+                    var scheduledAt = $el.data('scheduled-at');
+                    if (!scheduledAt) return;
+                    var target = new Date(scheduledAt);
+                    var now = new Date();
+                    if (target <= now) {
+                        $el.find('.countdown-value').text('Đã tới giờ đăng');
+                        return;
+                    }
+                    var diff = Math.floor((target - now) / 1000);
+                    var days = Math.floor(diff / 86400);
+                    var hours = Math.floor((diff % 86400) / 3600);
+                    var mins = Math.floor((diff % 3600) / 60);
+                    var parts = [];
+                    if (days > 0) parts.push(days + ' ngày');
+                    if (hours > 0) parts.push(hours + ' giờ');
+                    parts.push(mins + ' phút');
+                    $el.find('.countdown-value').text('Còn ' + parts.join(' '));
+                });
+            }
+            updateCountdowns();
+            setInterval(updateCountdowns, 60000);
+
             // Toggle description
             $('.toggle-description').click(function() {
                 const description = $(this).next('.story-description');

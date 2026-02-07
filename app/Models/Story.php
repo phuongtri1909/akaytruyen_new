@@ -93,7 +93,7 @@ class Story extends Model
 
     public function latestChapter()
     {
-        return $this->hasOne(Chapter::class, 'story_id')->latestOfMany();
+        return $this->hasOne(Chapter::class, 'story_id')->published()->latestOfMany();
     }
 
     public function getChapterLastAttribute()

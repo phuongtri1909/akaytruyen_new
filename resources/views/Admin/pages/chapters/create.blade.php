@@ -72,11 +72,56 @@
                             </div>
                         </div>
 
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label-custom">Kiểu nội dung <span class="required-mark">*</span></label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="content_type" value="plain" {{ old('content_type', 'plain') === 'plain' ? 'checked' : '' }}>
+                                            <span>Text thông thường (textarea)</span>
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="content_type" value="rich" {{ old('content_type') === 'rich' ? 'checked' : '' }}>
+                                            <span>Rich content (CKEditor - kéo thả ảnh)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label-custom">Trạng thái <span class="required-mark">*</span></label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="status" value="published" {{ old('status', 'published') === 'published' ? 'checked' : '' }}>
+                                            <span>Xuất bản ngay</span>
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="status" value="draft" {{ old('status') === 'draft' ? 'checked' : '' }}>
+                                            <span>Nháp</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="scheduled-publish-group" style="display: none;">
+                            <label for="scheduled_publish_at" class="form-label-custom">Hẹn giờ đăng (tùy chọn)</label>
+                            <input type="datetime-local" id="scheduled_publish_at" name="scheduled_publish_at" 
+                                   class="custom-input" value="{{ old('scheduled_publish_at') }}">
+                            <small class="text-muted">Chỉ áp dụng khi trạng thái là Nháp. Tới giờ hẹn, chương sẽ tự động xuất bản.</small>
+                            <div class="error-message" id="error-scheduled_publish_at">
+                                @error('scheduled_publish_at')
+                                    {{ $message }}
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label for="content" class="form-label-custom">
                                 Nội dung <span class="required-mark">*</span>
                             </label>
-                            <textarea id="content" name="content" class="custom-input {{ $errors->has('content') ? 'input-error' : '' }}" rows="15" required>{{ old('content') }}</textarea>
+                            <textarea id="content" name="content" class="custom-input {{ $errors->has('content') ? 'input-error' : '' }}" rows="15">{{ old('content') }}</textarea>
                             <div class="error-message" id="error-content">
                                 @error('content')
                                     {{ $message }}
@@ -120,14 +165,92 @@
         color: #6c757d;
     }
 
+    .radio-group { display: flex; flex-direction: column; gap: 8px; }
+    .radio-label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .radio-label input { margin: 0; }
 </style>
 @endpush
 
 @push('scripts')
+<script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
 <script>
     $(document).ready(function() {
+        var ckEditor = null;
+
+        function initCKEditor() {
+            if (ckEditor) return;
+            var uploadUrl = "{{ url(route('admin.chapters.upload-image')) }}";
+            var csrfToken = "{{ csrf_token() }}";
+            CKEDITOR.replace('content', {
+                height: 400,
+                imageUploadUrl: uploadUrl,
+                filebrowserImageUploadUrl: uploadUrl,
+                filebrowserUploadMethod: 'form',
+                extraPlugins: 'uploadimage,image',
+                removePlugins: 'elementspath',
+                toolbar: [
+                    { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', '-', 'Undo', 'Redo'] },
+                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat'] },
+                    { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Blockquote'] },
+                    { name: 'links', items: ['Link', 'Unlink'] },
+                    { name: 'insert', items: ['Image', 'UploadImage'] }
+                ]
+            });
+            ckEditor = CKEDITOR.instances.content;
+            ckEditor.on('fileUploadRequest', function(evt) {
+                evt.data.fileLoader.xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+                evt.data.requestData._token = csrfToken;
+            });
+        }
+
+        function destroyCKEditor() {
+            if (ckEditor) {
+                ckEditor.destroy();
+                ckEditor = null;
+            }
+        }
+
+        function toggleContentType() {
+            var contentType = $('input[name="content_type"]:checked').val();
+            if (contentType === 'rich') {
+                var content = $('#content').val();
+                destroyCKEditor();
+                setTimeout(function() {
+                    $('#content').val(content);
+                    initCKEditor();
+                }, 100);
+            } else {
+                if (ckEditor) {
+                    var data = ckEditor.getData();
+                    destroyCKEditor();
+                    $('#content').val(data).show();
+                }
+            }
+        }
+
+        function toggleScheduledPublish() {
+            var status = $('input[name="status"]:checked').val();
+            if (status === 'draft') {
+                $('#scheduled-publish-group').show();
+            } else {
+                $('#scheduled-publish-group').hide();
+            }
+        }
+
+        $('input[name="content_type"]').on('change', toggleContentType);
+        $('input[name="status"]').on('change', toggleScheduledPublish);
+
+        if ($('input[name="content_type"]:checked').val() === 'rich') {
+            initCKEditor();
+        }
+        toggleScheduledPublish();
+
         $('#chapter-form').submit(function(e) {
             e.preventDefault();
+
+            if (ckEditor) {
+                ckEditor.updateElement();
+            }
 
             $('.error-message').empty();
             $('.input-error').removeClass('input-error');

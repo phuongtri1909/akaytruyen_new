@@ -40,9 +40,23 @@ Route::middleware(['ban:login'])->group(function () {
         Route::resource('stories', StoryController::class);
         Route::post('stories/{story}/toggle-status', [StoryController::class, 'toggleStatus'])->name('stories.toggle-status');
 
-        // Chapter Management
+        // Chapter Management - upload ảnh CKEditor (path riêng biệt tránh conflict)
+        Route::post('img-upload', [ChapterController::class, 'uploadImage'])->name('chapters.upload-image');
         Route::resource('chapters', ChapterController::class)->except('index', 'show');
         Route::post('chapters/{chapter}/toggle-status', [ChapterController::class, 'toggleStatus'])->name('chapters.toggle-status');
+
+        // Bulk create chapters
+        Route::get('stories/{story}/chapters/bulk-create', [ChapterController::class, 'bulkCreate'])->name('chapters.bulk-create');
+        Route::post('stories/{story}/chapters/bulk-store', [ChapterController::class, 'bulkStore'])->name('chapters.bulk-store');
+        Route::post('stories/{story}/chapters/check-existing', [ChapterController::class, 'checkExisting'])->name('chapters.check-existing');
+
+        // Server time for bulk create
+        Route::get('get-server-time', function () {
+            return response()->json([
+                'time' => \Carbon\Carbon::now('Asia/Ho_Chi_Minh')->format('Y-m-d\TH:i'),
+                'timezone' => 'Asia/Ho_Chi_Minh'
+            ]);
+        })->name('get-server-time');
 
         // Donate Management
         Route::get('donate/{storyId}', [DonateController::class, 'index'])->name('donate.index');

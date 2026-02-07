@@ -12,11 +12,21 @@ class Chapter extends Model
 
     const IS_NEW = 1;
 
+    const CONTENT_TYPE_PLAIN = 'plain';
+    const CONTENT_TYPE_RICH = 'rich';
+
+    const STATUS_DRAFT = 'draft';
+    const STATUS_PUBLISHED = 'published';
+
     protected $fillable = [
         'story_id',
         'name',
         'chapter',
         'content',
+        'content_type',
+        'status',
+        'scheduled_publish_at',
+        'published_at',
         'slug',
         'is_new',
         'views'
@@ -26,7 +36,9 @@ class Chapter extends Model
         'chapter' => 'integer',
         'story_id' => 'integer',
         'is_new' => 'integer',
-        'views' => 'integer'
+        'views' => 'integer',
+        'scheduled_publish_at' => 'datetime',
+        'published_at' => 'datetime'
     ];
 
     protected $dates = [
@@ -52,5 +64,24 @@ class Chapter extends Model
     
     public function story() {
         return $this->belongsTo(Story::class, 'story_id', 'id');
+    }
+
+    /**
+     * Scope: Chỉ lấy chương đã xuất bản (để hiển thị cho người đọc)
+     */
+    public function scopePublished($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('status', Chapter::STATUS_PUBLISHED)
+              ->orWhereNull('status');
+        });
+    }
+
+    /**
+     * Kiểm tra chương đã xuất bản chưa
+     */
+    public function isPublished(): bool
+    {
+        return $this->status === self::STATUS_PUBLISHED || $this->status === null;
     }
 }

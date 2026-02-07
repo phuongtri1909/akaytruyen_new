@@ -3,64 +3,45 @@
  * For licensing, see https://ckeditor.com/legal/ckeditor-oss-license
  */
 CKEDITOR.editorConfig = function(config) {
-    config.allowedContent = 'p;h1;h2;h3;h4;h5;h6;pre;br;strong;b;em;i;u;span{style};font[size,color,face];div{style};table[border,cellpadding,cellspacing,width,height];tr;td[colspan,rowspan,width,height];th[colspan,rowspan,width,height];tbody;thead;tfoot;ul;ol;li;blockquote;img[src,alt,width,height,title];a[href,title,target];video[src,width,height,controls,poster];source[src,type]';
-    
-    config.disallowedContent = 'script;iframe;object;embed;form;input;textarea;select;button;meta;link;style;title;head;html;body;base;bgsound;xml;xmp;plaintext;listing;marquee;blink;keygen;isindex;nextid;spacer;wbr;acronym;applet;basefont;big;center;dir;hgroup;kbd;noframes;s;strike;tt;nobr;noembed;noscript;param;q;rb;rbc;rp;rt;rtc;ruby;samp;small;var';
-    
-    config.protectedSource = [
-        /<script[\s\S]*?<\/script>/gi,
-        /<iframe[\s\S]*?<\/iframe>/gi,
-        /<object[\s\S]*?<\/object>/gi,
-        /<embed[\s\S]*?<\/embed>/gi,
-        /javascript\s*:/gi,
-        /on\w+\s*=/gi
-    ];
-    
-    config.forcePasteAsPlainText = true;
-    config.pasteFilter = 'semantic-content';
-    
-    config.on = {
-        instanceReady: function(evt) {
-            var editor = evt.editor;
-            
-            editor.on('paste', function(evt) {
-                var data = evt.data.dataValue;
-                if (data && (data.indexOf('<script') !== -1 || data.indexOf('javascript:') !== -1)) {
-                    evt.data.dataValue = data.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/javascript\s*:/gi, '');
-                }
-            });
-            
-            editor.on('key', function(evt) {
-                var data = evt.data;
-                if (data && (data.indexOf('<script') !== -1 || data.indexOf('javascript:') !== -1)) {
-                    evt.data = data.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/javascript\s*:/gi, '');
-                }
-            });
-        }
-    };
-  
-    config.extraPlugins = 'uploadimage,image,video,clipboard,table,justify,codesnippet,font,colorbutton'; 
+    config.allowedContent = true;
+    // Define changes to the default configuration here.
+    config.extraPlugins = 'uploadimage,image,video,clipboard,table,justify,codesnippet,font,colorbutton'; // Add plugins as needed
     config.toolbarGroups = [
         { name: 'clipboard', groups: [ 'clipboard', 'undo' ] },
         { name: 'editing', groups: [ 'find', 'selection', 'editing' ] },
+        { name: 'links', groups: [ 'links' ] },
+        { name: 'insert', groups: [ 'insert', 'video' ] },
+        { name: 'forms', groups: [ 'forms' ] },
         { name: 'tools', groups: [ 'tools' ] },
-        { name: 'basicstyles', groups: [ 'basicstyles'] },
-        { name: 'paragraph', groups: [ 'align', 'list', 'indent', 'blocks', 'bidi', 'paragraph', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ] },
+        { name: 'document', groups: [ 'mode', 'document', 'doctools' ] },
+        { name: 'others', groups: [ 'others' ] },
+        '/',
+        { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
+        { name: 'paragraph', groups: [ 'align', 'list', 'indent', 'blocks', 'bidi', 'paragraph', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ] }, // Add more groups as needed. ] },
         { name: 'styles', groups: [ 'styles' ] },
         { name: 'colors', groups: [ 'colors' ] }
     ];
 
-    config.removeButtons = 'Subscript,Superscript';
-    config.format_tags = 'p;h1;h2;h3;h4;h5;h6;pre';
+    // Ensure toolbar includes specific buttons for image, video, and alignment.
+    config.removeButtons = 'Underline,Subscript,Superscript';  // Remove "Subscript" and "Superscript" buttons
+    config.format_tags = 'p;h1;h2;h3;pre';
     config.removeDialogTabs = 'image:advanced;link:advanced';
-    config.height = 400;
+    config.height = 300;
+
+    // File browser settings (if using Laravel File Manager).
+    // config.filebrowserBrowseUrl = '/admin/laravel-filemanager?editor=ckeditor&type=Files';
+    // config.filebrowserImageBrowseUrl = '/admin/laravel-filemanager?editor=ckeditor&type=Images';
+    // config.filebrowserUploadUrl = '/admin/laravel-filemanager/upload?editor=ckeditor&type=Files&_token=' + document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    // config.filebrowserImageUploadUrl = '/admin/laravel-filemanager/upload?editor=ckeditor&type=Images&_token=' + document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    // config.uploadUrl = '/admin/laravel-filemanager/upload?editor=ckeditor&type=Files';
+    // config.removePlugins = 'image2';
 
     config.attributes = [ 'left', 'center', 'right' ];
     config.font_names = 'Arial;Times New Roman;Verdana;Tahoma;Courier New;Roboto;Georgia;Comic Sans MS;Impact;Lucida Sans Unicode;Palatino Linotype;Trebuchet MS;Helvetica';
     config.fontSize_sizes = '8/8px;10/10px;12/12px;13/13px;14/14px;16/16px;20/20px;24/24px;36/36px';
-    config.fontSize_input = true; 
+    config.fontSize_input = true; // Enable custom font size input
 
-    
+    // Add color buttons to the toolbar
     config.colorButton_enableAutomatic = true;
     config.colorButton_enableMore = true;
     config.colorButton_colors = '000,800000,8B4513,2F4F4F,008080,000080,4B0082,696969,' +

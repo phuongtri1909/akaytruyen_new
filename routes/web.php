@@ -51,6 +51,7 @@ Route::get('/confidental', [PageController::class, 'confidental'])->name('confid
 Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
 Route::get('sitemap-categories.xml', [SitemapController::class, 'categories'])->name('sitemap.categories.alt');
 Route::get('sitemap-stories.xml', [SitemapController::class, 'stories'])->name('sitemap.stories.alt');
+Route::get('sitemap-chapters-index.xml', [SitemapController::class, 'chaptersIndex'])->name('sitemap.chapters.index');
 Route::get('sitemap-chapters.xml', [SitemapController::class, 'chapters'])->name('sitemap.chapters.alt');
 Route::get('sitemap-main-pages.xml', [SitemapController::class, 'mainPages'])->name('sitemap.main.pages');
 

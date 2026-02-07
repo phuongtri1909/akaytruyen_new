@@ -56,7 +56,10 @@ class SitemapController extends Controller
                 return response()->json(['error' => 'Sitemap template not found'], 500);
             }
             
-            $stories = Story::all();
+            $stories = Story::where('status', Story::STATUS_ACTIVE)
+                ->select('id', 'slug', 'updated_at')
+                ->orderBy('updated_at', 'desc')
+                ->get();
             
             return response()->view('Frontend.sitemap.stories', [
                 'stories' => $stories,
@@ -75,12 +78,14 @@ class SitemapController extends Controller
                 return response()->json(['error' => 'Sitemap template not found'], 500);
             }
             
-            // Lấy tất cả chapter với phân trang
-            $page = request()->get('page', 1);
-            $perPage = 5000; // Mỗi sitemap nên chứa tối đa khoảng 50.000 URL, chọn số phù hợp
+            $page = (int) request()->get('page', 1);
+            $perPage = 500;
+            $page = max(1, $page);
             
-            $chapters = Chapter::with('story')
-                ->whereHas('story')
+            $chapters = Chapter::with('story:id,slug')
+                ->published()
+                ->whereHas('story', fn($q) => $q->where('status', \App\Models\Story::STATUS_ACTIVE))
+                ->select('id', 'story_id', 'slug', 'updated_at')
                 ->orderBy('id', 'desc')
                 ->skip(($page - 1) * $perPage)
                 ->take($perPage)
@@ -102,10 +107,11 @@ class SitemapController extends Controller
     public function chaptersIndex()
     {
         try {
-            // Đếm tổng số chapter
-            $totalChapters = Chapter::count();
-            $perPage = 5000;
-            $totalPages = ceil($totalChapters / $perPage);
+            $totalChapters = Chapter::published()
+                ->whereHas('story', fn($q) => $q->where('status', \App\Models\Story::STATUS_ACTIVE))
+                ->count();
+            $perPage = 500;
+            $totalPages = (int) ceil($totalChapters / $perPage);
             
             return response()->view('Frontend.sitemap.chapters_index', [
                 'totalPages' => $totalPages,
@@ -135,7 +141,6 @@ class SitemapController extends Controller
     public function authors()
     {
         try {
-            // Giả sử User có role là author hoặc writer
             $authors = User::where('is_author', true)->orWhere('role', 'author')->get();
             
             return response()->view('Frontend.sitemap.authors', [

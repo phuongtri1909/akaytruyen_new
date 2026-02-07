@@ -1,7 +1,6 @@
 @php
 echo '<?xml version="1.0" encoding="UTF-8"?>';
 @endphp
-<!-- Sitemap Index for akaytruyen.com - Các URL đã được kiểm tra hoạt động tốt -->
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <sitemap>
         <loc>{{ route('sitemap.main.pages') }}</loc>
@@ -16,7 +15,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
         <lastmod>{{ now()->toAtomString() }}</lastmod>
     </sitemap>
     <sitemap>
-        <loc>{{ route('sitemap.chapters.alt') }}</loc>
+        <loc>{{ route('sitemap.chapters.index') }}</loc>
         <lastmod>{{ now()->toAtomString() }}</lastmod>
     </sitemap>
   

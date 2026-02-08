@@ -89,7 +89,6 @@ class StoryRepository extends BaseRepository implements StoryRepositoryInterface
             // ->where('updated_at', '>=', $startDate)
             // ->where('updated_at', '<=', $now)
             ->orderBy('updated_at', 'desc')
-            ->limit(20)
             ->get();
     }
 
